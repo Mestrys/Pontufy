@@ -1,0 +1,13 @@
+services:
+  ollama:
+    image: ollama/ollama
+    container_name: pontufy-ollama
+    ports:
+      - '11434:11434'
+    volumes:
+      # Modelos baixados sobrevivem a restarts do container
+      - ollama-data:/root/.ollama
+    restart: unless-stopped
+
+volumes:
+  ollama-data:
