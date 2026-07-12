@@ -542,8 +542,8 @@ export const translations: Record<string, TranslationSchema> = {
       colCompany: "Institucional",
       colCompanyAddress: "Pontufy S/A — Gamificação Corporativa de Alta Performance. Avenida Brigadeiro Faria Lima, 1485 — Pinheiros, São Paulo - SP",
       btnSales: "Iniciar Parceria Comercial",
-      copyright: "© 2026 Pontufy S/A. Educação com autonomia.",
-      subCopyright: "Construindo o futuro das relações corporativas com transparência e respeito ao talento."
+      copyright: "© 2026 Mestry's Tecnologia e Consultoria em TI LTDA. Todos os direitos reservados.",
+      subCopyright: "Rua Pais Leme, 215, Conj 1713, Pinheiros, São Paulo/SP"
     }
   },
   "EN-US": {
@@ -906,8 +906,8 @@ export const translations: Record<string, TranslationSchema> = {
       colCompany: "Enterprise",
       colCompanyAddress: "Pontufy Inc — Enterprise Gamified Training. Pinheiros, Sao Paulo, SP, Brazil",
       btnSales: "Speak with Sales",
-      copyright: "© 2026 Pontufy S/A. Training with Autonomy.",
-      subCopyright: "Building respectful enterprise relationships with transparency and profound appreciation of talent."
+      copyright: "© 2026 Mestry's Tecnologia e Consultoria em TI LTDA. All rights reserved.",
+      subCopyright: "Rua Pais Leme, 215, Conj 1713, Pinheiros, São Paulo/SP, Brazil"
     }
   },
   "ES-LA": {
@@ -1270,8 +1270,8 @@ export const translations: Record<string, TranslationSchema> = {
       colCompany: "Compañía",
       colCompanyAddress: "Pontufy Inc — Capacitación y Gamificación Empresarial. Pinheiros, Sao Paulo, SP, Brasil",
       btnSales: "Conversar con Ventas",
-      copyright: "© 2026 Pontufy S/A. Educación con Autonomía.",
-      subCopyright: "Construyendo relaciones empresariales saludables con transparencia y respeto al talento individual."
+      copyright: "© 2026 Mestry's Tecnologia e Consultoria em TI LTDA. Todos los derechos reservados.",
+      subCopyright: "Rua Pais Leme, 215, Conj 1713, Pinheiros, São Paulo/SP, Brasil"
     }
   }
 };
