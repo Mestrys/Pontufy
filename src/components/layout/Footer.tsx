@@ -8,7 +8,11 @@ export default function Footer() {
           <span className="text-base font-black text-white">
             <span className="text-emerald-400">Pontu</span>fy
           </span>
-          <span className="text-xs text-gray-600">© 2026 Todos os direitos reservados.</span>
+          <span className="text-xs text-gray-600 leading-relaxed">
+            © 2026 Mestry&apos;s Tecnologia e Consultoria em TI LTDA. Todos os direitos reservados.
+            <br />
+            Rua Pais Leme, 215, Conj 1713, Pinheiros, São Paulo/SP
+          </span>
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-6 text-xs">
           <Link href="/termos" className="hover:text-gray-300 transition-colors">Termos de Serviço</Link>
