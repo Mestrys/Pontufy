@@ -1,0 +1,101 @@
+@import 'tailwindcss';
+
+/* Estratégia 'class' do next-themes: .dark no <html> ativa o tema escuro */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --color-surface-0: var(--surface-0);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-edge: var(--edge);
+  --color-mint: var(--mint);
+  /* Escala semântica de texto: troca junto com o tema */
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-ink-dim: var(--ink-dim);
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+  --surface-0: #fafafa;
+  --surface-1: #ffffff;
+  --surface-2: #f4f4f5;
+  --edge: #e4e4e7;
+  --mint: #10b981;
+  --ink: #18181b;
+  --ink-soft: #3f3f46;
+  --ink-muted: #52525b;
+  --ink-faint: #71717a;
+  --ink-dim: #a1a1aa;
+}
+
+/* Tema escuro: exatamente a paleta original do app */
+.dark {
+  color-scheme: dark;
+  --surface-0: #0a0a0a;
+  --surface-1: #141414;
+  --surface-2: #1c1c1c;
+  --edge: #2a2a2a;
+  --mint: #34d399;
+  --ink: #ffffff;
+  --ink-soft: #d1d5db;
+  --ink-muted: #9ca3af;
+  --ink-faint: #6b7280;
+  --ink-dim: #4b5563;
+}
+
+body {
+  background-color: var(--surface-0);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Carrosséis horizontais sem barra de rolagem visível */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes celebration-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.92);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-4px) scale(1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-celebration {
+  animation: celebration-pop 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes points-float {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-36px);
+  }
+}
+.animate-points-float {
+  animation: points-float 1.6s ease-out both;
+}
