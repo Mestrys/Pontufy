@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+App principal do Pontufy (`app.pontufy.com`), um [Next.js](https://nextjs.org) project bootstrapped com [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+
+Faz parte do monorepo `Pontufy`; veja o [README raiz](../../README.md) para a estrutura geral e os outros apps.
 
 ## Getting Started
 
