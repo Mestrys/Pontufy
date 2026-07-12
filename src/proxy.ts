@@ -12,6 +12,11 @@ export const proxy = auth((req: any) => {
 
   if (pathname.startsWith('/api/auth')) return;
 
+  // ── Páginas públicas (acessíveis sem login) ─────────────────────────────
+  if (pathname.startsWith('/termos') || pathname.startsWith('/privacidade')) {
+    return;
+  }
+
   // ── Super-admin login page ──────────────────────────────────────────────
   if (pathname.startsWith('/superadmin/login')) {
     if (isLoggedIn && role === 'super_admin' && email.endsWith('@pontufy.com')) {
