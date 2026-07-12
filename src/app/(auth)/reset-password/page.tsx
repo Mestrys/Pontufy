@@ -40,7 +40,7 @@ function ResetPasswordForm() {
         <p className="text-sm text-gray-500 mb-6">Agora você pode fazer login com a nova senha.</p>
         <button
           onClick={() => window.location.assign('/login')}
-          className="w-full py-3 px-4 rounded-lg text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors"
+          className="w-full py-3 px-4 rounded-full text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors"
         >
           Fazer login
         </button>
@@ -133,7 +133,7 @@ function ResetPasswordForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full flex justify-center items-center py-3 px-4 rounded-lg text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-[#141414] disabled:opacity-50 disabled:cursor-not-allowed gap-2 mt-2"
+          className="w-full flex justify-center items-center py-3 px-4 rounded-full text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-[#141414] disabled:opacity-50 disabled:cursor-not-allowed gap-2 mt-2"
         >
           {isLoading ? (
             <><Loader2 className="animate-spin" size={18} /> Redefinindo...</>

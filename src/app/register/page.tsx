@@ -40,7 +40,7 @@ function RegisterForm() {
         <p className="text-sm text-gray-500 mb-6">Agora você já pode acessar a plataforma.</p>
         <button
           onClick={() => router.push('/login')}
-          className="w-full py-3 px-4 rounded-lg text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors"
+          className="w-full py-3 px-4 rounded-full text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors"
         >
           Ir para o login
         </button>
@@ -147,7 +147,7 @@ function RegisterForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full flex justify-center items-center py-3 px-4 rounded-lg text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed gap-2 mt-2"
+          className="w-full flex justify-center items-center py-3 px-4 rounded-full text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed gap-2 mt-2"
         >
           {isLoading ? (
             <><Loader2 className="animate-spin" size={18} /> Criando conta...</>

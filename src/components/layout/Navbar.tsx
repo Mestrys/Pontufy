@@ -83,10 +83,10 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`px-3 py-1.5 text-sm font-medium transition-colors rounded ${
+                  className={`px-3 py-1.5 text-sm font-medium transition-colors rounded-full ${
                     isActive(link.href)
-                      ? 'text-white font-bold'
-                      : 'text-gray-400 hover:text-white'
+                      ? 'text-white font-bold bg-white/10'
+                      : 'text-gray-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
                   {link.label}
@@ -152,7 +152,7 @@ export default function Navbar() {
                 <button
                   type="button"
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="w-8 h-8 rounded-md bg-emerald-600 flex items-center justify-center hover:bg-emerald-500 transition-colors text-white font-black text-sm"
+                  className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center hover:bg-emerald-500 transition-colors text-white font-black text-sm"
                 >
                   {session?.user?.name?.[0]?.toUpperCase() ?? <User size={16} />}
                 </button>
@@ -251,7 +251,7 @@ export default function Navbar() {
             {status === 'authenticated' && (
               <div className="border-t border-[#2a2a2a] px-4 py-3">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-9 h-9 rounded-md bg-emerald-600 flex items-center justify-center text-white font-black flex-shrink-0">
+                  <div className="w-9 h-9 rounded-full bg-emerald-600 flex items-center justify-center text-white font-black flex-shrink-0">
                     {session?.user?.name?.[0]?.toUpperCase() ?? <User size={16} />}
                   </div>
                   <div className="min-w-0">

@@ -79,7 +79,7 @@ export default function CertificatesPage() {
             <p className="text-gray-500 text-sm mb-6">Conclua um curso para receber seu certificado.</p>
             <Link
               href="/cursos"
-              className="inline-block px-5 py-2.5 rounded-lg text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors"
+              className="inline-block px-5 py-2.5 rounded-full text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors"
             >
               Ver cursos disponíveis
             </Link>

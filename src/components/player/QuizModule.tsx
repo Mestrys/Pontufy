@@ -116,7 +116,7 @@ export default function QuizModule({ module, questions, onComplete }: QuizModule
           <button
             onClick={handleConfirm}
             disabled={selected === null}
-            className="px-6 py-2.5 rounded-lg font-bold text-sm bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="px-6 py-2.5 rounded-full font-bold text-sm bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             Confirmar
           </button>

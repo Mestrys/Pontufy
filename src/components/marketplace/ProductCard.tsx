@@ -50,7 +50,7 @@ export default function ProductCard({ product, userPoints, onRedeem }: ProductCa
         {canRedeem ? (
           <button
             onClick={() => onRedeem(product)}
-            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm"
+            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-full transition-colors flex items-center justify-center gap-2 text-sm"
           >
             <CheckCircle2 size={16} /> Resgatar
           </button>
