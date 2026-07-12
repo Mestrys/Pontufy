@@ -1,0 +1,14 @@
+{
+  "name": "pontufy-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:pontufy": "npm run dev -w apps/pontufy",
+    "dev:landing": "npm run dev -w apps/landing",
+    "build:pontufy": "npm run build -w apps/pontufy",
+    "build:landing": "npm run build -w apps/landing"
+  }
+}
