@@ -9,7 +9,7 @@ export default function AISelectionTable({ courses }: { courses: any[] }) {
           <Sparkles className="text-brand-slate flex-shrink-0" size={20} />
           <h2 className="text-base sm:text-lg font-bold text-brand-slate">Cursos Gerados pela IA</h2>
         </div>
-        <Link href="/admin/wizard" className="bg-gradient-pontufy text-emerald-900 font-bold px-4 py-2 rounded-lg text-sm shadow-sm hover:shadow-md transition-shadow text-center">
+        <Link href="/admin/wizard" className="bg-gradient-pontufy text-emerald-900 font-bold px-4 py-2 rounded-full text-sm shadow-sm hover:shadow-md transition-shadow text-center">
           + Gerar Novo Curso
         </Link>
       </div>

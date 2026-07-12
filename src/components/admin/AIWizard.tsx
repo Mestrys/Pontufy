@@ -487,7 +487,7 @@ export default function AIWizard() {
             onClick={() => {
               window.location.href = '/admin';
             }}
-            className="flex items-center gap-2 bg-gradient-pontufy text-emerald-900 font-bold px-8 py-3 rounded-lg shadow-sm hover:shadow-md hover:scale-[1.02] transition-all"
+            className="flex items-center gap-2 bg-gradient-pontufy text-emerald-900 font-bold px-8 py-3 rounded-full shadow-sm hover:shadow-md hover:scale-[1.02] transition-all"
           >
             Voltar ao Painel
           </button>

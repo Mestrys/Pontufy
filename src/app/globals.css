@@ -1,6 +1,16 @@
 @import "tailwindcss";
 
+/*
+ * Design system: Google Material Design 3 (M3) sobre a paleta dark da Pontufy.
+ * - Tipografia: Open Sans (carregada via next/font em layout.tsx → --font-open-sans)
+ * - Shape scale M3: xs 4dp · sm 8dp · md/lg 12dp · xl 16dp · 2xl/3xl 28dp · full (pill)
+ * - Elevação M3: níveis 1–5 mapeados nos tokens shadow-* do Tailwind
+ * - Cores: paleta existente inalterada (bg #0a0a0a, surface #141414, accent emerald)
+ */
+
 @theme {
+  --font-sans: var(--font-open-sans), "Open Sans", ui-sans-serif, system-ui, sans-serif;
+
   --color-brand-bg: #0a0a0a;
   --color-brand-surface: #141414;
   --color-brand-raised: #1f1f1f;
@@ -12,6 +22,31 @@
   --color-brand-accent: #10b981;
   --color-brand-lavender: #10b981;
   --color-brand-mint: #34d399;
+
+  /* M3 shape scale (corner radius) */
+  --radius: 0.5rem;
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.75rem;
+  --radius-3xl: 1.75rem;
+  --radius-4xl: 2rem;
+
+  /* M3 elevation levels 1–5 (umbra + penumbra) */
+  --shadow-2xs: 0 1px 2px 0 rgb(0 0 0 / 0.30);
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.30), 0 1px 3px 1px rgb(0 0 0 / 0.15);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.30), 0 1px 3px 1px rgb(0 0 0 / 0.15);
+  --shadow: 0 1px 2px 0 rgb(0 0 0 / 0.30), 0 1px 3px 1px rgb(0 0 0 / 0.15);
+  --shadow-md: 0 1px 2px 0 rgb(0 0 0 / 0.30), 0 2px 6px 2px rgb(0 0 0 / 0.15);
+  --shadow-lg: 0 1px 3px 0 rgb(0 0 0 / 0.30), 0 4px 8px 3px rgb(0 0 0 / 0.15);
+  --shadow-xl: 0 2px 3px 0 rgb(0 0 0 / 0.30), 0 6px 10px 4px rgb(0 0 0 / 0.15);
+  --shadow-2xl: 0 4px 4px 0 rgb(0 0 0 / 0.30), 0 8px 12px 6px rgb(0 0 0 / 0.15);
+
+  /* M3 motion: easing padrão (emphasized/standard) */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasized: cubic-bezier(0.05, 0.7, 0.1, 1);
 }
 
 @layer base {
@@ -29,7 +64,79 @@
   }
 }
 
+@layer components {
+  /* Botões M3: base comum (pill, 40dp, label-large) + state layer via ::after */
+  .md-btn {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 2.5rem;
+    padding-inline: 1.5rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    letter-spacing: 0.00714em;
+    font-weight: 600;
+    transition: box-shadow 0.2s var(--ease-standard), background-color 0.2s var(--ease-standard);
+  }
+  .md-btn::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: currentColor;
+    opacity: 0;
+    transition: opacity 0.15s var(--ease-standard);
+  }
+  .md-btn:hover::after { opacity: 0.08; }
+  .md-btn:active::after { opacity: 0.12; }
+  .md-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .md-btn-filled { background-color: #059669; color: #fff; }
+  .md-btn-filled:hover { box-shadow: var(--shadow-sm); }
+  .md-btn-tonal { background-color: rgb(16 185 129 / 0.15); color: #34d399; }
+  .md-btn-outlined { border: 1px solid #2a2a2a; color: #34d399; background: transparent; }
+  .md-btn-text { color: #34d399; background: transparent; padding-inline: 0.75rem; }
+
+  /* Cards M3 sobre a paleta atual */
+  .md-card-elevated {
+    background-color: #141414;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+  }
+  .md-card-outlined {
+    background-color: #141414;
+    border: 1px solid #2a2a2a;
+    border-radius: var(--radius-md);
+  }
+  .md-card-filled {
+    background-color: #1f1f1f;
+    border-radius: var(--radius-md);
+  }
+}
+
 @layer utilities {
+  /* M3 type scale (Open Sans) */
+  .text-display-lg { font-size: 3.5625rem; line-height: 4rem; letter-spacing: -0.015625em; }
+  .text-display-md { font-size: 2.8125rem; line-height: 3.25rem; }
+  .text-display-sm { font-size: 2.25rem; line-height: 2.75rem; }
+  .text-headline-lg { font-size: 2rem; line-height: 2.5rem; }
+  .text-headline-md { font-size: 1.75rem; line-height: 2.25rem; }
+  .text-headline-sm { font-size: 1.5rem; line-height: 2rem; }
+  .text-title-lg { font-size: 1.375rem; line-height: 1.75rem; }
+  .text-title-md { font-size: 1rem; line-height: 1.5rem; letter-spacing: 0.009375em; font-weight: 600; }
+  .text-title-sm { font-size: 0.875rem; line-height: 1.25rem; letter-spacing: 0.00714em; font-weight: 600; }
+  .text-body-lg { font-size: 1rem; line-height: 1.5rem; letter-spacing: 0.03125em; }
+  .text-body-md { font-size: 0.875rem; line-height: 1.25rem; letter-spacing: 0.017857em; }
+  .text-body-sm { font-size: 0.75rem; line-height: 1rem; letter-spacing: 0.033333em; }
+  .text-label-lg { font-size: 0.875rem; line-height: 1.25rem; letter-spacing: 0.00714em; font-weight: 600; }
+  .text-label-md { font-size: 0.75rem; line-height: 1rem; letter-spacing: 0.041666em; font-weight: 600; }
+  .text-label-sm { font-size: 0.6875rem; line-height: 1rem; letter-spacing: 0.045454em; font-weight: 600; }
+
   .bg-gradient-pontufy {
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   }

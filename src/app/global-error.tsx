@@ -33,7 +33,7 @@ export default function GlobalError({
           </p>
           <button
             onClick={() => reset()}
-            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md hover:shadow-lg"
+            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-6 rounded-full transition-all shadow-md hover:shadow-lg"
           >
             Tentar Recarregar
           </button>

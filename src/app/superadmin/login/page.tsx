@@ -91,7 +91,7 @@ export default function SuperAdminLoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex justify-center items-center py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full flex justify-center items-center py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-full text-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {isLoading ? <Loader2 className="animate-spin" size={18} /> : 'Entrar'}
             </button>
