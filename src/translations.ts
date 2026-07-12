@@ -540,7 +540,7 @@ export const translations: Record<string, TranslationSchema> = {
       colSolutions: "Verticalidades",
       colSolutionsItems: ["Mitigação de Riscos & Compliance", "Saúde & Boas Práticas", "Liderança & Conduta Comercial"],
       colCompany: "Institucional",
-      colCompanyAddress: "Pontufy S/A — Gamificação Corporativa de Alta Performance. Avenida Brigadeiro Faria Lima, 1485 — Pinheiros, São Paulo - SP",
+      colCompanyAddress: "Mestry's Tecnologia e Consultoria em TI LTDA, Rua Pais Leme, 215, Conj 1713, Pinheiros, São Paulo/SP",
       btnSales: "Iniciar Parceria Comercial",
       copyright: "© 2026 Mestry's Tecnologia e Consultoria em TI LTDA. Todos os direitos reservados.",
       subCopyright: "Rua Pais Leme, 215, Conj 1713, Pinheiros, São Paulo/SP"
@@ -904,7 +904,7 @@ export const translations: Record<string, TranslationSchema> = {
       colSolutions: "Verticals",
       colSolutionsItems: ["Risk Mitigation & Compliance", "Operations & Patient Safety", "Leadership & Client Strategy"],
       colCompany: "Enterprise",
-      colCompanyAddress: "Pontufy Inc — Enterprise Gamified Training. Pinheiros, Sao Paulo, SP, Brazil",
+      colCompanyAddress: "Mestry's Tecnologia e Consultoria em TI LTDA, Rua Pais Leme, 215, Conj 1713, Pinheiros, São Paulo/SP, Brazil",
       btnSales: "Speak with Sales",
       copyright: "© 2026 Mestry's Tecnologia e Consultoria em TI LTDA. All rights reserved.",
       subCopyright: "Rua Pais Leme, 215, Conj 1713, Pinheiros, São Paulo/SP, Brazil"
@@ -1268,7 +1268,7 @@ export const translations: Record<string, TranslationSchema> = {
       colSolutions: "Verticales de Solución",
       colSolutionsItems: ["Cumplimiento de Leyes & Privacidad", "Excelencia Médica & Hospitalaria", "Liderazgo & Negociación Estratégica"],
       colCompany: "Compañía",
-      colCompanyAddress: "Pontufy Inc — Capacitación y Gamificación Empresarial. Pinheiros, Sao Paulo, SP, Brasil",
+      colCompanyAddress: "Mestry's Tecnologia e Consultoria em TI LTDA, Rua Pais Leme, 215, Conj 1713, Pinheiros, São Paulo/SP, Brasil",
       btnSales: "Conversar con Ventas",
       copyright: "© 2026 Mestry's Tecnologia e Consultoria em TI LTDA. Todos los derechos reservados.",
       subCopyright: "Rua Pais Leme, 215, Conj 1713, Pinheiros, São Paulo/SP, Brasil"
