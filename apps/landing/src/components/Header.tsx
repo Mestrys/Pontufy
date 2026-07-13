@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, ArrowRight, ChevronDown, Shield, Zap, Crown, BookOpen, LogIn } from 'lucide-react';
+import { Menu, X, ChevronDown, Shield, Zap, Crown, BookOpen, LogIn } from 'lucide-react';
 import { translations } from '../translations';
 import { LOGIN_URL } from '../config';
 
@@ -207,13 +207,6 @@ export default function Header({ language, setLanguage, points }: HeaderProps) {
                 <LogIn className="w-4 h-4" />
                 <span>{t.login}</span>
               </a>
-              <button
-                onClick={() => handleScrollTo('lead-form')}
-                className="font-sans text-sm font-medium text-white px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 transition-colors flex items-center gap-1.5 cursor-pointer"
-              >
-                <span>{t.cta}</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
             </div>
 
             {/* Mobile / compact: language + menu */}
@@ -332,13 +325,6 @@ export default function Header({ language, setLanguage, points }: HeaderProps) {
                 <LogIn className="w-5 h-5" />
                 <span>{t.login}</span>
               </a>
-              <button
-                onClick={() => handleScrollTo('lead-form')}
-                className="text-center py-3 text-base font-medium text-white rounded-xl bg-slate-900 hover:bg-slate-800 flex items-center justify-center gap-2"
-              >
-                <span>{t.cta}</span>
-                <ArrowRight className="w-5 h-5" />
-              </button>
             </div>
           </div>
         )}
