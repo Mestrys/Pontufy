@@ -1,0 +1,6 @@
+{
+  "name": "Pontufy",
+  "description": "B2B SaaS corporate gamification platform that solves low employee engagement in training by turning learning into points and real-world rewards.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

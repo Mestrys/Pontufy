@@ -1,36 +1,34 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pontufy — Monorepo
 
-## Getting Started
+Este repositório reúne, em um único monorepo com npm workspaces, o código e o histórico que antes viviam em três repositórios separados.
 
-First, run the development server:
+## Estrutura
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+apps/
+├── pontufy/    Aplicação principal (Next.js 16 + Prisma/PostgreSQL) — app.pontufy.com
+└── landing/    Site institucional (Vite + React, estático) — pontufy.com
+
+archive/
+└── pontufy-app-legacy/   Experimento "v2" descontinuado (Next.js 15 + Supabase RPC), fora do build/deploy ativo
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Veja o README de cada app para detalhes específicos: [`apps/pontufy/README.md`](apps/pontufy/README.md), [`apps/landing/README.md`](apps/landing/README.md), [`archive/pontufy-app-legacy/README.md`](archive/pontufy-app-legacy/README.md).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Desenvolvimento
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install          # instala as dependências de todos os workspaces (apps/*)
 
-## Learn More
+npm run dev:pontufy    # roda o app principal
+npm run dev:landing    # roda a landing page
 
-To learn more about Next.js, take a look at the following resources:
+npm run build:pontufy
+npm run build:landing
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+`archive/pontufy-app-legacy` não faz parte dos workspaces (`workspaces: ["apps/*"]` na raiz) e não é instalado nem buildado a partir daqui.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deploy
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Cada app em `apps/` corresponde a um projeto Vercel próprio, configurado com "Root Directory" apontando para a subpasta correspondente (`apps/pontufy` e `apps/landing`).

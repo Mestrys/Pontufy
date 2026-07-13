@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Open Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --color-slate-custom: #1E293B;
+  --color-ice-gray: #F8F9FA;
+  --color-lavender-calm: #9333EA;
+  --color-mint-electric: #10B981;
+
+  /*
+   * Material Design 3: shape scale (xs 4dp · sm 8dp · md/lg 12dp · xl 16dp ·
+   * 2xl/3xl 28dp) e elevação (níveis 1–5) sobre os tokens do Tailwind.
+   * Paleta de cores inalterada.
+   */
+  --radius: 0.5rem;
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.75rem;
+  --radius-3xl: 1.75rem;
+  --radius-4xl: 2rem;
+
+  --shadow-2xs: 0 1px 2px 0 rgb(0 0 0 / 0.30);
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.30), 0 1px 3px 1px rgb(0 0 0 / 0.15);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.30), 0 1px 3px 1px rgb(0 0 0 / 0.15);
+  --shadow: 0 1px 2px 0 rgb(0 0 0 / 0.30), 0 1px 3px 1px rgb(0 0 0 / 0.15);
+  --shadow-md: 0 1px 2px 0 rgb(0 0 0 / 0.30), 0 2px 6px 2px rgb(0 0 0 / 0.15);
+  --shadow-lg: 0 1px 3px 0 rgb(0 0 0 / 0.30), 0 4px 8px 3px rgb(0 0 0 / 0.15);
+  --shadow-xl: 0 2px 3px 0 rgb(0 0 0 / 0.30), 0 6px 10px 4px rgb(0 0 0 / 0.15);
+  --shadow-2xl: 0 4px 4px 0 rgb(0 0 0 / 0.30), 0 8px 12px 6px rgb(0 0 0 / 0.15);
+
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasized: cubic-bezier(0.05, 0.7, 0.1, 1);
+}
+
+/* Custom scrollbar and subtle transitions */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #F8F9FA;
+}
+::-webkit-scrollbar-thumb {
+  background: #E2E8F0;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #CBD5E1;
+}
