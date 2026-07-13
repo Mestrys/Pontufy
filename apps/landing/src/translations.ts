@@ -168,14 +168,7 @@ export interface TranslationSchema {
     items: Array<{ question: string; answer: string }>;
   };
   footer: {
-    desc: string;
     zeroTrustActive: string;
-    colPlatform: string;
-    colSolutions: string;
-    colSolutionsItems: string[];
-    colCompany: string;
-    colCompanyAddress: string;
-    btnSales: string;
     copyright: string;
     subCopyright: string;
   };
@@ -534,14 +527,7 @@ export const translations: Record<string, TranslationSchema> = {
       ]
     },
     footer: {
-      desc: "Investimos na transformação dos treinamentos burocráticos em caminhos reais de crescimento. Autonomia, engajamento autêntico e segurança em nível corporativo.",
       zeroTrustActive: "Arquitetura Zero Trust Ativa",
-      colPlatform: "Plataforma",
-      colSolutions: "Verticalidades",
-      colSolutionsItems: ["Mitigação de Riscos & Compliance", "Saúde & Boas Práticas", "Liderança & Conduta Comercial"],
-      colCompany: "Institucional",
-      colCompanyAddress: "Mestry's Tecnologia e Consultoria em TI LTDA, Rua Pais Leme, 215, Conj 1713, Pinheiros, São Paulo/SP",
-      btnSales: "Iniciar Parceria Comercial",
       copyright: "© 2026 Mestry's Tecnologia e Consultoria em TI LTDA. Todos os direitos reservados.",
       subCopyright: "Rua Pais Leme, 215, Conj 1713, Pinheiros, São Paulo/SP"
     }
@@ -898,14 +884,7 @@ export const translations: Record<string, TranslationSchema> = {
       ]
     },
     footer: {
-      desc: "We turn check-the-box corporate training into real portable equity and physical milestones. Autonomy, genuine engagement, and enterprise-level reliability.",
       zeroTrustActive: "Zero Trust Active Shield",
-      colPlatform: "Platform",
-      colSolutions: "Verticals",
-      colSolutionsItems: ["Risk Mitigation & Compliance", "Operations & Patient Safety", "Leadership & Client Strategy"],
-      colCompany: "Enterprise",
-      colCompanyAddress: "Mestry's Tecnologia e Consultoria em TI LTDA, Rua Pais Leme, 215, Conj 1713, Pinheiros, São Paulo/SP, Brazil",
-      btnSales: "Speak with Sales",
       copyright: "© 2026 Mestry's Tecnologia e Consultoria em TI LTDA. All rights reserved.",
       subCopyright: "Rua Pais Leme, 215, Conj 1713, Pinheiros, São Paulo/SP, Brazil"
     }
@@ -1262,14 +1241,7 @@ export const translations: Record<string, TranslationSchema> = {
       ]
     },
     footer: {
-      desc: "Damos vuelta la dinámica de las capacitaciones burocráticas convirtiéndolas en verdaderos hitos de progreso. Autonomía, compromiso genuino y seguridad empresarial garantizada.",
       zeroTrustActive: "Aislamiento Zero Trust Activo",
-      colPlatform: "Plataforma",
-      colSolutions: "Verticales de Solución",
-      colSolutionsItems: ["Cumplimiento de Leyes & Privacidad", "Excelencia Médica & Hospitalaria", "Liderazgo & Negociación Estratégica"],
-      colCompany: "Compañía",
-      colCompanyAddress: "Mestry's Tecnologia e Consultoria em TI LTDA, Rua Pais Leme, 215, Conj 1713, Pinheiros, São Paulo/SP, Brasil",
-      btnSales: "Conversar con Ventas",
       copyright: "© 2026 Mestry's Tecnologia e Consultoria em TI LTDA. Todos los derechos reservados.",
       subCopyright: "Rua Pais Leme, 215, Conj 1713, Pinheiros, São Paulo/SP, Brasil"
     }
