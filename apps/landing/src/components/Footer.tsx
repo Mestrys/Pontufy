@@ -42,7 +42,7 @@ export default function Footer({ language }: FooterProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-12 text-center md:text-left">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12 text-center md:text-left">
           {/* Column 1: Platform */}
           <div>
             <h3 className="text-white font-medium text-xs tracking-wide uppercase mb-4">{t.colPlatform}</h3>
@@ -92,31 +92,6 @@ export default function Footer({ language }: FooterProps) {
                   </a>
                 </li>
               ))}
-            </ul>
-          </div>
-
-          {/* Column 3: Company */}
-          <div>
-            <h3 className="text-white font-medium text-xs tracking-wide uppercase mb-4">{t.colCompany}</h3>
-            <p className="text-xs text-slate-400 mb-4 leading-relaxed">
-              {t.colCompanyAddress}
-            </p>
-            <ul className="space-y-2.5 text-sm">
-              <li>
-                <a href="#lead-form" className="font-medium text-emerald-400 hover:text-emerald-300 transition-colors">
-                  {t.btnSales}
-                </a>
-              </li>
-              <li>
-                <a href="/terms/" className="hover:text-white transition-colors">
-                  {language === 'PT-BR' ? 'Termos de Uso' : language === 'EN-US' ? 'Terms of Service' : 'Términos de Uso'}
-                </a>
-              </li>
-              <li>
-                <a href="/privacy/" className="hover:text-white transition-colors">
-                  {language === 'PT-BR' ? 'Política de Privacidade' : language === 'EN-US' ? 'Privacy Policy' : 'Política de Privacidad'}
-                </a>
-              </li>
             </ul>
           </div>
         </div>
