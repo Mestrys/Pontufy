@@ -36,7 +36,6 @@ export interface TranslationSchema {
     security: string;
     faq: string;
     viewDemo: string;
-    cta: string;
     login: string;
   };
   hero: {
@@ -183,7 +182,6 @@ export const translations: Record<string, TranslationSchema> = {
       security: "Arquitetura Corporativa",
       faq: "Perguntas de Impacto",
       viewDemo: "Testar Simulador",
-      cta: "Agendar Demonstração",
       login: "Entrar na Plataforma"
     },
     hero: {
@@ -540,7 +538,6 @@ export const translations: Record<string, TranslationSchema> = {
       security: "Enterprise Architecture",
       faq: "High-Impact Questions",
       viewDemo: "Test Simulator",
-      cta: "Schedule Demonstration",
       login: "Sign In"
     },
     hero: {
@@ -897,7 +894,6 @@ export const translations: Record<string, TranslationSchema> = {
       security: "Arquitectura Corporativa",
       faq: "Preguntas de Impacto",
       viewDemo: "Probar Simulador",
-      cta: "Agendar Demostración",
       login: "Ingresar a la Plataforma"
     },
     hero: {
