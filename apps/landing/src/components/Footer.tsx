@@ -147,7 +147,10 @@ export default function Footer({ language }: FooterProps) {
               </a>
             </div>
           </div>
-          <p className="text-xs text-slate-600 sm:text-right">{t.subCopyright}</p>
+          <div className="flex flex-col items-center gap-1 sm:items-end">
+            <p className="text-xs text-slate-600 sm:text-right">{t.subCopyright}</p>
+            <p className="text-xs text-slate-600 sm:text-right">{t.address}</p>
+          </div>
         </div>
       </div>
     </footer>

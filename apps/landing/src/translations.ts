@@ -170,6 +170,7 @@ export interface TranslationSchema {
     zeroTrustActive: string;
     copyright: string;
     subCopyright: string;
+    address: string;
   };
 }
 
@@ -527,7 +528,8 @@ export const translations: Record<string, TranslationSchema> = {
     footer: {
       zeroTrustActive: "Arquitetura Zero Trust Ativa",
       copyright: "© 2026 Mestry's Tecnologia e Consultoria em TI LTDA. Todos os direitos reservados.",
-      subCopyright: "CNPJ: 68.027.889/0001-34"
+      subCopyright: "CNPJ: 68.027.889/0001-34",
+      address: "Rua Pais Leme, 215, Conj 1713, Pinheiros, São Paulo/SP"
     }
   },
   "EN-US": {
@@ -883,7 +885,8 @@ export const translations: Record<string, TranslationSchema> = {
     footer: {
       zeroTrustActive: "Zero Trust Active Shield",
       copyright: "© 2026 Mestry's Tecnologia e Consultoria em TI LTDA. All rights reserved.",
-      subCopyright: "CNPJ: 68.027.889/0001-34"
+      subCopyright: "CNPJ: 68.027.889/0001-34",
+      address: "Rua Pais Leme, 215, Conj 1713, Pinheiros, São Paulo/SP, Brazil"
     }
   },
   "ES-LA": {
@@ -1239,7 +1242,8 @@ export const translations: Record<string, TranslationSchema> = {
     footer: {
       zeroTrustActive: "Aislamiento Zero Trust Activo",
       copyright: "© 2026 Mestry's Tecnologia e Consultoria em TI LTDA. Todos los derechos reservados.",
-      subCopyright: "CNPJ: 68.027.889/0001-34"
+      subCopyright: "CNPJ: 68.027.889/0001-34",
+      address: "Rua Pais Leme, 215, Conj 1713, Pinheiros, São Paulo/SP, Brasil"
     }
   }
 };
