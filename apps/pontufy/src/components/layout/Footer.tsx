@@ -11,7 +11,7 @@ export default function Footer() {
           <span className="text-xs text-gray-600 leading-relaxed">
             © 2026 Mestry&apos;s Tecnologia e Consultoria em TI LTDA. Todos os direitos reservados.
             <br />
-            Rua Pais Leme, 215, Conj 1713, Pinheiros, São Paulo/SP
+            CNPJ: 68.027.889/0001-34
           </span>
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-6 text-xs">
