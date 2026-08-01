@@ -17,6 +17,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Pontufy — Plataforma de Gamificação Corporativa",
   description: "Transforme treinamentos corporativos em experiências engajadoras com gamificação, IA e recompensas reais.",
+  other: {
+    lomadee: "2324685",
+  },
 };
 
 export default function RootLayout({

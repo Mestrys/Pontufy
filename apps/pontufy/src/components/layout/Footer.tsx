@@ -12,6 +12,8 @@ export default function Footer() {
             © 2026 Mestry&apos;s Tecnologia e Consultoria em TI LTDA. Todos os direitos reservados.
             <br />
             CNPJ: 68.027.889/0001-34
+            <br />
+            Rua Pais Leme, 215, Conj 1713, Pinheiros, São Paulo/SP
           </span>
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-6 text-xs">
