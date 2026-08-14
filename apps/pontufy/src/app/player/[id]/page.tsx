@@ -8,10 +8,12 @@ import LessonContent from '@/components/player/LessonContent';
 import CourseSidebar from '@/components/player/CourseSidebar';
 import QuizModal, { type QuizModuleData } from '@/components/player/QuizModal';
 import PointsCelebration from '@/components/gamification/PointsCelebration';
+import CelebrationModal from '@/components/gamification/CelebrationModal';
 import { useCourse, triggerLessonCompletion } from '@/hooks/useApi';
 import { useStore } from '@/store/useStore';
 import { getCachedCourses } from '@/lib/local-courses';
 import { downloadCertificate } from '@/lib/download-certificate';
+import { getUserTier } from '@/lib/gamification';
 import { Loader2, BookOpen, ArrowLeft, Award, Trophy, LoaderCircle } from 'lucide-react';
 
 interface LessonItem {
@@ -84,6 +86,14 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
   const [quizPassed, setQuizPassed] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
+  // Level-up celebration state
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const [levelUpData, setLevelUpData] = useState<{
+    previousTier: string;
+    newTier: { name: string; color: string; icon: typeof Trophy | typeof Crown | typeof Medal };
+    points: number;
+  } | null>(null);
+
   const course = apiCourse && !apiCourse.error ? apiCourse : localCourse;
 
   if (isLoading && !localCourse) {
@@ -150,12 +160,39 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
     setShowCelebration(true);
   };
 
+  // Verifica subida de nível após ganho de pontos
+  const checkLevelUp = (previousPoints: number, newPoints: number) => {
+    const previousTier = getUserTier(previousPoints);
+    const newTier = getUserTier(newPoints);
+    
+    if (previousTier.name !== newTier.name) {
+      const TierIcon = previousTier.name === 'Mestre' ? Trophy : 
+        previousTier.name === 'Especialista' ? Crown : Trophy;
+      setLevelUpData({
+        previousTier: previousTier.name,
+        newTier: {
+          name: newTier.name,
+          color: newTier.name === 'Mestre' ? 'text-purple-400' :
+            newTier.name === 'Especialista' ? 'text-amber-400' :
+            newTier.name === 'Analista Sénior' ? 'text-blue-400' :
+            newTier.name === 'Analista' ? 'text-emerald-400' : 'text-gray-400',
+          icon: TierIcon,
+        },
+        points: newPoints,
+      });
+      setShowLevelUp(true);
+    }
+  };
+
   const handleLessonComplete = async () => {
     if (completedMap.has(activeLesson.id) || isCompleting) return;
 
+    const previousPoints = useStore.getState().currentPointsBalance;
     setIsCompleting(true);
     // Otimista: reflete os pontos imediatamente no store global (Navbar reativa).
     addPoints(activeLesson.points);
+    const newPoints = useStore.getState().currentPointsBalance;
+    checkLevelUp(previousPoints, newPoints);
     try {
       const res = await triggerLessonCompletion(activeLesson.id, {
         courseId: course.id,
@@ -206,6 +243,10 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
   const handleQuizPassed = (result: { score: number; total: number; bonusAwarded: boolean }) => {
     setQuizPassed(true);
     if (result.bonusAwarded) {
+      const previousPoints = useStore.getState().currentPointsBalance;
+      addPoints(50);
+      const newPoints = useStore.getState().currentPointsBalance;
+      checkLevelUp(previousPoints, newPoints);
       celebrate(50, 'Bônus por aprovação no quiz');
     }
   };
@@ -229,6 +270,19 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
         isVisible={showCelebration}
         message={celebrationMessage}
         onComplete={() => setShowCelebration(false)}
+      />
+      <CelebrationModal
+        isVisible={showLevelUp}
+        onComplete={() => { setShowLevelUp(false); setLevelUpData(null); }}
+        type="levelUp"
+        title="Subiu de Nível!"
+        subtitle={`Parabéns! Você alcançou o nível ${levelUpData?.newTier?.name}.`}
+        newTier={levelUpData ? {
+          name: levelUpData.newTier.name,
+          color: levelUpData.newTier.color,
+          icon: levelUpData.newTier.icon,
+        } : undefined}
+        previousTier={levelUpData?.previousTier}
       />
 
       {/* Top bar (Udemy-style) */}
