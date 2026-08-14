@@ -1,7 +1,6 @@
-import NextAuth, { type DefaultSession } from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
 import { scrypt, timingSafeEqual } from 'crypto';
-import { promisify } from 'util';
+import NextAuth, type DefaultSession from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from '@/backend/db';
 import { authConfig } from '@/auth.config';
 
@@ -22,12 +21,19 @@ declare module 'next-auth' {
 
 const scryptAsync = promisify(scrypt);
 
-async function verifyPassword(password: string, stored: string): Promise<boolean> {
-  const [salt, hash] = stored.split(':');
-  if (!salt || !hash) return false;
+export async function hashPassword(password: string): Promise<string> {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const derived = (await scryptAsync(password, salt, 64)) as Buffer;
+  return `${salt}:${derived.toString('hex')}`;
+}
+
+export async function verifyPassword(password: string, storedHash: string): Promise<boolean> {
   try {
-    const derived = (await scryptAsync(password, salt, 64)) as Buffer;
-    return timingSafeEqual(derived, Buffer.from(hash, 'hex'));
+    if (!storedHash || !storedHash.includes(':')) return false;
+    const [salt, key] = storedHash.split(':');
+    if (!salt || !key) return false;
+    const derivedKey = (await scryptAsync(password, salt, 64)) as Buffer;
+    return timingSafeEqual(derivedKey, Buffer.from(key, 'hex'));
   } catch {
     return false;
   }
