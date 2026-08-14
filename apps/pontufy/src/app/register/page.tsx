@@ -1,15 +1,31 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Loader2, Eye, EyeOff, CheckCircle2 } from 'lucide-react';
+import { Loader2, Eye, EyeOff, CheckCircle2, Building2 } from 'lucide-react';
+
+interface InvitationInfo {
+  email: string;
+  role: string;
+  companyName: string;
+  expiresAt: string;
+}
+
+const ROLE_LABELS: Record<string, string> = {
+  admin_rh: 'Administrador',
+  employee: 'Colaborador',
+  guest: 'Convidado',
+};
 
 function RegisterForm() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
   const router = useRouter();
 
+  const [invitation, setInvitation] = useState<InvitationInfo | null>(null);
+  const [inviteError, setInviteError] = useState('');
+  const [inviteLoading, setInviteLoading] = useState(true);
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -18,15 +34,56 @@ function RegisterForm() {
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => {
+    if (!token) return;
+
+    let cancelled = false;
+    fetch(`/api/invitations/accept?token=${encodeURIComponent(token)}`)
+      .then(async (res) => {
+        const data = await res.json();
+        if (cancelled) return;
+        if (res.ok && data.success) {
+          setInvitation(data);
+        } else {
+          setInviteError(data.error || 'Convite inválido.');
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setInviteError('Erro ao validar o convite.');
+      })
+      .finally(() => {
+        if (!cancelled) setInviteLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
+
   if (!token) {
     return (
       <div className="bg-[#141414] border border-[#2a2a2a] rounded-2xl p-8 text-center">
         <p className="text-white font-semibold mb-2">Convite necessário</p>
-        <p className="text-sm text-gray-500 mb-4">
+        <p className="text-sm text-gray-500 mb-6">
           Para criar uma conta, você precisa de um convite do gestor da sua empresa.
         </p>
+        <Link href="/register/tenant" className="block w-full py-3 px-4 rounded-full text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors mb-3">
+          Cadastrar minha empresa
+        </Link>
         <Link href="/login" className="inline-block text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors">
           Já tenho uma conta
+        </Link>
+      </div>
+    );
+  }
+
+  if (inviteError) {
+    return (
+      <div className="bg-[#141414] border border-[#2a2a2a] rounded-2xl p-8 text-center">
+        <p className="text-white font-semibold mb-2">Convite indisponível</p>
+        <p className="text-sm text-gray-500 mb-4">{inviteError}</p>
+        <Link href="/login" className="inline-block text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors">
+          Ir para o login
         </Link>
       </div>
     );
@@ -88,6 +145,24 @@ function RegisterForm() {
   return (
     <div className="bg-[#141414] border border-[#2a2a2a] rounded-2xl p-8">
       <form className="space-y-4" onSubmit={handleSubmit}>
+        {inviteLoading && (
+          <div className="flex items-center justify-center gap-2 text-gray-500 text-sm py-2">
+            <Loader2 className="animate-spin" size={16} /> Validando convite...
+          </div>
+        )}
+
+        {invitation && (
+          <div className="p-4 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg">
+            <div className="flex items-center gap-2">
+              <Building2 size={16} className="text-emerald-400" />
+              <span className="text-sm font-bold text-white">{invitation.companyName}</span>
+            </div>
+            <p className="text-xs text-gray-500 mt-1.5">
+              {invitation.email} · {ROLE_LABELS[invitation.role] ?? invitation.role}
+            </p>
+          </div>
+        )}
+
         {error && (
           <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3 rounded-lg text-center font-medium">
             {error}

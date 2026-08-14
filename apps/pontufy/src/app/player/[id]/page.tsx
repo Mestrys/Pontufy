@@ -1,64 +1,92 @@
 'use client';
-import { useState, useEffect, use } from 'react';
+import { useState, useMemo, use } from 'react';
 import Link from 'next/link';
+import { AnimatePresence } from 'framer-motion';
 
 import VideoPlayer from '@/components/player/VideoPlayer';
 import LessonContent from '@/components/player/LessonContent';
-import SidebarModules from '@/components/player/SidebarModules';
-import QuizModule from '@/components/player/QuizModule';
+import CourseSidebar from '@/components/player/CourseSidebar';
+import QuizModal, { type QuizModuleData } from '@/components/player/QuizModal';
 import PointsCelebration from '@/components/gamification/PointsCelebration';
 import { useCourse, triggerLessonCompletion } from '@/hooks/useApi';
+import { useStore } from '@/store/useStore';
 import { getCachedCourses } from '@/lib/local-courses';
-import { Loader2, Download, BookOpen, Play, ArrowLeft, Trophy, CheckCircle2 } from 'lucide-react';
+import { downloadCertificate } from '@/lib/download-certificate';
+import { Loader2, BookOpen, ArrowLeft, Award, Trophy, LoaderCircle } from 'lucide-react';
 
-interface Lesson {
+interface LessonItem {
   id: string;
   title: string;
   type: string;
   points: number;
   completed: boolean;
-  contentUrl?: string;
+  content: string; // markdown da aula ativa (nunca a descrição do curso)
+  contentUrl?: string | null;
+}
+
+interface ApiLesson {
+  id: string;
+  title: string;
+  type: string;
+  points?: number;
+  pointsAssigned?: number;
+  completed?: boolean;
+  contentUrl?: string | null;
+}
+
+interface LocalCourse {
+  id: string;
+  title: string;
+  description: string | null;
+  lessons: LessonItem[];
+  quiz: QuizModuleData[] | null;
 }
 
 export default function CoursePlayerPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { data: apiCourse, error: apiError, isLoading, mutate } = useCourse(id);
-  const [localCourse, setLocalCourse] = useState<any>(null);
-  const [localChecked, setLocalChecked] = useState(false);
-  const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
-  const [showCelebration, setShowCelebration] = useState(false);
-  const [earnedPoints, setEarnedPoints] = useState(0);
-  const [isCompleting, setIsCompleting] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false);
+  const { data: apiCourse, isLoading, mutate } = useCourse(id);
 
-  useEffect(() => {
+  const addPoints = useStore((s) => s.addPoints);
+  const deductPoints = useStore((s) => s.deductPoints);
+
+  // Cache offline (localStorage, síncrono) derivado — sem setState em effect.
+  const localCourse = useMemo<LocalCourse | null>(() => {
     const cached = getCachedCourses().find((c) => c.id === id);
-    if (cached) {
-      let quiz = null;
-      if (cached.quizJson) {
-        try { quiz = JSON.parse(cached.quizJson); } catch {}
-      }
-      setLocalCourse({
-        id: cached.id,
-        title: cached.title,
-        description: cached.description,
-        lessons: cached.lessons.map((l) => ({
-          id: l.id,
-          title: l.title,
-          type: l.type,
-          contentUrl: l.contentUrl,
-          points: l.pointsAssigned,
-          completed: false,
-        })),
-        quiz,
-      });
+    if (!cached) return null;
+    let quiz: QuizModuleData[] | null = null;
+    if (cached.quizJson) {
+      try { quiz = JSON.parse(cached.quizJson); } catch {}
     }
-    setLocalChecked(true);
+    return {
+      id: cached.id,
+      title: cached.title,
+      description: cached.description,
+      lessons: cached.lessons.map((l) => ({
+        id: l.id,
+        title: l.title,
+        type: l.type,
+        contentUrl: l.contentUrl,
+        content: l.contentUrl ?? '',
+        points: l.pointsAssigned,
+        completed: false,
+      })),
+      quiz,
+    };
   }, [id]);
+
+  const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
+  const [completedOverrides, setCompletedOverrides] = useState<Set<string>>(new Set());
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [celebrationPoints, setCelebrationPoints] = useState(0);
+  const [celebrationMessage, setCelebrationMessage] = useState('Você acaba de ganhar');
+  const [isCompleting, setIsCompleting] = useState(false);
+  const [quizOpen, setQuizOpen] = useState(false);
+  const [quizPassed, setQuizPassed] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const course = apiCourse && !apiCourse.error ? apiCourse : localCourse;
 
-  if ((isLoading && !localChecked) || (!course && !apiError && !localChecked)) {
+  if (isLoading && !localCourse) {
     return (
       <div className="flex items-center justify-center h-screen bg-[#0a0a0a]">
         <Loader2 className="animate-spin text-emerald-500" size={36} />
@@ -78,8 +106,27 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
     );
   }
 
-  const lessons: Lesson[] = course.lessons || [];
-  const activeLesson = lessons.find((l) => l.id === activeLessonId) || lessons[0];
+  const lessons: LessonItem[] = ((course?.lessons ?? []) as ApiLesson[]).map((l) => ({
+    id: l.id,
+    title: l.title,
+    type: l.type,
+    points: l.points ?? l.pointsAssigned ?? 0,
+    completed: !!l.completed,
+    content: l.contentUrl ?? '',
+    contentUrl: l.contentUrl,
+  }));
+
+  const completedMap = new Set<string>([
+    ...lessons.filter((l) => l.completed).map((l) => l.id),
+    ...completedOverrides,
+  ]);
+
+  const firstIncomplete = lessons.find((l) => !completedMap.has(l.id));
+  const activeLesson = lessons.find((l) => l.id === activeLessonId) ?? firstIncomplete ?? lessons[0];
+  const completedCount = lessons.filter((l) => completedMap.has(l.id)).length;
+  const allCompleted = lessons.length > 0 && completedCount === lessons.length;
+  const modules: QuizModuleData[] = course.quiz ?? [];
+  const passed = quizPassed || !!course.quizPassed;
 
   if (!activeLesson) {
     return (
@@ -92,43 +139,23 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
     );
   }
 
-  const completedCount = lessons.filter((l) => l.completed).length;
-  const allCompleted = completedCount === lessons.length && lessons.length > 0;
-  const quizzes: { module: string; questions: any[] }[] = course.quiz || [];
-  const isTextLesson = activeLesson.type === 'text';
-  const lessonContent = activeLesson.contentUrl || '';
+  const currentIndex = lessons.findIndex((l) => l.id === activeLesson.id);
+  const prevLesson = currentIndex > 0 ? lessons[currentIndex - 1] : null;
+  const nextLesson = currentIndex < lessons.length - 1 ? lessons[currentIndex + 1] : null;
+  const isVideoLesson = activeLesson.type === 'video';
 
-  const handleDownloadCertificate = async () => {
-    setIsDownloading(true);
-    try {
-      const res = await fetch('/api/certificates/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ courseId: id }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        alert(data.error || 'Erro ao gerar certificado.');
-        return;
-      }
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `certificado-${course.title}.pdf`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch {
-      alert('Erro ao baixar certificado.');
-    } finally {
-      setIsDownloading(false);
-    }
+  const celebrate = (points: number, message: string) => {
+    setCelebrationPoints(points);
+    setCelebrationMessage(message);
+    setShowCelebration(true);
   };
 
   const handleLessonComplete = async () => {
-    if (activeLesson.completed || isCompleting) return;
+    if (completedMap.has(activeLesson.id) || isCompleting) return;
 
     setIsCompleting(true);
+    // Otimista: reflete os pontos imediatamente no store global (Navbar reativa).
+    addPoints(activeLesson.points);
     try {
       const res = await triggerLessonCompletion(activeLesson.id, {
         courseId: course.id,
@@ -138,19 +165,26 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
           id: l.id,
           title: l.title,
           type: l.type,
-          contentUrl: l.contentUrl,
+          contentUrl: l.contentUrl ?? undefined,
           points: l.points,
         })),
       });
 
       if (res.success) {
-        setEarnedPoints(activeLesson.points);
-        setShowCelebration(true);
+        setCompletedOverrides((prev) => new Set(prev).add(activeLesson.id));
+        celebrate(activeLesson.points, 'Você acaba de ganhar');
         mutate();
+      } else if (res.queued) {
+        // Offline: salvo na fila local; será sincronizado automaticamente.
+        setCompletedOverrides((prev) => new Set(prev).add(activeLesson.id));
+        celebrate(activeLesson.points, 'Aula salva offline — sincronização automática');
       } else {
+        // Rollback do saldo otimista em caso de falha.
+        deductPoints(activeLesson.points);
         alert(res.error || 'Erro ao completar a aula.');
       }
     } catch (error) {
+      deductPoints(activeLesson.points);
       console.error(error);
       alert('Erro ao concluir a aula.');
     } finally {
@@ -158,14 +192,42 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
     }
   };
 
-  const currentIndex = lessons.findIndex((l) => l.id === activeLesson.id);
-  const nextLesson = currentIndex < lessons.length - 1 ? lessons[currentIndex + 1] : null;
+  const handleDownloadCertificate = async () => {
+    setIsDownloading(true);
+    try {
+      await downloadCertificate(course.id, course.title);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Erro ao baixar certificado.');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const handleQuizPassed = (result: { score: number; total: number; bonusAwarded: boolean }) => {
+    setQuizPassed(true);
+    if (result.bonusAwarded) {
+      celebrate(50, 'Bônus por aprovação no quiz');
+    }
+  };
+
+  const lessonNavProps = {
+    lessonTitle: activeLesson.title,
+    lessonIndex: currentIndex + 1,
+    totalLessons: lessons.length,
+    points: activeLesson.points,
+    completed: completedMap.has(activeLesson.id),
+    isCompleting,
+    onComplete: handleLessonComplete,
+    onPrevious: prevLesson ? () => setActiveLessonId(prevLesson.id) : null,
+    onNext: nextLesson ? () => setActiveLessonId(nextLesson.id) : null,
+  };
 
   return (
     <div className="flex flex-col h-screen bg-[#0a0a0a] overflow-hidden">
       <PointsCelebration
-        points={earnedPoints}
+        points={celebrationPoints}
         isVisible={showCelebration}
+        message={celebrationMessage}
         onComplete={() => setShowCelebration(false)}
       />
 
@@ -189,218 +251,133 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
       <div className="flex flex-1 overflow-hidden">
         {/* Content area */}
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          {isTextLesson ? (
-            <div className="flex-1 overflow-y-auto">
-              {/* Lesson header */}
-              <div className="bg-[#141414] border-b border-[#2a2a2a] px-6 sm:px-10 py-6">
-                <div className="flex items-center gap-2 text-gray-600 text-xs mb-2">
-                  <BookOpen size={13} />
-                  <span>Aula {currentIndex + 1} de {lessons.length}</span>
-                </div>
-                <h2 className="text-xl sm:text-2xl font-black text-white">{activeLesson.title}</h2>
-                <p className="text-gray-500 mt-1 text-sm">{course.title}</p>
+          {isVideoLesson ? (
+            <>
+              <div className="aspect-video lg:aspect-auto lg:flex-none lg:h-[52%] bg-black flex-shrink-0">
+                <VideoPlayer lesson={{ id: activeLesson.id, title: activeLesson.title, videoUrl: activeLesson.contentUrl ?? undefined }} />
               </div>
-
-              {/* Content */}
-              <div className="px-6 sm:px-10 py-8 max-w-4xl">
-                {lessonContent ? (
-                  <LessonContent content={lessonContent} />
-                ) : (
-                  <div className="text-center py-16">
-                    <BookOpen size={40} className="mx-auto text-gray-700 mb-4" />
-                    <p className="text-gray-500">Conteúdo desta aula em breve.</p>
-                  </div>
-                )}
-
-                {/* Actions */}
-                <div className="mt-10 pt-6 border-t border-[#2a2a2a]">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <button
-                      onClick={handleLessonComplete}
-                      disabled={activeLesson.completed || isCompleting}
-                      className={`px-6 py-3 rounded-lg font-bold transition-all text-sm flex items-center gap-2 ${
-                        activeLesson.completed
-                          ? 'bg-[#1f1f1f] text-gray-600 cursor-not-allowed border border-[#2a2a2a]'
-                          : 'bg-emerald-600 text-white hover:bg-emerald-500'
-                      }`}
-                    >
-                      {activeLesson.completed ? (
-                        <>
-                          <CheckCircle2 size={16} /> Aula Concluída
-                        </>
-                      ) : isCompleting ? (
-                        <>
-                          <Loader2 size={16} className="animate-spin" /> Concluindo...
-                        </>
-                      ) : (
-                        `Concluir e Ganhar ${activeLesson.points} Pontos`
-                      )}
-                    </button>
-
-                    {activeLesson.completed && nextLesson && (
-                      <button
-                        onClick={() => setActiveLessonId(nextLesson.id)}
-                        className="px-6 py-3 rounded-lg font-bold transition-all text-sm flex items-center gap-2 bg-white text-black hover:bg-gray-200"
-                      >
-                        Próxima Aula →
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Quiz section */}
-                {allCompleted && quizzes.length > 0 && (
-                  <div className="mt-10 space-y-4 pt-8 border-t border-[#2a2a2a]">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="w-8 h-8 bg-emerald-500/10 rounded-full flex items-center justify-center">
-                        <span className="text-emerald-400 font-black text-sm">?</span>
-                      </div>
-                      <div>
-                        <h2 className="text-lg font-bold text-white">Quiz de Avaliação</h2>
-                        <p className="text-xs text-gray-500">Teste seus conhecimentos sobre o curso.</p>
-                      </div>
-                    </div>
-                    {quizzes.map((q, i) => (
-                      <QuizModule
-                        key={i}
-                        module={q.module}
-                        questions={q.questions}
-                        onComplete={(score, total) => {
-                          console.log(`Quiz "${q.module}": ${score}/${total}`);
-                        }}
-                      />
-                    ))}
-                  </div>
-                )}
-
-                {/* Certificate */}
-                {allCompleted && (
-                  <div className="mt-6">
-                    <button
-                      onClick={handleDownloadCertificate}
-                      disabled={isDownloading}
-                      className="px-6 py-3 rounded-lg font-bold transition-all text-sm flex items-center gap-2 bg-[#1f1f1f] text-white hover:bg-[#2a2a2a] border border-[#2a2a2a] disabled:opacity-50"
-                    >
-                      {isDownloading ? (
-                        <>
-                          <Loader2 size={16} className="animate-spin" /> Gerando...
-                        </>
-                      ) : (
-                        <>
-                          <Download size={16} /> Baixar Certificado
-                        </>
-                      )}
-                    </button>
-                  </div>
-                )}
+              <div className="flex-1 min-h-0 flex flex-col">
+                <LessonContent content={activeLesson.content} {...lessonNavProps} />
               </div>
-            </div>
+            </>
           ) : (
-            <div className="flex flex-col flex-1 overflow-hidden">
-              {/* Video */}
-              <div className="aspect-video lg:aspect-auto lg:flex-none lg:h-[55%] bg-black">
-                <VideoPlayer lesson={activeLesson} onComplete={handleLessonComplete} />
-              </div>
+            <LessonContent content={activeLesson.content} {...lessonNavProps} />
+          )}
 
-              {/* Video lesson info */}
-              <div className="flex-1 overflow-y-auto bg-[#0f0f0f] p-5 sm:p-8">
-                <div className="flex items-center gap-2 text-gray-600 text-xs mb-2">
-                  <Play size={13} />
-                  <span>Aula {currentIndex + 1} de {lessons.length}</span>
-                </div>
-                <h2 className="text-xl sm:text-2xl font-black text-white mb-4">{activeLesson.title}</h2>
-
-                {lessonContent && (
-                  <div className="mt-4 max-w-3xl">
-                    <LessonContent content={lessonContent} />
+          {/* CTA do Quiz / Certificado (rodapé do conteúdo) */}
+          {allCompleted && (
+            <div className="flex-shrink-0 px-6 sm:px-10 py-6 border-t border-[#2a2a2a] bg-[#0f0f0f]">
+              {!passed ? (
+                <div className="max-w-4xl flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 bg-amber-400/10 rounded-full flex items-center justify-center">
+                      <Trophy size={18} className="text-amber-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-white">Quiz final disponível!</p>
+                      <p className="text-xs text-gray-500">Nota mínima: 70% · Bônus de +50 pts</p>
+                    </div>
                   </div>
-                )}
-
-                <div className="mt-6 flex flex-wrap items-center gap-3">
                   <button
-                    onClick={handleLessonComplete}
-                    disabled={activeLesson.completed || isCompleting}
-                    className={`px-6 py-3 rounded-lg font-bold transition-all text-sm flex items-center gap-2 ${
-                      activeLesson.completed
-                        ? 'bg-[#1f1f1f] text-gray-600 cursor-not-allowed border border-[#2a2a2a]'
-                        : 'bg-emerald-600 text-white hover:bg-emerald-500'
-                    }`}
+                    onClick={() => setQuizOpen(true)}
+                    className="px-6 py-3 rounded-lg font-bold text-sm bg-emerald-600 text-white hover:bg-emerald-500 transition-colors"
                   >
-                    {activeLesson.completed ? (
-                      <><CheckCircle2 size={16} /> Aula Concluída</>
-                    ) : isCompleting ? (
-                      <><Loader2 size={16} className="animate-spin" /> Concluindo...</>
-                    ) : (
-                      `Concluir e Ganhar ${activeLesson.points} Pontos`
-                    )}
+                    Iniciar Quiz Final
                   </button>
-
-                  {activeLesson.completed && nextLesson && (
-                    <button
-                      onClick={() => setActiveLessonId(nextLesson.id)}
-                      className="px-6 py-3 rounded-lg font-bold text-sm flex items-center gap-2 bg-white text-black hover:bg-gray-200 transition-colors"
-                    >
-                      Próxima Aula →
-                    </button>
-                  )}
                 </div>
-
-                {allCompleted && quizzes.length > 0 && (
-                  <div className="mt-8 space-y-4 pt-6 border-t border-[#2a2a2a]">
-                    <h2 className="text-base font-bold text-white flex items-center gap-2">
-                      <Trophy size={18} className="text-amber-400" /> Quiz de Avaliação
-                    </h2>
-                    {quizzes.map((q, i) => (
-                      <QuizModule
-                        key={i}
-                        module={q.module}
-                        questions={q.questions}
-                        onComplete={(score, total) => {
-                          console.log(`Quiz "${q.module}": ${score}/${total}`);
-                        }}
-                      />
-                    ))}
+              ) : (
+                <div className="max-w-4xl flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 bg-emerald-500/10 rounded-full flex items-center justify-center">
+                      <Award size={18} className="text-emerald-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-white">Curso concluído!</p>
+                      <p className="text-xs text-gray-500">Seu certificado com código de verificação está pronto.</p>
+                    </div>
                   </div>
-                )}
-
-                {allCompleted && (
                   <button
                     onClick={handleDownloadCertificate}
                     disabled={isDownloading}
-                    className="mt-4 px-6 py-3 rounded-lg font-bold text-sm flex items-center gap-2 bg-[#1f1f1f] text-white hover:bg-[#2a2a2a] border border-[#2a2a2a] disabled:opacity-50 transition-colors"
+                    className="flex items-center gap-2 px-6 py-3 rounded-lg font-bold text-sm bg-[#1f1f1f] text-white hover:bg-[#2a2a2a] border border-[#2a2a2a] disabled:opacity-50 transition-colors"
                   >
                     {isDownloading ? (
-                      <><Loader2 size={16} className="animate-spin" /> Gerando...</>
+                      <>
+                        <LoaderCircle size={16} className="animate-spin" /> Gerando...
+                      </>
                     ) : (
-                      <><Download size={16} /> Baixar Certificado</>
+                      <>
+                        <Award size={16} /> Emitir Certificado
+                      </>
                     )}
                   </button>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           )}
         </div>
 
-        {/* Sidebar (Udemy-style) */}
+        {/* Sidebar (desktop) */}
         <div className="hidden lg:flex w-[340px] xl:w-[380px] flex-shrink-0 border-l border-[#2a2a2a] flex-col">
-          <SidebarModules
-            lessons={lessons}
-            activeLesson={activeLesson}
+          <CourseSidebar
+            lessons={lessons.map((l) => ({
+              id: l.id,
+              title: l.title,
+              points: l.points,
+              completed: completedMap.has(l.id),
+            }))}
+            activeLesson={{
+              id: activeLesson.id,
+              title: activeLesson.title,
+              points: activeLesson.points,
+              completed: completedMap.has(activeLesson.id),
+            }}
             completedCount={completedCount}
             onLessonClick={(lesson) => setActiveLessonId(lesson.id)}
+            allCompleted={allCompleted}
+            quizPassed={passed}
+            onOpenQuiz={() => setQuizOpen(true)}
           />
         </div>
       </div>
 
-      {/* Mobile sidebar (bottom sheet trigger) */}
+      {/* Sidebar (mobile bottom sheet) */}
       <div className="lg:hidden border-t border-[#2a2a2a] bg-[#141414] max-h-[40vh] overflow-hidden">
-        <SidebarModules
-          lessons={lessons}
-          activeLesson={activeLesson}
+        <CourseSidebar
+          lessons={lessons.map((l) => ({
+            id: l.id,
+            title: l.title,
+            points: l.points,
+            completed: completedMap.has(l.id),
+          }))}
+          activeLesson={{
+            id: activeLesson.id,
+            title: activeLesson.title,
+            points: activeLesson.points,
+            completed: completedMap.has(activeLesson.id),
+          }}
           completedCount={completedCount}
           onLessonClick={(lesson) => setActiveLessonId(lesson.id)}
+          allCompleted={allCompleted}
+          quizPassed={passed}
+          onOpenQuiz={() => setQuizOpen(true)}
         />
       </div>
+
+      {/* Quiz Modal (remontado a cada abertura → estado sempre limpo) */}
+      <AnimatePresence>
+        {quizOpen && (
+          <QuizModal
+            courseId={course.id}
+            courseTitle={course.title}
+            modules={modules}
+            alreadyPassed={passed}
+            onClose={() => setQuizOpen(false)}
+            onQuizPassed={handleQuizPassed}
+            onEmitCertificate={handleDownloadCertificate}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

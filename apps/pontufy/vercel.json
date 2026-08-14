@@ -2,7 +2,7 @@
   "buildCommand": "npm run build",
   "framework": "nextjs",
   "functions": {
-    "src/app/api/courses/generate/route.ts": {
+    "src/app/api/rewards/autopilot/route.ts": {
       "maxDuration": 60
     }
   },
@@ -14,6 +14,10 @@
     {
       "path": "/api/cron/link-health",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/rewards-sync",
+      "schedule": "0 7 * * *"
     }
   ]
 }

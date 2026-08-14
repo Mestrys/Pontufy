@@ -4,13 +4,19 @@ import { authConfig } from '@/auth.config';
 
 const { auth } = NextAuth(authConfig);
 
-export const proxy = auth((req: any) => {
+export const proxy = auth((req) => {
   const isLoggedIn = !!req.auth;
   const { pathname } = req.nextUrl;
   const role: string = req.auth?.user?.role ?? '';
   const email: string = req.auth?.user?.email ?? '';
 
   if (pathname.startsWith('/api/auth')) return;
+
+  // ── Rotas públicas de API ─────────────────────────────────────────────
+  // O matcher exclui `api` por completo (as rotas protegem-se internamente),
+  // mas o bypass é mantido explícito por política de segurança: webhooks
+  // Stripe são públicos por natureza e validam a assinatura no handler.
+  if (pathname.startsWith('/api/webhooks/stripe')) return;
 
   // ── Páginas públicas (acessíveis sem login) ─────────────────────────────
   if (pathname.startsWith('/termos') || pathname.startsWith('/privacidade')) {
@@ -65,5 +71,7 @@ export const proxy = auth((req: any) => {
 });
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  matcher: [
+    '/((?!api|_next/static|_next/image|favicon.ico|sw.js|manifest.json|icons/).*)',
+  ],
 };

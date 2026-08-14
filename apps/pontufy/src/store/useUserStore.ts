@@ -6,10 +6,12 @@ import { useStore } from './useStore';
  *   - currentPoints: readonly balance
  *   - setPoints(val): absolute setter
  *   - addPoints(val): optimistic increment
+ *   - deductPoints(val): optimistic decrement (clamped at 0)
  */
 export function useUserStore() {
   const currentPoints = useStore((s) => s.currentPointsBalance);
   const setPoints = useStore((s) => s.setPointsBalance);
   const addPoints = useStore((s) => s.addPoints);
-  return { currentPoints, setPoints, addPoints } as const;
+  const deductPoints = useStore((s) => s.deductPoints);
+  return { currentPoints, setPoints, addPoints, deductPoints } as const;
 }

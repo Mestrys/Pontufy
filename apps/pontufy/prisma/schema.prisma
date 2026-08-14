@@ -16,10 +16,21 @@ datasource db {
 model Tenant {
   id              String   @id @default(uuid())
   name            String
-  customLogoUrl   String?
+  slug            String   @unique
+  logoUrl         String?
+  faviconUrl      String?
+  primaryColor    String?  @default("#10B981") // Padrão Verde Esmeralda Pontufy
+  accentColor     String?  @default("#8B5CF6") // Padrão Lavanda/Roxo
+  customDomain    String?  @unique
   sector          String   // 'tech', 'health', 'retail', 'industry'
   contractStatus  String   @default("active") // 'active', 'suspended', 'cancelled'
-  aiCredits       Int      @default(0)
+  plan            String   @default("trial") // 'trial', 'starter', 'enterprise'
+  trialEndsAt     DateTime?
+  aiCredits       Int      @default(20)
+  stripeCustomerId     String?  @unique
+  stripeSubscriptionId String?  @unique
+  stripePriceId        String?
+  subscriptionStatus   String?  // 'active', 'past_due', 'canceled', 'trialing'
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -31,6 +42,11 @@ model Tenant {
   rewards            Reward[]
   invitations        Invitation[]
   lessonCompletions  LessonCompletion[]
+  commissions        Commission[]
+  notifications      Notification[]
+  stripeEvents       StripeEvent[]
+  auditLogs          AuditLog[]
+  quizAttempts       QuizAttempt[]
 }
 
 model User {
@@ -49,6 +65,10 @@ model User {
   lessonCompletions   LessonCompletion[]
   passwordReset       PasswordReset?
   issuedCertificates  IssuedCertificate[]
+  commissions         Commission[]
+  notifications       Notification[]
+  auditLogs           AuditLog[]
+  quizAttempts        QuizAttempt[]
 
   @@index([tenantId])
   @@index([tenantId, pointsBalance])
@@ -67,6 +87,9 @@ model Course {
 
   tenant          Tenant   @relation(fields: [tenantId], references: [id])
   lessons         Lesson[]
+  quizAttempts    QuizAttempt[]
+
+  workloadHours   Int      @default(0) // Carga horária oficial do curso (certificado). 0 = fallback para nº de aulas.
 
   @@index([tenantId])
 }
@@ -100,6 +123,24 @@ model LessonCompletion {
 
   @@unique([userId, lessonId])
   @@index([userId])
+  @@index([tenantId])
+}
+
+model QuizAttempt {
+  id        String   @id @default(uuid())
+  userId    String
+  tenantId  String
+  courseId  String
+  score     Int
+  total     Int
+  passed    Boolean  @default(false) // score/total >= 70% (server-side)
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  course  Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([userId, courseId])
   @@index([tenantId])
 }
 
@@ -152,20 +193,23 @@ model PasswordReset {
 }
 
 model AuditLog {
-  id             String   @id @default(uuid())
-  tenantId       String
-  userId         String?
-  action         String
-  ipAddress      String?
-  userAgent      String?
-  previousValues String?  @db.Text
-  newValues      String?  @db.Text
-  createdAt      DateTime @default(now())
+  id         String   @id @default(uuid())
+  tenantId   String
+  userId     String?
+  action     String   // ex.: "COURSE_CREATED", "USER_ROLE_UPDATED", "POINTS_MANUAL_ADJUST"
+  entity     String   // ex.: "Course", "User", "Reward", "Tenant", "Invitation"
+  entityId   String?
+  oldValue   Json?
+  newValue   Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
 
-  @@index([tenantId])
-  @@index([userId])
-  @@index([action])
-  @@index([createdAt])
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, createdAt])
+  @@index([tenantId, action])
 }
 
 model Invitation {
@@ -174,27 +218,106 @@ model Invitation {
   email     String
   token     String   @unique
   role      String   @default("employee") // 'admin_rh', 'employee', 'guest'
+  status    String   @default("pending") // 'pending', 'accepted', 'expired'
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime @default(now())
 
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  @@index([tenantId])
+  @@index([tenantId, email])
   @@index([token])
 }
 
+// ═══════════════════════════════════════════════════════════════════════
+// Idempotência de webhooks Stripe
+// ───────────────────────────────────────────────────────────────────────
+// Registro de eventos processados para impedir créditos/ativações duplicadas
+// (Stripe redelivers até obter 2xx). `eventId` é único globalmente.
+// ═══════════════════════════════════════════════════════════════════════
+
+model StripeEvent {
+  id          String   @id @default(uuid())
+  eventId     String   @unique
+  type        String
+  tenantId    String?
+  processedAt DateTime @default(now())
+
+  tenant      Tenant?  @relation(fields: [tenantId], references: [id])
+
+  @@index([type])
+  @@index([tenantId])
+}
+
 model IssuedCertificate {
-  id         String   @id @default(uuid())
-  userId     String
-  tenantId   String
-  courseId   String
-  courseName String
-  issuedAt   DateTime @default(now())
+  id               String   @id @default(uuid())
+  userId           String
+  tenantId         String
+  courseId         String
+  courseName       String
+  verificationHash String?  @unique // Código único de verificação impresso no PDF
+  issuedAt         DateTime @default(now())
 
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId])
   @@index([userId])
   @@index([tenantId])
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// Notificações in-app (Centro de Notificações em Tempo Real)
+// ───────────────────────────────────────────────────────────────────────
+// Pertencem a um utilizador e tenant específicos (Zero Trust: leitura e
+// escrita sempre via getTenantDb). `read` controla o badge não-lido.
+// ═══════════════════════════════════════════════════════════════════════
+
+model Notification {
+  id        String   @id @default(cuid())
+  tenantId  String
+  userId    String
+  title     String
+  message   String
+  type      String   // "POINTS_EARNED" | "REWARD_REDEEMED" | "COURSE_ASSIGNED" | "LEVEL_UP" | "SYSTEM"
+  read      Boolean  @default(false)
+  link      String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, userId, read])
+  @@index([createdAt])
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// Comissões de afiliados (Postback)
+// ───────────────────────────────────────────────────────────────────────
+// Registro persistente de cada postback recebido das redes afiliadas.
+// Idempotência: um (tenantId, orderId, network) só pode ser processado
+// uma vez — o crédito de pontos acontece dentro de uma $transaction.
+// ═══════════════════════════════════════════════════════════════════════
+
+model Commission {
+  id              String   @id @default(uuid())
+  tenantId        String
+  network         String   // 'amazon', 'magalu', 'shopee', 'mercadolivre'
+  trackingId      String
+  userId          String
+  orderId         String
+  orderValue      Decimal  @db.Decimal(12, 2)
+  commissionValue Decimal  @db.Decimal(12, 2)
+  currency        String   @default("BRL")
+  status          String   @default("pending") // 'pending', 'approved', 'rejected'
+  pointsAwarded   Int      @default(0)
+  receivedAt      DateTime @default(now())
+
+  tenant          Tenant   @relation(fields: [tenantId], references: [id])
+  user            User     @relation(fields: [userId], references: [id])
+
+  @@unique([tenantId, network, orderId])
+  @@index([tenantId])
+  @@index([userId])
+  @@index([status])
 }

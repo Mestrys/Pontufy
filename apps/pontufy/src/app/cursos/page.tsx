@@ -24,11 +24,14 @@ function localToEnrolled(c: CachedCourse) {
 export default function CoursesPage() {
   const { data: courses, isLoading } = useEnrolledCourses();
   const searchQuery = useStore((s) => s.searchQuery);
+  const setSearchQuery = useStore((s) => s.setSearchQuery);
   const [filter, setFilter] = useState<FilterStatus>('all');
   const [localCourses, setLocalCourses] = useState<CachedCourse[]>([]);
   const [certCourseIds, setCertCourseIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get('q');
+    if (q) setSearchQuery(q);
     setLocalCourses(getCachedCourses());
     fetch('/api/certificates')
       .then((res) => res.json())
@@ -38,7 +41,7 @@ export default function CoursesPage() {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [setSearchQuery]);
 
   const apiCourses = Array.isArray(courses) ? courses : [];
   const apiIds = new Set(apiCourses.map((c: any) => c.id));

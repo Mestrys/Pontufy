@@ -3,12 +3,14 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Award, Download, Loader2, BookOpen } from 'lucide-react';
+import { downloadCertificate } from '@/lib/download-certificate';
 
 interface Certificate {
   id: string;
   courseId: string;
   courseName: string;
   issuedAt: string;
+  verificationHash?: string | null;
 }
 
 export default function CertificatesPage() {
@@ -29,25 +31,9 @@ export default function CertificatesPage() {
   const handleDownload = async (cert: Certificate) => {
     setDownloading(cert.id);
     try {
-      const res = await fetch('/api/certificates/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ courseId: cert.courseId }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        alert(data.error || 'Erro ao gerar certificado.');
-        return;
-      }
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `certificado-${cert.courseName}.pdf`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch {
-      alert('Erro ao baixar certificado.');
+      await downloadCertificate(cert.courseId, cert.courseName);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Erro ao baixar certificado.');
     } finally {
       setDownloading(null);
     }
@@ -106,6 +92,11 @@ export default function CertificatesPage() {
                     <div className="min-w-0">
                       <p className="text-white font-bold truncate">{cert.courseName}</p>
                       <p className="text-xs text-gray-500 mt-0.5">Emitido em {issuedDate}</p>
+                      {cert.verificationHash && (
+                        <p className="text-[10px] text-gray-600 mt-1 font-mono truncate">
+                          Verificação: {cert.verificationHash}
+                        </p>
+                      )}
                     </div>
                   </div>
 

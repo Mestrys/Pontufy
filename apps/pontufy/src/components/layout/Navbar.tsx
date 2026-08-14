@@ -1,14 +1,16 @@
 'use client';
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Search, User, Coins, LogOut, Menu, X, LayoutDashboard, ShieldCheck, Award } from 'lucide-react';
+import { Search, User, Coins, LogOut, Menu, X, LayoutDashboard, ShieldCheck } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 
 export default function Navbar() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
+  const router = useRouter();
   const pointsBalance = useStore((s) => s.currentPointsBalance);
   const setSearchQuery = useStore((s) => s.setSearchQuery);
 
@@ -19,11 +21,15 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const pathnameRef = useRef(pathname);
 
-  const role = (session?.user as any)?.role;
+  const role = (session?.user as { role?: string } | undefined)?.role;
 
   useEffect(() => {
-    setIsMobileMenuOpen(false);
+    if (pathnameRef.current !== pathname) {
+      pathnameRef.current = pathname;
+      setIsMobileMenuOpen(false);
+    }
   }, [pathname]);
 
   useEffect(() => {
@@ -50,6 +56,19 @@ export default function Navbar() {
       debounceRef.current = setTimeout(() => setSearchQuery(value), 300);
     },
     [setSearchQuery],
+  );
+
+  const handleSearchSubmit = useCallback(
+    (value: string) => {
+      setSearchQuery(value);
+      const q = value.trim();
+      if (q) {
+        router.push(`/cursos?q=${encodeURIComponent(q)}`);
+      } else {
+        router.push('/cursos');
+      }
+    },
+    [router, setSearchQuery],
   );
 
   const navLinks = [
@@ -125,6 +144,9 @@ export default function Navbar() {
               <span className="font-bold text-emerald-400">{pointsBalance}</span>
             </Link>
 
+            {/* Notification bell */}
+            <NotificationBell />
+
             {/* Search (desktop) */}
             <div className="hidden md:flex relative items-center">
               {isSearchOpen && (
@@ -134,6 +156,12 @@ export default function Navbar() {
                   placeholder="Buscar cursos..."
                   value={localSearch}
                   onChange={(e) => handleSearchChange(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearchSubmit(localSearch);
+                      setIsSearchOpen(false);
+                    }
+                  }}
                   className="absolute right-8 w-64 px-4 py-1.5 rounded-full text-sm bg-[#1f1f1f] border border-[#3a3a3a] text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500"
                 />
               )}
@@ -167,6 +195,14 @@ export default function Navbar() {
                         {session?.user?.email}
                       </p>
                     </div>
+                    <Link
+                      href="/profile"
+                      onClick={() => setIsDropdownOpen(false)}
+                      className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:bg-white/5 transition-colors font-medium"
+                    >
+                      <User size={15} />
+                      Meu Perfil
+                    </Link>
                     <button
                       type="button"
                       onClick={() => signOut({ callbackUrl: '/login' })}
@@ -208,6 +244,12 @@ export default function Navbar() {
                   placeholder="Buscar cursos..."
                   value={localSearch}
                   onChange={(e) => handleSearchChange(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearchSubmit(localSearch);
+                      setIsMobileMenuOpen(false);
+                    }
+                  }}
                   className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#1f1f1f] border border-[#2a2a2a] text-white placeholder-gray-600 text-sm focus:outline-none focus:border-emerald-500"
                 />
               </div>
@@ -259,6 +301,14 @@ export default function Navbar() {
                     <p className="text-xs text-gray-500 truncate">{session?.user?.email}</p>
                   </div>
                 </div>
+                <Link
+                  href="/profile"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
+                >
+                  <User size={15} />
+                  Meu Perfil
+                </Link>
                 <button
                   type="button"
                   onClick={() => signOut({ callbackUrl: '/login' })}

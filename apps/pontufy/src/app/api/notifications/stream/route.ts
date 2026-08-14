@@ -11,7 +11,7 @@ const encode = (s: string) => new TextEncoder().encode(s);
  * Uses a Redis List so events survive across serverless instances.
  * Fire-and-forget: callers do not need to await.
  */
-export function broadcastToTenant(tenantId: string, event: string, data: any): void {
+export function broadcastToTenant(tenantId: string, event: string, data: unknown): void {
   const redis = getRedis();
   if (!redis) return;
   const key = `sse:${tenantId}`;

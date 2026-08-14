@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { randomBytes } from 'crypto';
 import { getSessionContext } from '@/backend/session';
-import { prisma } from '@/backend/db';
+import { getTenantDb, prisma } from '@/backend/db';
 
 const VALID_ROLES = ['employee', 'guest'] as const;
 const TOKEN_EXPIRY_HOURS = 72;
@@ -28,13 +28,15 @@ export async function POST(request: Request) {
       );
     }
 
+    // Global email lookup by design (email is globally unique across tenants).
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       return NextResponse.json({ error: 'Usuário já cadastrado.' }, { status: 409 });
     }
 
-    const pendingInvite = await prisma.invitation.findFirst({
-      where: { email, tenantId, usedAt: null, expiresAt: { gt: new Date() } },
+    const db = getTenantDb(tenantId);
+    const pendingInvite = await db.invitation.findFirst({
+      where: { email, usedAt: null, expiresAt: { gt: new Date() } },
     });
     if (pendingInvite) {
       return NextResponse.json({ error: 'Convite pendente já existe para este email.' }, { status: 409 });
@@ -43,7 +45,7 @@ export async function POST(request: Request) {
     const token = randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + TOKEN_EXPIRY_HOURS * 60 * 60 * 1000);
 
-    const invitation = await prisma.invitation.create({
+    const invitation = await db.invitation.create({
       data: {
         tenantId,
         email,

@@ -2,8 +2,21 @@ import { PrismaClient } from '@prisma/client';
 import { scrypt, randomBytes } from 'crypto';
 import { promisify } from 'util';
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Seed idempotente de homologação — Pontufy
+// ───────────────────────────────────────────────────────────────────────────
+// - 100% idempotente: upserts por chaves únicas (email, slug, ids fixos).
+// - Senhas no padrão Pontufy: scrypt(salt, 64 bytes) → "salt:hash" (hex 64),
+//   exatamente o formato verificado em src/auth.ts (verifyPassword).
+// - Zero Trust: todo usuário criado tem tenantId explícito; o único usuário
+//   fora do domínio do tenant é o super_admin (@pontufy.com), alocado no
+//   tenant de plataforma "Pontufy" (User.tenantId é NOT NULL no schema).
+// ═══════════════════════════════════════════════════════════════════════════
+
 const prisma = new PrismaClient();
 const scryptAsync = promisify(scrypt);
+
+const DEFAULT_PASSWORD = '123456';
 
 async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(16).toString('hex');
@@ -11,198 +24,305 @@ async function hashPassword(password: string): Promise<string> {
   return `${salt}:${buf.toString('hex')}`;
 }
 
+// ── Tenant de plataforma (super_admin) ────────────────────────────────────────
+const PLATFORM_TENANT = {
+  id: 'tenant-pontufy-platform',
+  name: 'Pontufy',
+  slug: 'pontufy-platform',
+  sector: 'tech',
+  contractStatus: 'active',
+  plan: 'enterprise',
+  aiCredits: 0,
+  primaryColor: '#10B981',
+  accentColor: '#8B5CF6',
+} as const;
+
+// ── Tenant principal de homologação ───────────────────────────────────────────
+const ALPHA_TENANT = {
+  id: 'tenant-alpha-001',
+  name: 'Empresa Alpha',
+  slug: 'empresa-alpha',
+  sector: 'tech',
+  contractStatus: 'active',
+  plan: 'starter',
+  aiCredits: 50,
+  primaryColor: '#10B981',
+  accentColor: '#8B5CF6',
+} as const;
+
 async function main() {
-  console.log('Start seeding...');
+  console.log('── Iniciando seed (idempotente) ──');
 
-  // 1. Tenant
-  const tenant = await prisma.tenant.upsert({
-    where: { id: 'tenant-alpha-001' },
-    update: {},
-    create: {
-      id: 'tenant-alpha-001',
-      name: 'Empresa Alpha',
-      sector: 'tech',
-      contractStatus: 'active',
-      aiCredits: 1000,
+  // 1. Tenants (upsert por slug)
+  const alpha = await prisma.tenant.upsert({
+    where: { slug: ALPHA_TENANT.slug },
+    update: {
+      name: ALPHA_TENANT.name,
+      sector: ALPHA_TENANT.sector,
+      contractStatus: ALPHA_TENANT.contractStatus,
+      plan: ALPHA_TENANT.plan,
+      aiCredits: ALPHA_TENANT.aiCredits,
+      primaryColor: ALPHA_TENANT.primaryColor,
+      accentColor: ALPHA_TENANT.accentColor,
     },
+    create: { ...ALPHA_TENANT },
   });
-  console.log(`Upserted Tenant: ${tenant.name}`);
+  console.log(`Tenant: ${alpha.name} (${alpha.slug}) — aiCredits ${alpha.aiCredits}`);
 
-  // 2. Users
-  const adminHash = await hashPassword('123456');
-  const hrAdmin = await prisma.user.upsert({
-    where: { email: 'admin@empresaalpha.com' },
-    update: { passwordHash: adminHash },
-    create: {
+  const platform = await prisma.tenant.upsert({
+    where: { slug: PLATFORM_TENANT.slug },
+    update: {
+      name: PLATFORM_TENANT.name,
+      sector: PLATFORM_TENANT.sector,
+      contractStatus: PLATFORM_TENANT.contractStatus,
+      plan: PLATFORM_TENANT.plan,
+      aiCredits: PLATFORM_TENANT.aiCredits,
+      primaryColor: PLATFORM_TENANT.primaryColor,
+      accentColor: PLATFORM_TENANT.accentColor,
+    },
+    create: { ...PLATFORM_TENANT },
+  });
+  console.log(`Tenant: ${platform.name} (${platform.slug}) — domínio super_admin`);
+
+  // 2. Utilizadores de teste (upsert por email; senha padrão 123456)
+  const passwordHash = await hashPassword(DEFAULT_PASSWORD);
+  const users = [
+    {
       id: 'user-admin-001',
-      tenantId: tenant.id,
-      name: 'Maria Silva (RH)',
+      tenantId: alpha.id,
       email: 'admin@empresaalpha.com',
-      role: 'admin_rh',
-      pointsBalance: 500,
-      passwordHash: adminHash,
-    },
-  });
-  console.log(`Upserted User (Admin): ${hrAdmin.name}`);
-
-  const admin2Hash = await hashPassword('123456');
-  const admin2 = await prisma.user.upsert({
-    where: { email: 'admin@alpha.com' },
-    update: { passwordHash: admin2Hash },
-    create: {
-      id: 'user-admin-002',
-      tenantId: tenant.id,
-      name: 'Admin Alpha',
-      email: 'admin@alpha.com',
+      name: 'Maria Silva (RH)',
       role: 'admin_rh',
       pointsBalance: 0,
-      passwordHash: admin2Hash,
     },
-  });
-  console.log(`Upserted User (Admin 2): ${admin2.name}`);
-
-  const empHash = await hashPassword('123456');
-  const employee = await prisma.user.upsert({
-    where: { email: 'joao@empresaalpha.com' },
-    update: { passwordHash: empHash },
-    create: {
+    {
       id: 'user-emp-002',
-      tenantId: tenant.id,
-      name: 'João Souza',
+      tenantId: alpha.id,
       email: 'joao@empresaalpha.com',
+      name: 'João Souza',
       role: 'employee',
-      pointsBalance: 1250,
-      passwordHash: empHash,
+      pointsBalance: 450,
     },
-  });
-  console.log(`Upserted User (Employee): ${employee.name}`);
-
-  const emp2Hash = await hashPassword('123456');
-  const employee2 = await prisma.user.upsert({
-    where: { email: 'user@alpha.com' },
-    update: { passwordHash: emp2Hash },
-    create: {
-      id: 'user-emp-003',
-      tenantId: tenant.id,
-      name: 'Employee Alpha',
-      email: 'user@alpha.com',
-      role: 'employee',
-      pointsBalance: 200,
-      passwordHash: emp2Hash,
-    },
-  });
-  console.log(`Upserted User (Employee 2): ${employee2.name}`);
-
-  const guestHash = await hashPassword('123456');
-  const guest = await prisma.user.upsert({
-    where: { email: 'guest@alpha.com' },
-    update: { passwordHash: guestHash },
-    create: {
+    {
       id: 'user-guest-001',
-      tenantId: tenant.id,
-      name: 'Guest Alpha',
-      email: 'guest@alpha.com',
+      tenantId: alpha.id,
+      email: 'guest@empresaalpha.com',
+      name: 'Convidado Alpha',
       role: 'guest',
       pointsBalance: 0,
-      passwordHash: guestHash,
     },
-  });
-  console.log(`Upserted User (Guest): ${guest.name}`);
-
-  // 3. Courses + Lessons
-  const course1 = await prisma.course.upsert({
-    where: { id: 'course-001' },
-    update: {},
-    create: {
-      id: 'course-001',
-      tenantId: tenant.id,
-      title: 'Liderança na Era da IA',
-      description: 'Desenvolva habilidades essenciais para liderar equipes multidisciplinares com suporte de Inteligência Artificial.',
-      status: 'published',
+    {
+      id: 'user-superadmin-001',
+      tenantId: platform.id,
+      email: 'superadmin@pontufy.com',
+      name: 'Super Admin Pontufy',
+      role: 'super_admin',
+      pointsBalance: 0,
     },
-  });
-
-  const course1Lessons = [
-    { id: 'lesson-001', courseId: course1.id, title: 'O que é IA Generativa?', type: 'video', pointsAssigned: 50 },
-    { id: 'lesson-002', courseId: course1.id, title: 'Aplicações B2B da IA', type: 'video', pointsAssigned: 50 },
-    { id: 'lesson-003', courseId: course1.id, title: 'Preparando a Equipe para IA', type: 'video', pointsAssigned: 75 },
-    { id: 'lesson-004', courseId: course1.id, title: 'Gestão de Riscos com IA', type: 'video', pointsAssigned: 50 },
-    { id: 'lesson-005', courseId: course1.id, title: 'Case Studies: IA no RH', type: 'text', pointsAssigned: 75 },
   ];
 
-  for (const lesson of course1Lessons) {
+  for (const u of users) {
+    await prisma.user.upsert({
+      where: { email: u.email },
+      update: {
+        name: u.name,
+        role: u.role,
+        tenantId: u.tenantId,
+        pointsBalance: u.pointsBalance,
+        passwordHash,
+      },
+      create: { ...u, passwordHash },
+    });
+    console.log(`User: ${u.email} (${u.role})`);
+  }
+
+  // 3. Curso inicial + 3 lições completas em Markdown + quiz de 3 perguntas
+  const LGPD_QUIZ = JSON.stringify([
+    {
+      module: 'Segurança da Informação e LGPD',
+      questions: [
+        {
+          question:
+            'Qual princípio da LGPD limita o tratamento de dados ao mínimo necessário para a finalidade declarada?',
+          options: [
+            { text: 'Necessidade' },
+            { text: 'Transparência' },
+            { text: 'Segurança' },
+            { text: 'Livre acesso' },
+          ],
+          correctIndex: 0,
+        },
+        {
+          question: 'O que é phishing?',
+          options: [
+            { text: 'Um tipo de firewall corporativo' },
+            {
+              text: 'Uma técnica de engenharia social para obter dados confidenciais',
+            },
+            { text: 'Um backup automatizado em nuvem' },
+            { text: 'Uma política de senhas fortes' },
+          ],
+          correctIndex: 1,
+        },
+        {
+          question:
+            'Ao receber um e-mail de um suposto fornecedor pedindo suas credenciais de acesso, o correto é:',
+          options: [
+            { text: 'Clicar no link e verificar o sistema' },
+            { text: 'Responder solicitando mais informações' },
+            { text: 'Encaminhar para os colegas' },
+            {
+              text: 'Verificar a legitimidade pelo canal oficial antes de qualquer resposta',
+            },
+          ],
+          correctIndex: 3,
+        },
+      ],
+    },
+  ]);
+
+  const lgpdCourse = await prisma.course.upsert({
+    where: { id: 'course-lgpd-001' },
+    update: {
+      title: 'Segurança da Informação e LGPD no Trabalho Remoto',
+      description:
+        'Aprenda os fundamentos de segurança da informação e a Lei Geral de Proteção de Dados (LGPD) aplicados ao trabalho remoto, com boas práticas para proteger dados pessoais e corporativos.',
+      status: 'published',
+      quizJson: LGPD_QUIZ,
+      workloadHours: 8,
+    },
+    create: {
+      id: 'course-lgpd-001',
+      tenantId: alpha.id,
+      title: 'Segurança da Informação e LGPD no Trabalho Remoto',
+      description:
+        'Aprenda os fundamentos de segurança da informação e a Lei Geral de Proteção de Dados (LGPD) aplicados ao trabalho remoto, com boas práticas para proteger dados pessoais e corporativos.',
+      status: 'published',
+      quizJson: LGPD_QUIZ,
+      workloadHours: 8,
+    },
+  });
+
+  const lgpdLessons = [
+    {
+      id: 'lesson-lgpd-001',
+      courseId: lgpdCourse.id,
+      title: 'Fundamentos de Segurança da Informação',
+      type: 'text',
+      pointsAssigned: 40,
+      contentUrl: `## O que é Segurança da Informação?
+
+Segurança da informação é o conjunto de práticas que protege a **confidencialidade**, a **integridade** e a **disponibilidade** dos dados — a tríade CID.
+
+### Os três pilares
+
+- **Confidencialidade**: somente pessoas autorizadas acessam os dados.
+- **Integridade**: os dados não são alterados de forma não autorizada.
+- **Disponibilidade**: os dados estão acessíveis quando necessários.
+
+### Ameaças comuns
+
+1. Engenharia social (phishing, pretexting).
+2. Malware e ransomware.
+3. Acesso não autorizado por senhas fracas.
+
+## Por que isso importa no trabalho remoto?
+
+No home office, os dados corporativos trafegam por redes domésticas e dispositivos pessoais. Cada colaborador é a **primeira linha de defesa**: a falha de um único usuário pode comprometer toda a empresa.
+
+> **Regra de ouro:** desconfie de tudo que parecer urgente demais ou bom demais para ser verdade.`,
+    },
+    {
+      id: 'lesson-lgpd-002',
+      courseId: lgpdCourse.id,
+      title: 'LGPD: Princípios e Direitos do Titular',
+      type: 'text',
+      pointsAssigned: 40,
+      contentUrl: `## O que é a LGPD?
+
+A Lei Geral de Proteção de Dados (Lei nº 13.709/2018) regula o tratamento de dados pessoais no Brasil, inclusive no ambiente digital.
+
+### Princípios que guiam o tratamento
+
+- **Finalidade**: tratar apenas para propósitos legítimos e informados.
+- **Necessidade**: limitar o tratamento ao mínimo necessário.
+- **Transparência**: informar claramente como os dados são usados.
+- **Segurança**: adotar medidas técnicas e administrativas de proteção.
+
+### Direitos do titular
+
+O titular (o colaborador) tem direito a:
+
+1. Confirmação e acesso aos dados tratados.
+2. Correção de dados incompletos ou desatualizados.
+3. Portabilidade e eliminação, quando aplicável.
+4. Informação sobre compartilhamento com terceiros.
+
+### Na prática, no dia a dia
+
+- Nunca colete dados que a empresa não precisa.
+- Não compartilhe dados pessoais de colegas ou clientes fora dos canais oficiais.
+- Reporte vazamentos ou suspeitas ao canal de privacidade da empresa.`,
+    },
+    {
+      id: 'lesson-lgpd-003',
+      courseId: lgpdCourse.id,
+      title: 'Trabalho Remoto: Boas Práticas e Incidentes',
+      type: 'text',
+      pointsAssigned: 50,
+      contentUrl: `## Boas práticas no trabalho remoto
+
+### Senhas e autenticação
+
+- Use senhas fortes e **únicas** por serviço.
+- Ative a **autenticação multifator (MFA)** sempre que disponível.
+- Nunca compartilhe credenciais por mensagem.
+
+### Dispositivos e redes
+
+- Mantenha o sistema operacional e os aplicativos atualizados.
+- Prefira redes Wi-Fi protegidas; evite redes públicas abertas.
+- Utilize o **VPN corporativo** para acessar sistemas internos.
+
+### E-mails e links
+
+- Verifique o remetente antes de clicar em qualquer link ou anexo.
+- Desconfie de mensagens com tom de urgência pedindo dados ou pagamentos.
+- Ao menor sinal de phishing, **não responda** — reporte ao suporte.
+
+## O que fazer em caso de incidente?
+
+1. **Não altere nada**: não apague e-mails, logs ou arquivos envolvidos.
+2. **Comunique imediatamente** o time de segurança/TI.
+3. **Mude a senha** do serviço afetado e revogue sessões ativas.
+4. Documente o ocorrido: horário, mensagens, links clicados.
+
+> Lembre-se: reportar rápido não é punição — é proteção coletiva.`,
+    },
+  ];
+
+  for (const lesson of lgpdLessons) {
     await prisma.lesson.upsert({
       where: { id: lesson.id },
-      update: {},
+      update: {
+        title: lesson.title,
+        type: lesson.type,
+        contentUrl: lesson.contentUrl,
+        pointsAssigned: lesson.pointsAssigned,
+      },
       create: lesson,
     });
   }
-  console.log(`Upserted Course: ${course1.title} (${course1Lessons.length} lessons)`);
+  console.log(`Course: ${lgpdCourse.title} (${lgpdLessons.length} lessons + quiz)`);
 
-  const course2 = await prisma.course.upsert({
-    where: { id: 'course-002' },
-    update: {},
-    create: {
-      id: 'course-002',
-      tenantId: tenant.id,
-      title: 'Comunicação Não Violenta',
-      description: 'Aprenda técnicas de CNV para melhorar o ambiente corporativo e a colaboração entre equipes.',
-      status: 'published',
-    },
-  });
-
-  const course2Lessons = [
-    { id: 'lesson-006', courseId: course2.id, title: 'Fundamentos da CNV', type: 'video', pointsAssigned: 50 },
-    { id: 'lesson-007', courseId: course2.id, title: 'Escuta Ativa e Empatia', type: 'video', pointsAssigned: 50 },
-    { id: 'lesson-008', courseId: course2.id, title: 'Expressando Necessidades', type: 'video', pointsAssigned: 75 },
-    { id: 'lesson-009', courseId: course2.id, title: 'Resolvendo Conflitos', type: 'text', pointsAssigned: 75 },
-  ];
-
-  for (const lesson of course2Lessons) {
-    await prisma.lesson.upsert({
-      where: { id: lesson.id },
-      update: {},
-      create: lesson,
-    });
-  }
-  console.log(`Upserted Course: ${course2.title} (${course2Lessons.length} lessons)`);
-
-  const course3 = await prisma.course.upsert({
-    where: { id: 'course-003' },
-    update: {},
-    create: {
-      id: 'course-003',
-      tenantId: tenant.id,
-      title: 'Gestão Ágil de Projetos',
-      description: 'Domine frameworks ágeis como Scrum e Kanban para entregar projetos com mais velocidade e qualidade.',
-      status: 'published',
-    },
-  });
-
-  const course3Lessons = [
-    { id: 'lesson-010', courseId: course3.id, title: 'Manifesto Ágil', type: 'video', pointsAssigned: 50 },
-    { id: 'lesson-011', courseId: course3.id, title: 'Scrum na Prática', type: 'video', pointsAssigned: 75 },
-    { id: 'lesson-012', courseId: course3.id, title: 'Kanban para Times', type: 'video', pointsAssigned: 50 },
-    { id: 'lesson-013', courseId: course3.id, title: 'Métricas Ágeis', type: 'text', pointsAssigned: 75 },
-  ];
-
-  for (const lesson of course3Lessons) {
-    await prisma.lesson.upsert({
-      where: { id: lesson.id },
-      update: {},
-      create: lesson,
-    });
-  }
-  console.log(`Upserted Course: ${course3.title} (${course3Lessons.length} lessons)`);
-
-  // 4. Rewards (enriched with imageUrl and category)
+  // 4. Catálogo de recompensas do tenant Empresa Alpha
   const rewards = [
     {
       id: 'reward-001',
-      tenantId: tenant.id,
+      tenantId: alpha.id,
       partnerStore: 'amazon',
-      title: 'Vale-Presente Amazon R$ 50',
-      affiliateLink: 'https://amazon.com.br/vale50',
+      title: 'Cartão Presente Amazon R$ 50',
+      affiliateLink: 'https://www.amazon.com.br/giftcard',
       pricePoints: 500,
       imageUrl: 'https://images.unsplash.com/photo-1523474253046-8cd2748b5fd2?auto=format&fit=crop&q=80&w=600',
       category: 'coupons',
@@ -210,57 +330,24 @@ async function main() {
     },
     {
       id: 'reward-002',
-      tenantId: tenant.id,
-      partnerStore: 'magalu',
-      title: 'Cupom Magalu R$ 100',
-      affiliateLink: 'https://magazineluiza.com.br/cupom100',
-      pricePoints: 1000,
+      tenantId: alpha.id,
+      partnerStore: 'custom',
+      title: 'Voucher iFood R$ 30',
+      affiliateLink: 'https://www.ifood.com.br',
+      pricePoints: 300,
       imageUrl: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&q=80&w=600',
       category: 'coupons',
       isActive: true,
     },
     {
       id: 'reward-003',
-      tenantId: null,
-      partnerStore: 'amazon',
-      title: 'Fone de Ouvido Bluetooth Premium',
-      affiliateLink: 'https://amazon.com.br/fone-bt',
-      pricePoints: 1200,
-      imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=600',
-      category: 'tech',
-      isActive: true,
-    },
-    {
-      id: 'reward-004',
-      tenantId: null,
-      partnerStore: 'shopee',
-      title: 'Kit Exercícios Casa',
-      affiliateLink: 'https://shopee.com.br/kit-exercicio',
-      pricePoints: 1500,
-      imageUrl: 'https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?auto=format&fit=crop&q=80&w=600',
-      category: 'health',
-      isActive: true,
-    },
-    {
-      id: 'reward-005',
-      tenantId: null,
-      partnerStore: 'mercadolivre',
-      title: 'Cadeira de Escritório Ergonômica',
-      affiliateLink: 'https://mercadolivre.com.br/cadeira-ergo',
-      pricePoints: 3500,
-      imageUrl: 'https://images.unsplash.com/photo-1505843490538-5133c6c7d0e1?auto=format&fit=crop&q=80&w=600',
-      category: 'home',
-      isActive: true,
-    },
-    {
-      id: 'reward-006',
-      tenantId: null,
-      partnerStore: 'amazon',
-      title: 'Smartwatch Fitness',
-      affiliateLink: 'https://amazon.com.br/smartwatch',
-      pricePoints: 2100,
-      imageUrl: 'https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&q=80&w=600',
-      category: 'tech',
+      tenantId: alpha.id,
+      partnerStore: 'custom',
+      title: 'Curso Avançado de Liderança',
+      affiliateLink: 'https://www.pontufy.com/lideranca-avancada',
+      pricePoints: 1000,
+      imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=600',
+      category: 'courses',
       isActive: true,
     },
   ];
@@ -268,12 +355,31 @@ async function main() {
   for (const reward of rewards) {
     await prisma.reward.upsert({
       where: { id: reward.id },
-      update: {},
-      create: reward,
+      update: {
+        tenantId: reward.tenantId,
+        partnerStore: reward.partnerStore,
+        title: reward.title,
+        affiliateLink: reward.affiliateLink,
+        pricePoints: reward.pricePoints,
+        imageUrl: reward.imageUrl,
+        category: reward.category,
+        isActive: reward.isActive,
+      },
+      create: { ...reward },
     });
   }
-  console.log(`Upserted ${rewards.length} Rewards`);
+  console.log(`Rewards: ${rewards.length} recompensas ativas`);
 
+  // 5. Resumo
+  const summary = {
+    tenants: await prisma.tenant.count(),
+    users: await prisma.user.count(),
+    courses: await prisma.course.count(),
+    lessons: await prisma.lesson.count(),
+    rewards: await prisma.reward.count(),
+  };
+  console.log('── Resumo do seed ──');
+  console.log(JSON.stringify(summary, null, 2));
   console.log('Seeding finished.');
 }
 

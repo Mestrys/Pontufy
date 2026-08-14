@@ -26,6 +26,7 @@ export async function POST(request: Request) {
       create: {
         id: 'tenant-alpha-001',
         name: 'Empresa Alpha',
+        slug: 'empresa-alpha',
         sector: 'tech',
         contractStatus: 'active',
         aiCredits: 1000,

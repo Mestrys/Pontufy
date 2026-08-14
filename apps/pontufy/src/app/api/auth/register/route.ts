@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Convite inválido.' }, { status: 404 });
     }
 
-    if (invitation.usedAt) {
+    if (invitation.status === 'accepted' || invitation.usedAt) {
       return NextResponse.json(
         { error: 'Este convite já foi utilizado.' },
         { status: 410 },
@@ -62,6 +62,7 @@ export async function POST(request: Request) {
 
     const passwordHash = await hashPassword(password);
 
+    // Criação do utilizador + aceitação do convite: transação atómica.
     await prisma.$transaction([
       prisma.user.create({
         data: {
@@ -74,14 +75,14 @@ export async function POST(request: Request) {
       }),
       prisma.invitation.update({
         where: { id: invitation.id },
-        data: { usedAt: new Date() },
+        data: { status: 'accepted', usedAt: new Date() },
       }),
     ]);
 
     sendWelcomeEmail(invitation.email, name.trim()).catch(() => {});
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error) {
     console.error('POST /api/auth/register:', error);
     return NextResponse.json(
       { error: 'Erro interno ao criar conta.' },

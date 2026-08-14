@@ -41,6 +41,7 @@ export default function AIWizard() {
     available: string[];
     configured: boolean;
     diagnostics?: Record<string, string>;
+    chainOrder?: string[];
   } | null>(null);
 
   useEffect(() => {
@@ -233,6 +234,11 @@ export default function AIWizard() {
             <Zap size={18} />
             <span className="text-sm font-medium">
               IA ativa: {providerStatus.available.join(', ')}
+              {providerStatus.chainOrder && providerStatus.chainOrder.length > 0 && (
+                <span className="text-emerald-600/80 ml-1">
+                  (ordem: {providerStatus.chainOrder.join(' → ')})
+                </span>
+              )}
             </span>
           </div>
         )}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { triggerRewardRedemption } from "@/hooks/useApi";
 
 type AutopilotResponse = {
   recommendedRewardId: string;
@@ -97,14 +98,11 @@ export default function SurpriseRewardToast() {
                 type="button"
                 onClick={async () => {
                   try {
-                    const res = await fetch('/api/rewards/redeem', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ rewardId: data.recommendedRewardId }),
-                    });
-                    const result = await res.json();
+                    const result = await triggerRewardRedemption(data.recommendedRewardId);
                     if (result.success && result.affiliateUrl) {
                       window.open(result.affiliateUrl, '_blank');
+                    } else if (!result.success) {
+                      console.error('Autopilot redeem failed:', result.error);
                     }
                   } catch (err) {
                     console.error('Autopilot redeem failed:', err);

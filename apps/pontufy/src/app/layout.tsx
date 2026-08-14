@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Roboto, Geist_Mono } from "next/font/google";
 import AuthProvider from "@/components/providers/AuthProvider";
 import AppShell from "@/components/layout/AppShell";
+import PwaRegister from "@/components/pwa/PwaRegister";
+import OfflineBanner from "@/components/pwa/OfflineBanner";
+import DynamicThemeProvider from "@/components/theme/DynamicThemeProvider";
 import "./globals.css";
 
 const roboto = Roboto({
@@ -18,8 +21,20 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Pontufy — Plataforma de Gamificação Corporativa",
   description: "Transforme treinamentos corporativos em experiências engajadoras com gamificação, IA e recompensas reais.",
+  manifest: "/manifest.json",
+  applicationName: "Pontufy",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Pontufy",
+  },
+  icons: {
+    icon: "/icons/icon-192x192.png",
+    apple: "/icons/icon-192x192.png",
+  },
   other: {
     lomadee: "2324685",
+    "theme-color": "#0a0a0a",
   },
 };
 
@@ -35,8 +50,12 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-brand-gray">
         <AuthProvider>
-          <AppShell>{children}</AppShell>
+          <DynamicThemeProvider>
+            <AppShell>{children}</AppShell>
+          </DynamicThemeProvider>
         </AuthProvider>
+        <PwaRegister />
+        <OfflineBanner />
       </body>
     </html>
   );

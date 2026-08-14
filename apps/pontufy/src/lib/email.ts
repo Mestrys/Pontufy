@@ -35,7 +35,7 @@ async function sendEmail(payload: EmailPayload): Promise<boolean> {
   return true;
 }
 
-function resolveBaseUrl(): string {
+export function resolveBaseUrl(): string {
   // Explicit canonical URL wins (already includes protocol).
   if (process.env.NEXTAUTH_URL) return process.env.NEXTAUTH_URL.replace(/\/$/, '');
   // Vercel injects the deployment host without a protocol.
@@ -74,6 +74,34 @@ export async function sendWelcomeEmail(to: string, name: string): Promise<boolea
         <h2 style="color: #10b981;">Pontufy</h2>
         <p>Olá <strong>${name}</strong>, seja bem-vindo(a) ao Pontufy!</p>
         <p>Sua conta foi criada com sucesso. Acesse a plataforma para explorar cursos e acumular pontos.</p>
+        <p style="color: #666; font-size: 12px;">Equipe Pontufy</p>
+      </div>
+    `,
+  });
+}
+
+export async function sendInvitationEmail(
+  to: string,
+  companyName: string,
+  signupUrl: string,
+  expiresAt: Date,
+): Promise<boolean> {
+  const expiresLabel = expiresAt.toLocaleDateString('pt-BR');
+
+  return sendEmail({
+    to,
+    subject: `${companyName} te convidou para o Pontufy!`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+        <h2 style="color: #10b981;">Pontufy</h2>
+        <p>Você foi convidado(a) para acessar a plataforma de benefícios da <strong>${companyName}</strong>.</p>
+        <p>Clique no botão abaixo para criar sua conta:</p>
+        <a href="${signupUrl}" style="display: inline-block; padding: 12px 24px; background: #10b981; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">
+          Criar minha conta
+        </a>
+        <p style="color: #666; font-size: 12px; margin-top: 24px;">
+          Este convite expira em <strong>${expiresLabel}</strong>.
+        </p>
         <p style="color: #666; font-size: 12px;">Equipe Pontufy</p>
       </div>
     `,

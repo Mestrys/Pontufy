@@ -1,0 +1,27 @@
+# Stack local de desenvolvimento — PostgreSQL 16 para o app Pontufy.
+# Uso: docker compose up -d db
+# Depois: copie apps/pontufy/.env.example → apps/pontufy/.env.local e ajuste as
+# URLs conforme o bloco "Local development" do exemplo. Aplicar schema:
+#   cd apps/pontufy && npm run db:migrate && npm run db:seed
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: pontufy-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: pontufy
+      POSTGRES_PASSWORD: pontufy
+      POSTGRES_DB: pontufy
+    ports:
+      - "5432:5432"
+    volumes:
+      - pontufy-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pontufy -d pontufy"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pontufy-pgdata:

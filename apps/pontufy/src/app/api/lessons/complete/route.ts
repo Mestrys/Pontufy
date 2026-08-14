@@ -3,6 +3,7 @@ import { getSessionContext } from '@/backend/session';
 import { getTenantDb } from '@/backend/db';
 import { acquireLock, releaseLock } from '@/lib/redis/mutex';
 import { checkVelocityLimit } from '@/lib/security/velocity';
+import { notifyLessonCompleted } from '@/lib/notifications';
 
 export async function POST(request: Request) {
   try {
@@ -14,13 +15,16 @@ export async function POST(request: Request) {
     const db = getTenantDb(tenantId);
 
     // Validates lesson exists AND belongs to this tenant (via course.tenantId relation scope).
-    const lesson = await db.lesson.findFirst({ where: { id: lessonId } });
+    const lesson = await db.lesson.findFirst({
+      where: { id: lessonId },
+      include: { course: { select: { id: true, title: true } } },
+    });
     if (!lesson) {
       return NextResponse.json({ error: 'Aula não encontrada no escopo da empresa.' }, { status: 404 });
     }
 
     // Distributed lock prevents double-credit if the client fires two concurrent completions.
-    const lockKey = `lesson:${tenantId}:${userId}:${lessonId}`;
+    const lockKey = `lock:lesson:${tenantId}:${userId}:${lessonId}`;
     const lockAcquired = await acquireLock(lockKey, 10);
     if (!lockAcquired) {
       return NextResponse.json({ error: 'Transação já em andamento. Aguarde.' }, { status: 429 });
@@ -44,13 +48,13 @@ export async function POST(request: Request) {
 
       const velocity = await checkVelocityLimit(userId, tenantId);
       if (!velocity.allowed) {
-        return NextResponse.json({ error: velocity.reason }, { status: 429 });
+        return NextResponse.json({ error: velocity.reason }, { status: 400 });
       }
 
       const pointsToAward = lesson.pointsAssigned;
 
-      const result = await db.$transaction(async (tx: any) => {
-        await tx.lessonCompletion.create({ data: { userId, lessonId } });
+      const result = await db.$transaction(async (tx) => {
+        await tx.lessonCompletion.create({ data: { userId, tenantId, lessonId } });
 
         const updatedUser = await tx.user.update({
           where: { id: userId },
@@ -70,6 +74,16 @@ export async function POST(request: Request) {
         return { updatedUser };
       });
 
+      // Non-blocking: não atrasa nem quebra a resposta principal.
+      notifyLessonCompleted({
+        tenantId,
+        userId,
+        lessonTitle: lesson.title,
+        courseTitle: lesson.course?.title ?? lesson.title,
+        points: pointsToAward,
+        link: lesson.course ? `/player/${lesson.course.id}` : undefined,
+      });
+
       return NextResponse.json({
         success: true,
         message: `Você ganhou +${pointsToAward} pontos!`,
@@ -78,8 +92,8 @@ export async function POST(request: Request) {
     } finally {
       await releaseLock(lockKey);
     }
-  } catch (error: any) {
-    if (error.message === 'Não autenticado.') {
+  } catch (error) {
+    if (error instanceof Error && error.message === 'Não autenticado.') {
       return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 });
     }
     console.error('Erro ao completar aula:', error);

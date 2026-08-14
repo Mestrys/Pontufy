@@ -14,6 +14,11 @@
 @theme {
   --font-sans: "Google Sans Flex", "Google Sans", var(--font-roboto), "Roboto", sans-serif;
 
+  /* White-Label dinâmico: valores padrão injetados em runtime pelo
+     DynamicThemeProvider (nunca aceitar input do tenant sem sanitização). */
+  --brand-primary: #10b981;
+  --brand-accent: #8b5cf6;
+
   --color-brand-bg: #0a0a0a;
   --color-brand-surface: #141414;
   --color-brand-raised: #1f1f1f;
@@ -141,11 +146,26 @@
   .text-label-sm { font-size: 0.6875rem; line-height: 1rem; letter-spacing: 0.045454em; font-weight: 600; }
 
   .bg-gradient-pontufy {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(135deg, var(--brand-primary, #10b981) 0%, #059669 100%);
   }
   .text-gradient-pontufy {
-    background-image: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    background-image: linear-gradient(135deg, var(--brand-primary, #10b981) 0%, var(--brand-accent, #8b5cf6) 100%);
     @apply bg-clip-text text-transparent;
+  }
+  .bg-brand-primary {
+    background-color: var(--brand-primary, #10b981);
+  }
+  .bg-brand-accent {
+    background-color: var(--brand-accent, #8b5cf6);
+  }
+  .text-brand-primary {
+    color: var(--brand-primary, #10b981);
+  }
+  .text-brand-accent {
+    color: var(--brand-accent, #8b5cf6);
+  }
+  .border-brand-primary {
+    border-color: var(--brand-primary, #10b981);
   }
   .hide-scrollbar::-webkit-scrollbar {
     display: none;

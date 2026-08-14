@@ -10,5 +10,9 @@
     "dev:landing": "npm run dev -w apps/landing",
     "build:pontufy": "npm run build -w apps/pontufy",
     "build:landing": "npm run build -w apps/landing"
+  },
+  "devDependencies": {
+    "lightningcss": "^1.32.0",
+    "lightningcss-win32-x64-msvc": "^1.32.0"
   }
 }

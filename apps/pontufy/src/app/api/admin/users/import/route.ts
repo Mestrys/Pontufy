@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { randomBytes, scrypt } from 'crypto';
 import { promisify } from 'util';
 import { getSessionContext } from '@/backend/session';
-import { prisma } from '@/backend/db';
+import { getTenantDb, prisma } from '@/backend/db';
 import { logAudit, extractRequestMeta } from '@/lib/audit';
 
 const scryptAsync = promisify(scrypt);
@@ -66,6 +66,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Máximo de 500 usuários por importação.' }, { status: 400 });
     }
 
+    const db = getTenantDb(tenantId);
+
+    // Global email dedup by design (email is globally unique across tenants).
     const existingUsers = await prisma.user.findMany({
       where: { email: { in: rows.map((r) => r.email) } },
       select: { email: true },
@@ -83,7 +86,9 @@ export async function POST(request: Request) {
         // a real password via the "forgot password" flow (emailed reset link),
         // so no shared/plaintext credential is ever issued or exposed.
         const passwordHash = await hashPassword(randomBytes(32).toString('hex'));
-        await prisma.user.create({
+        // tenantId comes from the authenticated session (never the file/body);
+        // the Zero Trust interceptor re-forces it at runtime regardless.
+        await db.user.create({
           data: {
             tenantId,
             name: r.name,
@@ -105,9 +110,10 @@ export async function POST(request: Request) {
       tenantId,
       userId,
       action: 'USER_IMPORT',
+      entity: 'User',
       ipAddress: meta.ipAddress,
       userAgent: meta.userAgent,
-      newValues: { total: rows.length, created, skipped },
+      newValue: { total: rows.length, created, skipped },
     });
 
     return NextResponse.json({
