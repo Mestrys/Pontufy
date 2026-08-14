@@ -161,8 +161,9 @@ export default function AIWizard() {
       mutate('/api/courses?page=1&limit=12');
       mutate('/api/courses/enrolled');
       router.refresh();
-    } catch (err: any) {
-      setError(err?.message || 'Erro inesperado ao gerar curso. Verifique o console do servidor.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erro inesperado ao gerar curso. Verifique o console do servidor.';
+      setError(message);
       setStep(1);
     }
   };

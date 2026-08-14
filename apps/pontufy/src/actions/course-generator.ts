@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { generateObject } from 'ai';
 import { revalidatePath } from 'next/cache';
 import { randomUUID } from 'crypto';
+import type { Prisma } from '@prisma/client';
 
 import { auth } from '@/auth';
 import { getTenantDb } from '@/backend/db';
@@ -366,7 +367,7 @@ export async function generateTrainingCourse(
   let persisted = false;
 
   try {
-    const result = await db.$transaction(async (tx: any) => {
+    const result = await db.$transaction(async (tx: Prisma.TransactionClient) => {
       // Débito atômico de crédito — instrução única e segura contra race condition.
       // Se a query afetar 0 registos, o tenant não tem crédito → aborta.
       const debit = await tx.tenant.updateMany({
