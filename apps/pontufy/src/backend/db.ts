@@ -37,13 +37,28 @@ const WRITE_OPS = ['update', 'updateMany', 'delete', 'deleteMany'];
 // a findUnique `where`, so reads that must be relation-scoped use findFirst.
 const RELATION_SAFE_READ_OPS = ['findFirst', 'findFirstOrThrow', 'findMany', 'count'];
 
+// Models that are strictly tenant-scoped (every row belongs to exactly one tenant)
+const STRICT_TENANT_MODELS = [
+  'User',
+  'Course',
+  'PointsLedger',
+  'AuditLog',
+  'Invitation',
+  'PasswordReset',
+  'LessonCompletion',
+  'QuizAttempt',
+  'Commission',
+  'StripeEvent',
+  'IssuedCertificate',
+  'Notification',
+] as const;
+
 /**
  * Zero Trust Prisma extension — isolates every query to the caller's tenant.
  *
  * Per-model scoping:
  *  - Tenant: global lookup by design (callers always pass the session tenantId).
- *  - User / Course / PointsLedger / AuditLog / Invitation / PasswordReset:
- *    strict `tenantId` equality injected into every read and write.
+ *  - STRICT_TENANT_MODELS: strict `tenantId` equality injected into every read and write.
  *  - Reward: reads expose global (tenantId = null) + own tenant; writes are
  *    restricted to the caller's own rewards (global/foreign rewards are immutable).
  *  - Lesson: no tenantId column — reads are scoped through the parent Course
@@ -52,6 +67,7 @@ const RELATION_SAFE_READ_OPS = ['findFirst', 'findFirstOrThrow', 'findMany', 'co
  *  - LessonCompletion: scoped by tenantId (injected automatically by this extension).
  *    Use findFirst (not findUnique) for tenant-sensitive lookups — findUnique rejects
  *    extra where fields injected by the interceptor.
+ *  - All other models (Tenant): no tenant isolation applied.
  */
 export function getTenantDb(tenantId: string) {
   if (!tenantId) throw new Error('Operação negada: tenantId não fornecido.');
@@ -59,26 +75,34 @@ export function getTenantDb(tenantId: string) {
   return prisma.$extends({
     query: {
       $allModels: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         async $allOperations({ model, operation, args, query }: any) {
+          // Tenant: global lookup (no scoping)
           if (model === 'Tenant') {
             return query(args);
           }
 
-          // Reward: global rewards (tenantId null) are visible to every tenant
-          // but mutable only by no tenant; own rewards are read+write.
+          // Reward: hybrid model — global (tenantId: null) visible to all,
+          // own rewards read/write. Global rewards are immutable.
           if (model === 'Reward') {
             if (READ_OPS.includes(operation)) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const currentWhere = (args as any).where || {};
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               (args as any).where = {
                 ...currentWhere,
                 OR: [{ tenantId: null }, { tenantId }],
               };
             } else if (WRITE_OPS.includes(operation)) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const currentWhere = (args as any).where || {};
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               (args as any).where = { ...currentWhere, tenantId };
             } else if (['create', 'createMany'].includes(operation)) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const currentData = (args as any).data;
               if (Array.isArray(currentData)) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 currentData.forEach((d: any) => {
                   if (d.tenantId === undefined) d.tenantId = tenantId;
                 });
@@ -89,29 +113,41 @@ export function getTenantDb(tenantId: string) {
             return query(args);
           }
 
-          // Lesson: scope through the parent Course relation. Relation filters are
-          // invalid inside findUnique, so only relation-safe reads get scoped here.
+          // Lesson: scope through the parent Course relation.
+          // Relation filters are invalid inside findUnique, so only relation-safe reads get scoped.
           if (model === 'Lesson') {
             if (RELATION_SAFE_READ_OPS.includes(operation)) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               const currentWhere = (args as any).where || {};
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               (args as any).where = {
                 ...currentWhere,
                 course: { is: { tenantId } },
               };
             }
+            // For writes (create/update/delete), tenant scoping is enforced at the Course level
+            // via the relation. The interceptor does not inject tenantId on Lesson writes
+            // because Lesson has no tenantId column.
             return query(args);
           }
 
-          // Strict tenant isolation for all remaining tenant-owned models.
-          if ([...READ_OPS, ...WRITE_OPS].includes(operation)) {
-            const currentWhere = (args as any).where || {};
-            (args as any).where = { ...currentWhere, tenantId };
-          } else if (['create', 'createMany'].includes(operation)) {
-            const currentData = (args as any).data;
-            if (Array.isArray(currentData)) {
-              currentData.forEach((d: any) => (d.tenantId = tenantId));
-            } else {
-              currentData.tenantId = tenantId;
+          // Strict tenant isolation for all tenant-owned models.
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          if (STRICT_TENANT_MODELS.includes(model as any)) {
+            if ([...READ_OPS, ...WRITE_OPS].includes(operation)) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const currentWhere = (args as any).where || {};
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (args as any).where = { ...currentWhere, tenantId };
+            } else if (['create', 'createMany'].includes(operation)) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const currentData = (args as any).data;
+              if (Array.isArray(currentData)) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                currentData.forEach((d: any) => (d.tenantId = tenantId));
+              } else {
+                currentData.tenantId = tenantId;
+              }
             }
           }
 
@@ -120,4 +156,18 @@ export function getTenantDb(tenantId: string) {
       },
     },
   });
+}
+
+/**
+ * Returns the raw Prisma client for administrative operations that require
+ * cross-tenant access (e.g., super_admin dashboards, migrations, seeding).
+ * 
+ * ⚠️ USE WITH EXTREME CAUTION — bypasses all Zero Trust isolation.
+ * Only permitted in:
+ *   - Super admin routes (with explicit role + domain validation)
+ *   - Database migrations / seeding scripts
+ *   - Background jobs with explicit tenant context
+ */
+export function getRawPrisma(): PrismaClient {
+  return prisma;
 }
