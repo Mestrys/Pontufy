@@ -18,6 +18,10 @@
     {
       "path": "/api/cron/rewards-sync",
       "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/sync-lomadee",
+      "schedule": "0 8 * * *"
     }
   ]
 }
