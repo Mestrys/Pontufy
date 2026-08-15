@@ -52,6 +52,7 @@ export default function Navbar() {
   const navLinks = [
     { href: '/dashboard', label: 'Início' },
     { href: '/cursos', label: 'Meus Cursos' },
+    { href: '/skills', label: 'Trilhas' },
     { href: '/loja', label: 'Benefícios' },
     { href: '/wallet', label: 'Carteira' },
     { href: '/certificados', label: 'Certificados' },

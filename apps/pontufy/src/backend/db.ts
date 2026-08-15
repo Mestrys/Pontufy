@@ -80,6 +80,9 @@ const STRICT_TENANT_MODELS = [
   'StripeEvent',
   'IssuedCertificate',
   'Notification',
+  'Skill',
+  'SkillNode',
+  'UserSkillProgress',
 ] as const;
 
 /**

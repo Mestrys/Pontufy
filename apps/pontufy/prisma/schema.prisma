@@ -47,6 +47,9 @@ model Tenant {
   stripeEvents       StripeEvent[]
   auditLogs          AuditLog[]
   quizAttempts       QuizAttempt[]
+  skills             Skill[]
+  skillNodes         SkillNode[]
+  userSkillProgress  UserSkillProgress[]
 }
 
 model User {
@@ -67,6 +70,7 @@ model User {
   issuedCertificates  IssuedCertificate[]
   commissions         Commission[]
   notifications       Notification[]
+  skillProgress       UserSkillProgress[]
   auditLogs           AuditLog[]
   quizAttempts        QuizAttempt[]
 
@@ -88,6 +92,7 @@ model Course {
   tenant          Tenant   @relation(fields: [tenantId], references: [id])
   lessons         Lesson[]
   quizAttempts    QuizAttempt[]
+  skillNodes      SkillNode[]
 
   workloadHours   Int      @default(0) // Carga horária oficial do curso (certificado). 0 = fallback para nº de aulas.
 
@@ -320,4 +325,82 @@ model Commission {
   @@index([tenantId])
   @@index([userId])
   @@index([status])
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// TAREFA 12 — Trilhas de Competência e Árvore de Habilidades (Skill Tree)
+// ───────────────────────────────────────────────────────────────────────
+// Skill = competência corporativa (Liderança, Compliance, etc.).
+// SkillNode = nó da árvore (módulo/curso) com posição (x,y), curso
+// vinculado e pré-requisito opcional (12.3: aprovação >= requiredScore
+// no nó anterior para desbloquear o próximo).
+// UserSkillProgress = progresso do colaborador por nó: score % (quiz),
+// status locked/available/in_progress/completed. PDI (12.5) = nó alvo
+// atribuído pelo RH, materializado como registro com status
+// "in_progress" e flag pdiTarget.
+// ═══════════════════════════════════════════════════════════════════════
+
+model Skill {
+  id          String   @id @default(uuid())
+  tenantId    String
+  name        String
+  description String?
+  category    String   @default("general") // 'tech', 'health', 'retail', 'industry', 'leadership', 'compliance'
+  targetLevel Int      @default(4) // nível-alvo de proficiência 1..5
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant      Tenant            @relation(fields: [tenantId], references: [id])
+  nodes       SkillNode[]
+  userProgress UserSkillProgress[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+}
+
+model SkillNode {
+  id              String    @id @default(uuid())
+  skillId         String
+  tenantId        String
+  title           String
+  description     String?
+  x               Int       // posição na árvore (SVG viewBox)
+  y               Int
+  requiredScore   Int       @default(80) // % mínimo no pré-requisito
+  courseId        String?
+  prerequisiteId  String?   // nó que deve ser concluído antes
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  skill           Skill                 @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  tenant          Tenant                @relation(fields: [tenantId], references: [id])
+  course          Course?               @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  prerequisite    SkillNode?            @relation("SkillPrerequisite", fields: [prerequisiteId], references: [id], onDelete: SetNull)
+  dependents      SkillNode[]           @relation("SkillPrerequisite")
+  userProgress    UserSkillProgress[]
+
+  @@index([skillId])
+  @@index([tenantId])
+  @@index([courseId])
+}
+
+model UserSkillProgress {
+  id          String   @id @default(uuid())
+  tenantId    String
+  userId      String
+  skillId     String
+  skillNodeId String
+  score       Int      @default(0)      // % obtido no quiz vinculado (0 = não iniciado)
+  status      String   @default("locked") // 'locked' | 'available' | 'in_progress' | 'completed'
+  pdiTarget   Boolean  @default(false)  // 12.5 — nó apontado pelo PDI do RH
+  updatedAt   DateTime @updatedAt
+
+  skill      Skill     @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  skillNode  SkillNode @relation(fields: [skillNodeId], references: [id], onDelete: Cascade)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant     Tenant    @relation(fields: [tenantId], references: [id])
+
+  @@unique([userId, skillNodeId])
+  @@index([tenantId])
+  @@index([userId])
 }

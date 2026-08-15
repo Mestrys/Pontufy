@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getSessionContext } from '@/backend/session';
 import { getTenantDb } from '@/backend/db';
 import { acquireLock, releaseLock } from '@/lib/redis/mutex';
+import { recordNodeScore } from '@/lib/skill-tree';
 
 // Submissão server-side do quiz final. A nota NUNCA é aceita do cliente — o
 // servidor re-scora com o quizJson do curso. Aprovação exige >= 70%.
@@ -116,6 +117,15 @@ export async function POST(
           }
         }
       });
+
+      // 12.3 — Skill Tree: aprovação >= 80% grava a pontuação no nó vinculado
+      // ao curso e desbloqueia dependentes na próxima leitura da árvore.
+      if (passed && score / total >= 0.8) {
+        const linkedNode = await db.skillNode.findFirst({ where: { courseId: id } });
+        if (linkedNode) {
+          await recordNodeScore(tenantId, userId, linkedNode.id, Math.round((score / total) * 100));
+        }
+      }
 
       return NextResponse.json({
         success: true,
