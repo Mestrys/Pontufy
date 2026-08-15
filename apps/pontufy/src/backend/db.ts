@@ -84,6 +84,7 @@ const STRICT_TENANT_MODELS = [
   'SkillNode',
   'UserSkillProgress',
   'Battle',
+  'Redemption',
 ] as const;
 
 /**

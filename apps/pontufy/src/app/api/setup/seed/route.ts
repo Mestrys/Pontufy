@@ -148,9 +148,11 @@ export async function POST(request: Request) {
         create: {
           id: r.id,
           tenantId: r.tenantId,
-          partnerStore: r.store,
+          partner: r.store,
+          externalId: null,
           title: r.title,
-          affiliateLink: r.link,
+          originalUrl: r.link,
+          affiliateUrl: null,
           pricePoints: r.price,
           imageUrl: r.image,
           category: r.category,

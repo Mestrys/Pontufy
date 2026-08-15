@@ -51,6 +51,7 @@ model Tenant {
   skillNodes         SkillNode[]
   userSkillProgress  UserSkillProgress[]
   battles            Battle[]
+  redemptions        Redemption[]
 }
 
 model User {
@@ -77,6 +78,7 @@ model User {
   battlesOpposed      Battle[]             @relation("BattleOpponent")
   auditLogs           AuditLog[]
   quizAttempts        QuizAttempt[]
+  redemptions         Redemption[]
 
   @@index([tenantId])
   @@index([tenantId, pointsBalance])
@@ -173,12 +175,14 @@ model PointsLedger {
 model Reward {
   id              String   @id @default(uuid())
   tenantId        String?  // Null = global reward available to all tenants.
-  partnerStore    String   // 'amazon', 'magalu', 'shopee', 'mercadolivre'
+  partner         String   @default("LOMADEE") // 'LOMADEE', 'amazon', 'magalu', 'shopee', 'mercadolivre'
+  externalId      String?  // ID do produto/oferta na Lomadee
   title           String
-  affiliateLink   String
+  originalUrl     String   // URL original do produto/oferta
+  affiliateUrl    String?  // URL afiliada gerada (com tracking)
   pricePoints     Int
   imageUrl        String?
-  category        String?  // 'tech', 'health', 'home', 'coupons'
+  category        String?  // 'tech', 'health', 'home', 'coupons', etc.
   isActive        Boolean  @default(true)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -186,6 +190,40 @@ model Reward {
   tenant          Tenant?  @relation(fields: [tenantId], references: [id])
 
   @@index([tenantId])
+  @@index([partner])
+  @@index([category])
+  @@index([externalId])
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// Resgates de Recompensas (Lomadee / Afiliados)
+// ───────────────────────────────────────────────────────────────────────
+// Registro imutável de cada resgate efetuado pelo colaborador.
+// O link afiliado é gerado no momento do resgate com trackingSubId único
+// para atribuição de comissões via postback.
+// ═══════════════════════════════════════════════════════════════════════
+
+model Redemption {
+  id              String   @id @default(uuid())
+  tenantId        String
+  userId          String
+  rewardId        String
+  pointsDebited   Int
+  trackingSubId   String   @unique // UUID único para atribuição de comissão (subId)
+  affiliateLink   String   // Link afiliado gerado no momento do resgate
+  status          String   @default("PENDING") // 'PENDING' | 'CONFIRMED' | 'CANCELLED'
+  commissionValue Decimal? @db.Decimal(12, 2)
+  postbackPayload Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tenant          Tenant   @relation(fields: [tenantId], references: [id])
+  user            User     @relation(fields: [userId], references: [id])
+
+  @@index([tenantId, userId])
+  @@index([tenantId, status])
+  @@index([rewardId])
+  @@index([trackingSubId])
 }
 
 model PasswordReset {
