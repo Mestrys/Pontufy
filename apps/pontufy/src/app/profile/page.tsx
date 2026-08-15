@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useStore } from '@/store/useStore';
 import { useUserStore } from '@/store/useUserStore';
 import { isSoundEnabled, setSoundEnabled } from '@/lib/feedback';
+import AchievementsCard from '@/components/profile/AchievementsCard';
 import { Loader2, User, Coins, Save, ShieldCheck, Building2, Volume2, VolumeX, LogOut } from 'lucide-react';
 
 export default function ProfilePage() {
@@ -165,6 +166,9 @@ export default function ProfilePage() {
               </span>
             </button>
           </section>
+
+          {/* Conquistas (11.4) */}
+          <AchievementsCard />
 
           {/* Segurança (7.3) — revogação instantânea de sessões */}
           <section className="bg-md-surface border border-md-outline rounded-xl p-6">

@@ -4,6 +4,7 @@ import { useStore } from '@/store/useStore';
 import HeroCourse from '@/components/dashboard/HeroCourse';
 import CourseRow from '@/components/dashboard/CourseRow';
 import SurpriseRewardToast from '@/components/dashboard/SurpriseRewardToast';
+import StreakCard from '@/components/dashboard/StreakCard';
 import { useCourses, useEnrolledCourses } from '@/hooks/useApi';
 import { getCachedCourses, reconcileWithApi, type CachedCourse } from '@/lib/local-courses';
 import { Loader2 } from 'lucide-react';
@@ -94,6 +95,9 @@ export default function Home() {
           {heroCourse && <HeroCourse course={heroCourse} />}
 
           <div className="relative z-20 -mt-8 space-y-2 pt-4">
+            <div className="px-8 md:px-16 pb-2">
+              <StreakCard />
+            </div>
             {filteredInProgress.length > 0 && (
               <CourseRow title="Continue de onde parou" courses={filteredInProgress} />
             )}

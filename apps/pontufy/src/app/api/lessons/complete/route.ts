@@ -3,10 +3,11 @@ import { getSessionContext } from '@/backend/session';
 import { getTenantDb } from '@/backend/db';
 import { acquireLock, releaseLock } from '@/lib/redis/mutex';
 import { checkVelocityLimit } from '@/lib/security/velocity';
-import { notifyLessonCompleted } from '@/lib/notifications';
+import { notifyLessonCompleted, notifyStreakMilestone, notifyLevelUp } from '@/lib/notifications';
 import { getClientIp, ipRateLimit } from '@/lib/security/auth-guard';
 import { tenantRateLimit } from '@/lib/security/rate-limit';
 import { completeLessonSchema, parseBody } from '@/lib/validations';
+import { burstMultiplier, countCompletionsToday, getStreak, getUserTier, type StreakInfo } from '@/lib/gamification';
 
 const LESSON_IP_MAX = 60;
 const LESSON_IP_WINDOW = 60; // 60 req/min/IP
@@ -82,7 +83,10 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: velocity.reason }, { status: 400 });
       }
 
-      const pointsToAward = lesson.pointsAssigned;
+      // 11.2 — Burst: multiplicador por aulas concluídas HOJE (x1, x1.5, x2).
+      const completionsToday = await countCompletionsToday(userId, tenantId);
+      const burst = burstMultiplier(completionsToday);
+      const pointsToAward = Math.round(lesson.pointsAssigned * burst);
 
       const result = await db.$transaction(async (tx) => {
         await tx.lessonCompletion.create({ data: { userId, tenantId, lessonId } });
@@ -98,12 +102,41 @@ export async function POST(request: Request) {
             tenantId,
             type: 'gain',
             pointsAmount: pointsToAward,
-            description: `Conclusão da Aula: ${lesson.title}`,
+            description:
+              burst > 1
+                ? `Conclusão da Aula: ${lesson.title} (burst x${burst})`
+                : `Conclusão da Aula: ${lesson.title}`,
           },
         });
 
         return { updatedUser };
       });
+
+      // 11.1/11.5 — Milestone de streak: notifica e celebra marcos de consistência.
+      const streak = await getStreak(userId, tenantId);
+      const isMilestone = streak.current >= 3 && (streak.current % 3 === 0 || streak.current <= 5);
+      if (isMilestone) {
+        notifyStreakMilestone({
+          tenantId,
+          userId,
+          streak: streak.current,
+          best: streak.best,
+        });
+      }
+
+      // Level up: notifica quando o saldo cruza o piso do próximo nível.
+      const previousPoints = result.updatedUser.pointsBalance - pointsToAward;
+      const beforeTier = getUserTier(previousPoints);
+      const afterTier = getUserTier(result.updatedUser.pointsBalance);
+      if (beforeTier.name !== afterTier.name) {
+        notifyLevelUp({
+          tenantId,
+          userId,
+          tierName: afterTier.name,
+          pointsBalance: result.updatedUser.pointsBalance,
+          link: '/dashboard',
+        });
+      }
 
       // Non-blocking: não atrasa nem quebra a resposta principal.
       notifyLessonCompleted({
@@ -117,8 +150,13 @@ export async function POST(request: Request) {
 
       return NextResponse.json({
         success: true,
-        message: `Você ganhou +${pointsToAward} pontos!`,
+        message:
+          burst > 1
+            ? `Você ganhou +${pointsToAward} pontos (burst x${burst})!`
+            : `Você ganhou +${pointsToAward} pontos!`,
         newBalance: result.updatedUser.pointsBalance,
+        burst,
+        streak: streak.current,
       });
     } finally {
       await releaseLock(lockKey);

@@ -144,3 +144,25 @@ export function notifySystem(params: {
     link: params.link,
   });
 }
+
+// 11.5 — Notificação inteligente de milestone de streak.
+export function notifyStreakMilestone(params: {
+  tenantId: string;
+  userId: string;
+  streak: number;
+  best: number;
+  link?: string;
+}): void {
+  void dispatchNotification({
+    tenantId: params.tenantId,
+    userId: params.userId,
+    type: 'LEVEL_UP',
+    title: `Streak de ${params.streak} dias! 🔥`,
+    message:
+      params.streak === params.best
+        ? `Novo recorde pessoal! Continue assim, sua melhor marca agora é ${params.streak} dias.`
+        : `Você completou ${params.streak} dias seguidos de aprendizado.`,
+    link: params.link,
+    metadata: { streak: params.streak, best: params.best, milestone: true },
+  });
+}
