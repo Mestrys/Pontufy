@@ -59,6 +59,51 @@ export async function cacheDeletePattern(pattern: string): Promise<void> {
   } catch {}
 }
 
+// Unread notifications counter per user (Redis-persisted badge)
+// Key: unread:{tenantId}:{userId}
+
+export async function incrementUnreadCount(tenantId: string, userId: string, delta: number = 1): Promise<void> {
+  const client = getRedis();
+  if (!client) return;
+  const key = `unread:${tenantId}:${userId}`;
+  try {
+    const current = (await client.get<number>(key)) ?? 0;
+    const next = Math.max(0, current + delta);
+    await client.set(key, next);
+  } catch {}
+}
+
+export async function getUnreadCount(tenantId: string, userId: string): Promise<number> {
+  const client = getRedis();
+  if (!client) return 0;
+  const key = `unread:${tenantId}:${userId}`;
+  try {
+    return (await client.get<number>(key)) ?? 0;
+  } catch {
+    return 0;
+  }
+}
+
+export async function decrementUnreadCount(tenantId: string, userId: string, delta: number = 1): Promise<void> {
+  const client = getRedis();
+  if (!client) return;
+  const key = `unread:${tenantId}:${userId}`;
+  try {
+    const current = (await client.get<number>(key)) ?? 0;
+    const next = Math.max(0, current - delta);
+    await client.set(key, next);
+  } catch {}
+}
+
+export async function resetUnreadCount(tenantId: string, userId: string): Promise<void> {
+  const client = getRedis();
+  if (!client) return;
+  const key = `unread:${tenantId}:${userId}`;
+  try {
+    await client.set(key, 0);
+  } catch {}
+}
+
 export async function rateLimitCheck(
   key: string,
   maxRequests: number,

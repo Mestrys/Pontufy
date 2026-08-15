@@ -1,12 +1,17 @@
 import { getTenantDb } from '@/backend/db';
 import { broadcastToTenant } from '@/app/api/notifications/stream/route';
+import { incrementUnreadCount } from '@/lib/redis';
 
 export type NotificationType =
   | 'POINTS_EARNED'
   | 'REWARD_REDEEMED'
   | 'COURSE_ASSIGNED'
   | 'LEVEL_UP'
-  | 'SYSTEM';
+  | 'SYSTEM'
+  | 'BATTLE_CHALLENGE'
+  | 'BATTLE_RESULT'
+  | 'CERTIFICATE_READY'
+  | 'DEPT_BONUS_AWARDED';
 
 export interface NotificationPayload {
   tenantId: string;
@@ -51,6 +56,9 @@ export async function dispatchNotification(
       type: payload.type,
       link: payload.link ?? null,
     });
+
+    // Incrementa contador Redis de não-lidas (badge)
+    incrementUnreadCount(payload.tenantId, payload.userId, 1).catch(() => {});
   } catch (err) {
     console.error('Falha ao despachar notificação (não-bloqueante):', err);
   }
@@ -164,5 +172,83 @@ export function notifyStreakMilestone(params: {
         : `Você completou ${params.streak} dias seguidos de aprendizado.`,
     link: params.link,
     metadata: { streak: params.streak, best: params.best, milestone: true },
+  });
+}
+
+// 13.x — Notificação de desafio de batalha recebido.
+export function notifyBattleChallenge(params: {
+  tenantId: string;
+  userId: string;
+  challengerName: string;
+  battleId: string;
+  link?: string;
+}): void {
+  void dispatchNotification({
+    tenantId: params.tenantId,
+    userId: params.userId,
+    type: 'BATTLE_CHALLENGE',
+    title: 'Novo desafio de batalha!',
+    message: `${params.challengerName} te desafiou para um duelo de conhecimento.`,
+    link: params.link ?? `/battles`,
+    metadata: { battleId: params.battleId, challengerName: params.challengerName },
+  });
+}
+
+// 13.x — Notificação de resultado de batalha finalizada.
+export function notifyBattleResult(params: {
+  tenantId: string;
+  userId: string;
+  opponentName: string;
+  won: boolean;
+  score: number;
+  link?: string;
+}): void {
+  void dispatchNotification({
+    tenantId: params.tenantId,
+    userId: params.userId,
+    type: 'BATTLE_RESULT',
+    title: params.won ? 'Você venceu o duelo!' : 'Duelo finalizado',
+    message: params.won
+      ? `Você derrotou ${params.opponentName} com ${params.score} acertos! +${params.score * 5} pts para seu departamento.`
+      : `Você perdeu para ${params.opponentName}. Tente novamente na próxima!`,
+    link: params.link ?? `/battles`,
+    metadata: { opponentName: params.opponentName, won: params.won, score: params.score },
+  });
+}
+
+// 14.x — Notificação de certificado pronto para download.
+export function notifyCertificateReady(params: {
+  tenantId: string;
+  userId: string;
+  courseName: string;
+  link?: string;
+}): void {
+  void dispatchNotification({
+    tenantId: params.tenantId,
+    userId: params.userId,
+    type: 'CERTIFICATE_READY',
+    title: 'Certificado emitido! 🏆',
+    message: `Seu certificado de "${params.courseName}" está pronto. Baixe e compartilhe!`,
+    link: params.link ?? `/certificados`,
+    metadata: { courseName: params.courseName },
+  });
+}
+
+// 13.5 — Notificação de bônus coletivo de departamento concedido.
+export function notifyDeptBonusAwarded(params: {
+  tenantId: string;
+  userId: string;
+  department: string;
+  bonusPoints: number;
+  link?: string;
+}): void {
+  void dispatchNotification({
+    tenantId: params.tenantId,
+    userId: params.userId,
+    type: 'DEPT_BONUS_AWARDED',
+    title: 'Bônus coletivo concedido!',
+    message: `Seu departamento "${params.department}" atingiu a meta semanal! +${params.bonusPoints} pts para cada membro.`,
+    link: params.link ?? `/battles`,
+    metadata: { department: params.department, bonusPoints: params.bonusPoints },
   });
 }

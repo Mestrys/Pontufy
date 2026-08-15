@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSessionContext } from '@/backend/session';
 import { getTenantDb } from '@/backend/db';
+import { decrementUnreadCount } from '@/lib/redis';
 
 export async function PATCH(
   _request: Request,
@@ -22,6 +23,9 @@ export async function PATCH(
     if (result.count === 0) {
       return NextResponse.json({ error: 'Notificação não encontrada.' }, { status: 404 });
     }
+
+    // Decrementa contador Redis de não-lidas
+    decrementUnreadCount(tenantId, userId, 1).catch(() => {});
 
     return NextResponse.json({ success: true });
   } catch (error) {

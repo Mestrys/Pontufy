@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSessionContext } from '@/backend/session';
 import { getTenantDb } from '@/backend/db';
+import { getUnreadCount } from '@/lib/redis';
 
 export async function GET(request: Request) {
   try {
@@ -20,7 +21,7 @@ export async function GET(request: Request) {
         take: limit,
       }),
       db.notification.count({ where: { userId } }),
-      db.notification.count({ where: { userId, read: false } }),
+      getUnreadCount(tenantId, userId),
     ]);
 
     return NextResponse.json({

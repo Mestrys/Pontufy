@@ -3,6 +3,7 @@ import { getSessionContext } from '@/backend/session';
 import { getTenantDb } from '@/backend/db';
 import { issueCertificate, CertificateError } from '@/lib/certificate-service';
 import { logAudit } from '@/lib/audit';
+import { notifyCertificateReady } from '@/lib/notifications';
 
 export async function GET() {
   try {
@@ -41,6 +42,19 @@ export async function POST(request: Request) {
     }
 
     const { buffer, filename } = await issueCertificate(tenantId, userId, courseId);
+
+    // Notificação de certificado pronto (fire-and-forget)
+    const course = await getTenantDb(tenantId).course.findFirst({
+      where: { id: courseId },
+      select: { title: true },
+    });
+    if (course) {
+      notifyCertificateReady({
+        tenantId,
+        userId,
+        courseName: course.title,
+      });
+    }
 
     // Trilha de auditoria append-only (nunca derruba a resposta).
     logAudit({

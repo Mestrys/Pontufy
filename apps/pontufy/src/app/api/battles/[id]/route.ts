@@ -11,6 +11,7 @@ import {
 } from '@/lib/battles';
 import { creditDepartmentPoints } from '@/lib/dept-ranking';
 import { parseBody } from '@/lib/validations';
+import { notifyBattleResult } from '@/lib/notifications';
 
 // TAREFA 13.1/13.4 — Turno da batalha: re-score server-side + travas de
 // integridade (cronômetro estrito + perda de foco anula o turno).
@@ -176,8 +177,8 @@ export async function POST(
 
         // Pontos do duelo: 5 por acerto, creditados no ranking do departamento.
         const [challenger, opponent] = await Promise.all([
-          db.user.findFirst({ where: { id: updated.challengerId }, select: { department: true } }),
-          db.user.findFirst({ where: { id: updated.opponentId }, select: { department: true } }),
+          db.user.findFirst({ where: { id: updated.challengerId }, select: { department: true, name: true } }),
+          db.user.findFirst({ where: { id: updated.opponentId }, select: { department: true, name: true } }),
         ]);
         const challengerPoints = updated.challengerScore * BATTLE_POINTS_PER_CORRECT;
         const opponentPoints = updated.opponentScore * BATTLE_POINTS_PER_CORRECT;
@@ -185,6 +186,24 @@ export async function POST(
           creditDepartmentPoints(tenantId, challenger?.department ?? null, challengerPoints),
           creditDepartmentPoints(tenantId, opponent?.department ?? null, opponentPoints),
         ]);
+
+        // Notificações de resultado para ambos os jogadores
+        const challengerWon = winnerId === updated.challengerId;
+        const opponentWon = winnerId === updated.opponentId;
+        notifyBattleResult({
+          tenantId,
+          userId: updated.challengerId,
+          opponentName: opponent?.name || 'Oponente',
+          won: challengerWon,
+          score: updated.challengerScore,
+        });
+        notifyBattleResult({
+          tenantId,
+          userId: updated.opponentId,
+          opponentName: challenger?.name || 'Desafiante',
+          won: opponentWon,
+          score: updated.opponentScore,
+        });
       }
 
       return NextResponse.json({

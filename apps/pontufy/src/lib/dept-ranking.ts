@@ -1,6 +1,7 @@
 import { getTenantDb } from '@/backend/db';
 import { getRedis } from '@/lib/redis';
 import { isoWeekKey } from '@/lib/battles';
+import { notifyDeptBonusAwarded } from '@/lib/notifications';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TAREFA 13.2/13.3/13.5 — Ranking interdepartamental semanal
@@ -110,6 +111,16 @@ export async function awardDepartmentBonusIfGoalMet(
       }),
     ]);
     credited++;
+  }
+
+  // Notificar todos os membros do departamento (fire-and-forget)
+  for (const member of membersList) {
+    notifyDeptBonusAwarded({
+      tenantId,
+      userId: member.id,
+      department,
+      bonusPoints: DEPT_BONUS_POINTS,
+    });
   }
 
   return credited;

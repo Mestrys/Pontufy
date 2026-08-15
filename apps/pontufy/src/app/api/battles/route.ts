@@ -10,7 +10,7 @@ import {
   getTenantCourseTitles,
 } from '@/lib/battles';
 import { parseBody } from '@/lib/validations';
-import { notifySystem } from '@/lib/notifications';
+import { notifySystem, notifyBattleChallenge } from '@/lib/notifications';
 
 // TAREFA 13.1 — Criação de desafio 1x1 assíncrono (5 questões geradas por IA).
 
@@ -78,12 +78,11 @@ export async function POST(request: Request) {
       newValue: { opponentId: opponent.id, questions: questions.length },
     });
 
-    notifySystem({
+    notifyBattleChallenge({
       tenantId,
       userId: opponent.id,
-      title: 'Novo desafio! ⚔️',
-      message: 'Você recebeu um desafio de conhecimento. Responda antes de expirar!',
-      link: '/battles',
+      challengerName: (await db.user.findFirst({ where: { id: userId }, select: { name: true } }))?.name || 'Um colega',
+      battleId: battle.id,
     });
 
     return NextResponse.json({ success: true, battleId: battle.id });

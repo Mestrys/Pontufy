@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getSessionContext } from '@/backend/session';
 import { getTenantDb } from '@/backend/db';
+import { resetUnreadCount } from '@/lib/redis';
 
 export async function POST() {
   try {
@@ -11,6 +12,9 @@ export async function POST() {
       where: { userId, read: false },
       data: { read: true },
     });
+
+    // Reseta contador Redis de não-lidas
+    resetUnreadCount(tenantId, userId).catch(() => {});
 
     return NextResponse.json({ success: true, updated: result.count });
   } catch (error) {

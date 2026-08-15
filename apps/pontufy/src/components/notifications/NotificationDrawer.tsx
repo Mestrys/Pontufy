@@ -1,6 +1,6 @@
 'use client';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, CheckCheck, Coins, Gift, GraduationCap, TrendingUp, Megaphone, Bell } from 'lucide-react';
+import { X, CheckCheck, Coins, Gift, GraduationCap, TrendingUp, Megaphone, Bell, Swords, Trophy, Award } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { useStore } from '@/store/useStore';
 
@@ -9,7 +9,11 @@ export type NotificationType =
   | 'REWARD_REDEEMED'
   | 'COURSE_ASSIGNED'
   | 'LEVEL_UP'
-  | 'SYSTEM';
+  | 'SYSTEM'
+  | 'BATTLE_CHALLENGE'
+  | 'BATTLE_RESULT'
+  | 'CERTIFICATE_READY'
+  | 'DEPT_BONUS_AWARDED';
 
 export interface NotificationItem {
   id: string;
@@ -32,6 +36,10 @@ const TYPE_STYLES: Record<NotificationType, { icon: typeof Coins; badge: string;
   COURSE_ASSIGNED: { icon: GraduationCap, badge: 'bg-blue-500/20 text-blue-400 border-blue-500/30', iconColor: 'text-blue-400' },
   LEVEL_UP: { icon: TrendingUp, badge: 'bg-violet-500/20 text-violet-400 border-violet-500/30', iconColor: 'text-violet-400' },
   SYSTEM: { icon: Megaphone, badge: 'bg-gray-500/20 text-gray-400 border-gray-500/30', iconColor: 'text-gray-400' },
+  BATTLE_CHALLENGE: { icon: Swords, badge: 'bg-orange-500/20 text-orange-400 border-orange-500/30', iconColor: 'text-orange-400' },
+  BATTLE_RESULT: { icon: Trophy, badge: 'bg-amber-500/20 text-amber-400 border-amber-500/30', iconColor: 'text-amber-400' },
+  CERTIFICATE_READY: { icon: Award, badge: 'bg-md-primary/20 text-md-primary border-md-primary/30', iconColor: 'text-md-primary' },
+  DEPT_BONUS_AWARDED: { icon: Gift, badge: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30', iconColor: 'text-emerald-400' },
 };
 
 function timeAgo(iso: string): string {
