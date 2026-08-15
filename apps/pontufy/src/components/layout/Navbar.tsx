@@ -1,26 +1,25 @@
 'use client';
-import { useState, useRef, useCallback, useEffect } from 'react';
-import { Search, User, LogOut, Menu, X, LayoutDashboard, ShieldCheck } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { User, LogOut, LayoutDashboard, ShieldCheck, Building2, Menu, X } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useStore } from '@/store/useStore';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { PointsChip } from '@/components/ui/Chip';
+import { MD3SearchBar } from '@/components/ui/MD3SearchBar';
+import { MD3NavigationDrawer } from '@/components/layout/MD3NavigationDrawer';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 
 export default function Navbar() {
   const { data: session, status } = useSession();
   const pathname = usePathname();
-  const router = useRouter();
   const pointsBalance = useStore((s) => s.currentPointsBalance);
-  const setSearchQuery = useStore((s) => s.setSearchQuery);
+  const { isOnline } = useNetworkStatus();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [localSearch, setLocalSearch] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const pathnameRef = useRef(pathname);
 
@@ -49,28 +48,6 @@ export default function Navbar() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isDropdownOpen]);
-
-  const handleSearchChange = useCallback(
-    (value: string) => {
-      setLocalSearch(value);
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(() => setSearchQuery(value), 300);
-    },
-    [setSearchQuery],
-  );
-
-  const handleSearchSubmit = useCallback(
-    (value: string) => {
-      setSearchQuery(value);
-      const q = value.trim();
-      if (q) {
-        router.push(`/cursos?q=${encodeURIComponent(q)}`);
-      } else {
-        router.push('/cursos');
-      }
-    },
-    [router, setSearchQuery],
-  );
 
   const navLinks = [
     { href: '/dashboard', label: 'Início' },
@@ -144,31 +121,9 @@ export default function Navbar() {
             {/* Notification bell */}
             <NotificationBell />
 
-            {/* Search (desktop) */}
+            {/* Search (desktop) — MD3SearchBar expansível integrada ao useStore */}
             <div className="hidden md:flex relative items-center">
-              {isSearchOpen && (
-                <input
-                  type="text"
-                  autoFocus
-                  placeholder="Buscar cursos..."
-                  value={localSearch}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleSearchSubmit(localSearch);
-                      setIsSearchOpen(false);
-                    }
-                  }}
-                  className="absolute right-8 w-64 px-4 py-1.5 rounded-full text-sm bg-md-surface-container border border-md-outline-variant text-white placeholder-gray-600 focus:outline-none focus:border-md-primary"
-                />
-              )}
-              <button
-                type="button"
-                onClick={() => setIsSearchOpen(!isSearchOpen)}
-                className="p-2 text-gray-400 hover:text-white transition-colors"
-              >
-                <Search size={18} />
-              </button>
+              <MD3SearchBar />
             </div>
 
             {/* User menu (desktop) */}
@@ -177,10 +132,23 @@ export default function Navbar() {
                 <button
                   type="button"
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="w-8 h-8 rounded-full bg-md-primary flex items-center justify-center hover:bg-md-primary-container transition-colors text-white font-black text-sm"
+                  className="relative w-8 h-8 rounded-full bg-md-primary flex items-center justify-center hover:bg-md-primary-container transition-colors text-white font-black text-sm"
                 >
                   {session?.user?.name?.[0]?.toUpperCase() ?? <User size={16} />}
+                  {/* Badge de status de conexão (3.4) */}
+                  <span
+                    className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-md-surface ${
+                      isOnline ? 'bg-emerald-500' : 'bg-red-500'
+                    }`}
+                    title={isOnline ? 'Conectado' : 'Offline'}
+                  />
                 </button>
+                {/* Badge de nível/role (3.4) */}
+                {role && (
+                  <span className="absolute -top-1.5 -right-1.5 text-[9px] font-black px-1.5 py-0.5 rounded-full bg-md-tertiary text-md-on-tertiary">
+                    {role === 'super_admin' ? 'SA' : role === 'admin_rh' ? 'RH' : 'EM'}
+                  </span>
+                )}
 
                 {isDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-md-surface-container rounded-xl shadow-2xl border border-md-outline py-1 overflow-hidden">
@@ -200,6 +168,16 @@ export default function Navbar() {
                       <User size={15} />
                       Meu Perfil
                     </Link>
+                    {role === 'super_admin' && (
+                      <Link
+                        href="/superadmin/tenants"
+                        onClick={() => setIsDropdownOpen(false)}
+                        className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm text-violet-300 hover:bg-white/5 transition-colors font-medium"
+                      >
+                        <Building2 size={15} />
+                        Trocar de locatário
+                      </Link>
+                    )}
                     <button
                       type="button"
                       onClick={() => signOut({ callbackUrl: '/login' })}
@@ -217,6 +195,7 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label="Abrir menu de navegação"
               className="md:hidden p-2 text-gray-400 hover:text-white transition-colors"
             >
               {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
@@ -225,100 +204,13 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile menu */}
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-40 md:hidden">
-          <div
-            className="absolute inset-0 bg-black/60"
-            onClick={() => setIsMobileMenuOpen(false)}
-          />
-          <div className="absolute top-[57px] left-0 right-0 bg-md-surface border-b border-md-outline shadow-2xl">
-            <div className="px-4 pt-3 pb-2">
-              <div className="relative">
-                <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-                <input
-                  type="text"
-                  placeholder="Buscar cursos..."
-                  value={localSearch}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleSearchSubmit(localSearch);
-                      setIsMobileMenuOpen(false);
-                    }
-                  }}
-                  className="w-full pl-9 pr-3 py-2 rounded-lg bg-md-surface-container border border-md-outline text-white placeholder-gray-600 text-sm focus:outline-none focus:border-md-primary"
-                />
-              </div>
-            </div>
-
-            <div className="px-2 py-2 flex flex-col">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                    isActive(link.href)
-                      ? 'bg-white/10 text-white font-bold'
-                      : 'text-gray-400 hover:bg-white/5 hover:text-white'
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              ))}
-
-              {role === 'admin_rh' && (
-                <Link
-                  href="/admin"
-                  className="flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-bold text-md-secondary mt-1"
-                >
-                  <LayoutDashboard size={15} />
-                  Painel RH
-                </Link>
-              )}
-              {role === 'super_admin' && (
-                <Link
-                  href="/superadmin"
-                  className="flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-bold text-violet-400 mt-1"
-                >
-                  <ShieldCheck size={15} />
-                  Console
-                </Link>
-              )}
-            </div>
-
-            {status === 'authenticated' && (
-              <div className="border-t border-md-outline px-4 py-3">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-9 h-9 rounded-full bg-md-primary flex items-center justify-center text-white font-black flex-shrink-0">
-                    {session?.user?.name?.[0]?.toUpperCase() ?? <User size={16} />}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-white truncate">{session?.user?.name}</p>
-                    <p className="text-xs text-gray-500 truncate">{session?.user?.email}</p>
-                  </div>
-                </div>
-                <Link
-                  href="/profile"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
-                >
-                  <User size={15} />
-                  Meu Perfil
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => signOut({ callbackUrl: '/login' })}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 transition-colors"
-                >
-                  <LogOut size={15} />
-                  Sair da conta
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      {/* Mobile: MD3 Navigation Drawer (modal deslizante) */}
+      <MD3NavigationDrawer
+        open={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+        links={navLinks}
+        activeHref={pathname}
+      />
     </>
   );
 }

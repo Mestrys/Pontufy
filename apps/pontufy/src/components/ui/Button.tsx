@@ -1,3 +1,4 @@
+import { forwardRef } from 'react';
 import type { ButtonHTMLAttributes } from 'react';
 
 // MD3 Button — filled/tonal/outlined/text, pill 40dp, state layer via hover
@@ -20,8 +21,16 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
 }
 
-export function Button({ variant = 'filled', className, type = 'button', ...props }: ButtonProps) {
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+  { variant = 'filled', className, type = 'button', ...props },
+  ref,
+) {
   return (
-    <button type={type} className={`${base} ${variants[variant]} ${className ?? ''}`} {...props} />
+    <button
+      ref={ref}
+      type={type}
+      className={`${base} ${variants[variant]} ${className ?? ''}`}
+      {...props}
+    />
   );
-}
+});

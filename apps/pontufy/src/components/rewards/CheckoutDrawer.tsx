@@ -6,6 +6,8 @@ import Image from 'next/image';
 import { useStore } from '@/store/useStore';
 import { triggerRewardRedemption } from '@/hooks/useApi';
 import { getPartnerDisplayName, getPartnerIcon, type Partner } from '@/lib/affiliate-engine';
+import { playFeedbackSound, haptic } from '@/lib/feedback';
+import { ConfettiBurst } from '@/components/ui/Confetti';
 
 type Step = 'confirm' | 'processing' | 'success';
 
@@ -56,6 +58,8 @@ export function CheckoutDrawer({ isOpen, onClose, reward }: CheckoutDrawerProps)
         deductPoints(reward.pricePoints);
         setAffiliateUrl(result.affiliateUrl || null);
         setStep('success');
+        playFeedbackSound('success');
+        haptic([40, 60, 40]);
       } else {
         setError(result.error || 'Falha ao processar resgate. Tente novamente.');
         setStep('confirm');
@@ -202,7 +206,9 @@ export function CheckoutDrawer({ isOpen, onClose, reward }: CheckoutDrawerProps)
               )}
 
               {step === 'success' && (
-                <motion.div
+                <>
+                  <ConfettiBurst />
+                  <motion.div
                   key="success"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -247,6 +253,7 @@ export function CheckoutDrawer({ isOpen, onClose, reward }: CheckoutDrawerProps)
                     </button>
                   </div>
                 </motion.div>
+                </>
               )}
             </AnimatePresence>
 

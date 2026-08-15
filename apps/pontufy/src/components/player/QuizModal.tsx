@@ -14,6 +14,7 @@ import {
   Coins,
 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
+import { playFeedbackSound, haptic } from '@/lib/feedback';
 
 export interface QuizQuestion {
   question: string;
@@ -87,6 +88,9 @@ export default function QuizModal({
   const handleConfirm = () => {
     if (selected === null || confirmed) return;
     setConfirmed(true);
+    const isCorrect = selected === questions[currentIdx].correctIndex;
+    playFeedbackSound(isCorrect ? 'quiz-correct' : 'quiz-wrong');
+    haptic(isCorrect ? 25 : [15, 40, 15]);
     setAnswers((prev) => prev.map((a, i) => (i === currentIdx ? selected : a)));
   };
 
@@ -120,7 +124,11 @@ export default function QuizModal({
       };
       setResult(r);
       if (data.newBalance !== undefined) setPointsBalance(data.newBalance);
-      if (r.passed) onQuizPassed?.(r);
+      if (r.passed) {
+        onQuizPassed?.(r);
+        playFeedbackSound('points');
+        haptic([40, 60, 40]);
+      }
     } catch {
       alert('Falha de conexão ao enviar o quiz. Tente novamente.');
     } finally {

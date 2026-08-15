@@ -5,6 +5,7 @@ import AppShell from "@/components/layout/AppShell";
 import PwaRegister from "@/components/pwa/PwaRegister";
 import OfflineBanner from "@/components/pwa/OfflineBanner";
 import DynamicThemeProvider from "@/components/theme/DynamicThemeProvider";
+import { ToastProvider } from "@/components/ui/Toast";
 import "./globals.css";
 
 // Tipografia Pontufy (MD3): Google Sans Flex é a família corporativa, mas NÃO
@@ -58,7 +59,9 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-brand-gray">
         <AuthProvider>
           <DynamicThemeProvider>
-            <AppShell>{children}</AppShell>
+            <ToastProvider>
+              <AppShell>{children}</AppShell>
+            </ToastProvider>
           </DynamicThemeProvider>
         </AuthProvider>
         <PwaRegister />
