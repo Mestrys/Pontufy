@@ -59,6 +59,14 @@ async function handleSync(request: Request): Promise<NextResponse> {
     // Busca catálogo ativo da Lomadee
     const catalog = await lomadeeService.fetchCatalog();
 
+    // Loga diagnóstico das chamadas HTTP para depuração de integração
+    if (catalog.diagnostics) {
+      const diag = catalog.diagnostics;
+      console.log(`Lomadee sync diagnostics: couponsStatus=${diag.couponsStatus} couponsSample=${diag.couponsBodySample}`);
+      console.log(`Lomadee sync diagnostics: offersStatus=${diag.offersStatus} offersSample=${diag.offersBodySample}`);
+      diag.errors.forEach(err => console.warn(`Lomadee sync diagnostic error: ${err}`));
+    }
+
     // Processa cupons
     for (const coupon of catalog.coupons) {
       try {
