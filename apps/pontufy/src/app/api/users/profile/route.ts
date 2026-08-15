@@ -13,7 +13,7 @@ export async function PATCH(request: Request) {
     const { userId, tenantId } = await getSessionContext();
     const db = getTenantDb(tenantId);
     const body = await request.json();
-    const { name, currentPassword, newPassword } = body;
+    const { name, currentPassword, newPassword, department } = body;
 
     const data: Record<string, string> = {};
 
@@ -23,6 +23,17 @@ export async function PATCH(request: Request) {
       }
       // 8.2 — Nome renderizado na UI: strip de markup antes de persistir.
       data.name = sanitizeAiText(name.trim()).slice(0, 120);
+    }
+
+    // 13.2 — Departamento p/ ranking interdepartamental (opcional, sanitizado).
+    if (department !== undefined) {
+      if (department === null || department === '') {
+        data.department = '';
+      } else if (typeof department === 'string' && department.trim().length >= 2 && department.trim().length <= 60) {
+        data.department = sanitizeAiText(department.trim());
+      } else {
+        return NextResponse.json({ error: 'Departamento deve ter entre 2 e 60 caracteres.' }, { status: 400 });
+      }
     }
 
     if (newPassword) {

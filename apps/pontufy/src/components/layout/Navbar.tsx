@@ -53,6 +53,7 @@ export default function Navbar() {
     { href: '/dashboard', label: 'Início' },
     { href: '/cursos', label: 'Meus Cursos' },
     { href: '/skills', label: 'Trilhas' },
+    { href: '/battles', label: 'Batalhas' },
     { href: '/loja', label: 'Benefícios' },
     { href: '/wallet', label: 'Carteira' },
     { href: '/certificados', label: 'Certificados' },

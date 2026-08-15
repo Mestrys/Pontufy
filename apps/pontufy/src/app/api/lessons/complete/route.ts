@@ -8,6 +8,7 @@ import { getClientIp, ipRateLimit } from '@/lib/security/auth-guard';
 import { tenantRateLimit } from '@/lib/security/rate-limit';
 import { completeLessonSchema, parseBody } from '@/lib/validations';
 import { burstMultiplier, countCompletionsToday, getStreak, getUserTier, type StreakInfo } from '@/lib/gamification';
+import { creditDepartmentStudyHours, awardDepartmentBonusIfGoalMet } from '@/lib/dept-ranking';
 
 const LESSON_IP_MAX = 60;
 const LESSON_IP_WINDOW = 60; // 60 req/min/IP
@@ -49,7 +50,16 @@ export async function POST(request: Request) {
     // Validates lesson exists AND belongs to this tenant (via course.tenantId relation scope).
     const lesson = await db.lesson.findFirst({
       where: { id: lessonId },
-      include: { course: { select: { id: true, title: true } } },
+      include: {
+        course: {
+          select: {
+            id: true,
+            title: true,
+            workloadHours: true,
+            _count: { select: { lessons: true } },
+          },
+        },
+      },
     });
     if (!lesson) {
       return NextResponse.json({ error: 'Aula não encontrada no escopo da empresa.' }, { status: 404 });
@@ -147,6 +157,18 @@ export async function POST(request: Request) {
         points: pointsToAward,
         link: lesson.course ? `/player/${lesson.course.id}` : undefined,
       });
+
+      // 13.5 — Acumula horas estudadas do departamento (carga do curso ÷ aulas)
+      // e concede o bônus coletivo quando a meta semanal for atingida.
+      const course = lesson.course;
+      const hoursPerLesson =
+        course && course.workloadHours > 0
+          ? course.workloadHours / Math.max(1, course._count.lessons)
+          : 0;
+      const user = await db.user.findFirst({ where: { id: userId }, select: { department: true } });
+      const department = user?.department ?? null;
+      void creditDepartmentStudyHours(tenantId, department, hoursPerLesson);
+      void awardDepartmentBonusIfGoalMet(tenantId, department);
 
       return NextResponse.json({
         success: true,

@@ -50,6 +50,7 @@ model Tenant {
   skills             Skill[]
   skillNodes         SkillNode[]
   userSkillProgress  UserSkillProgress[]
+  battles            Battle[]
 }
 
 model User {
@@ -60,6 +61,7 @@ model User {
   passwordHash    String?  // scrypt: "<salt>:<hash>". Null only for legacy/migrated accounts.
   role            String   @default("employee") // 'admin_rh', 'employee', 'guest'
   pointsBalance   Int      @default(0)
+  department      String?  // TAREFA 13.2 — departamento p/ ranking interdepartamental
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -71,6 +73,8 @@ model User {
   commissions         Commission[]
   notifications       Notification[]
   skillProgress       UserSkillProgress[]
+  battlesChallenged   Battle[]             @relation("BattleChallenger")
+  battlesOpposed      Battle[]             @relation("BattleOpponent")
   auditLogs           AuditLog[]
   quizAttempts        QuizAttempt[]
 
@@ -403,4 +407,38 @@ model UserSkillProgress {
   @@unique([userId, skillNodeId])
   @@index([tenantId])
   @@index([userId])
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// TAREFA 13 — Batalhas de Conhecimento (desafio 1x1 assíncrono)
+// ───────────────────────────────────────────────────────────────────────
+// Uma linha por duelo: 5 questões geradas por IA sobre a trilha do tenant.
+// Cada jogador responde seu turno de forma assíncrona (challenger/opponent);
+// o servidor re-scora com questionsJson e valida o cronômetro de 15s (13.4).
+// ═══════════════════════════════════════════════════════════════════════
+
+model Battle {
+  id                 String   @id @default(uuid())
+  tenantId           String
+  challengerId       String
+  opponentId         String
+  status             String   @default("pending") // 'pending' | 'challenger_done' | 'completed'
+  questionsJson      String   @db.Text            // 5 questões com correctIndex (server-side)
+  challengerScore    Int      @default(0)
+  opponentScore      Int      @default(0)
+  challengerElapsed  Int?     // segundos totais do turno (anti-trapaça)
+  opponentElapsed    Int?
+  forfeitedBy        String?  // turno anulado por perda de foco/tempo (13.4)
+  winnerId           String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  expiresAt          DateTime // desafio expira se o oponente não responder
+
+  tenant       Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  challenger   User   @relation("BattleChallenger", fields: [challengerId], references: [id], onDelete: Cascade)
+  opponent     User   @relation("BattleOpponent", fields: [opponentId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, status])
+  @@index([challengerId])
+  @@index([opponentId])
 }
