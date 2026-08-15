@@ -11,10 +11,6 @@ ALTER TABLE "Reward" ALTER COLUMN "partner" SET DEFAULT 'LOMADEE';
 -- Add new columns to Reward
 ALTER TABLE "Reward" ADD COLUMN "externalId" TEXT;
 ALTER TABLE "Reward" ADD COLUMN "affiliateUrl" TEXT;
-ALTER TABLE "Reward" ADD COLUMN "category" TEXT;
-
--- Create index for Reward externalId
-CREATE INDEX "Reward_externalId_idx" ON "Reward"("externalId");
 
 -- 2. Create Redemption table
 CREATE TABLE "Redemption" (
