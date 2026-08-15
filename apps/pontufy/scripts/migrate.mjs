@@ -33,6 +33,19 @@ if (!databaseUrl) {
   process.exit(0);
 }
 
+// Log only the variable NAMES that resolved — never the values (secrets).
+const urlSource = process.env.DATABASE_URL
+  ? 'DATABASE_URL'
+  : process.env.POSTGRES_PRISMA_URL
+    ? 'POSTGRES_PRISMA_URL'
+    : 'SUPABASE_DATABASE_URL';
+const directSource = process.env.DIRECT_URL
+  ? 'DIRECT_URL'
+  : process.env.POSTGRES_URL_NON_POOLING
+    ? 'POSTGRES_URL_NON_POOLING'
+    : 'SUPABASE_DIRECT_URL';
+console.log(`🔌 migrate: DATABASE_URL <- \`${urlSource}\` | DIRECT_URL <- \`${directSource}\``);
+
 // Prisma migrate uses directUrl; fall back to the main URL when unset. Resolved
 // values are passed explicitly so `prisma migrate deploy` picks them up no
 // matter which variable names the platform provides.

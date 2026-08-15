@@ -22,6 +22,21 @@ if (!databaseUrl) {
       'DATABASE_URL, POSTGRES_PRISMA_URL or SUPABASE_DATABASE_URL ' +
       '(pooled endpoint) before starting the app.',
   );
+} else {
+  // Log only the variable NAME that resolved — never the value (secret).
+  const urlSource = process.env.DATABASE_URL
+    ? 'DATABASE_URL'
+    : process.env.POSTGRES_PRISMA_URL
+      ? 'POSTGRES_PRISMA_URL'
+      : 'SUPABASE_DATABASE_URL';
+  const directSource = process.env.DIRECT_URL
+    ? 'DIRECT_URL'
+    : process.env.POSTGRES_URL_NON_POOLING
+      ? 'POSTGRES_URL_NON_POOLING'
+      : 'SUPABASE_DIRECT_URL';
+  console.log(
+    `🔌 db.ts: conexão pooled <- \`${urlSource}\` | direct <- \`${directSource}\``,
+  );
 }
 
 const globalForPrisma = globalThis as unknown as {
