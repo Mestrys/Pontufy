@@ -12,18 +12,31 @@
 //     endpoint) or runs `npm run db:migrate` once.
 import { execSync } from 'node:child_process';
 
-const databaseUrl = process.env.DATABASE_URL;
+// Vercel / Supabase may inject the connection strings under different names
+// depending on how the integration is configured — resolve with fallbacks.
+const databaseUrl =
+  process.env.DATABASE_URL ||
+  process.env.POSTGRES_PRISMA_URL ||
+  process.env.SUPABASE_DATABASE_URL;
+
+const directUrl =
+  process.env.DIRECT_URL ||
+  process.env.POSTGRES_URL_NON_POOLING ||
+  process.env.SUPABASE_DIRECT_URL;
 
 if (!databaseUrl) {
   console.warn(
-    '\n🟠 DATABASE_URL is not set — skipping migrations. Set it (PostgreSQL) to ' +
-      'apply the schema.\n',
+    '\n🟠 No PostgreSQL connection string is set — skipping migrations. Set ' +
+      'DATABASE_URL, POSTGRES_PRISMA_URL or SUPABASE_DATABASE_URL to apply ' +
+      'the schema.\n',
   );
   process.exit(0);
 }
 
-// Prisma migrate uses directUrl; fall back to the main URL when unset.
-const env = { ...process.env, DIRECT_URL: process.env.DIRECT_URL || databaseUrl };
+// Prisma migrate uses directUrl; fall back to the main URL when unset. Resolved
+// values are passed explicitly so `prisma migrate deploy` picks them up no
+// matter which variable names the platform provides.
+const env = { ...process.env, DATABASE_URL: databaseUrl, DIRECT_URL: directUrl || databaseUrl };
 
 try {
   execSync('npx prisma migrate deploy', { stdio: 'inherit', env });

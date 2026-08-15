@@ -14,7 +14,7 @@ import { useStore } from '@/store/useStore';
 import { getCachedCourses } from '@/lib/local-courses';
 import { downloadCertificate } from '@/lib/download-certificate';
 import { getUserTier } from '@/lib/gamification';
-import { Loader2, BookOpen, ArrowLeft, Award, Trophy, LoaderCircle } from 'lucide-react';
+import { Loader2, BookOpen, ArrowLeft, Award, Trophy, Crown, Medal, LoaderCircle } from 'lucide-react';
 
 interface LessonItem {
   id: string;

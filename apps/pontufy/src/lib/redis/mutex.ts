@@ -37,7 +37,7 @@ export async function releaseLock(key: string): Promise<void> {
     end
   `;
   try {
-    await redis.eval(luaScript, 1, `mutex:${key}`);
+    await redis.eval(luaScript, [`mutex:${key}`], []);
   } catch {
     // Fallback: simple delete (best effort)
     await redis.del(`mutex:${key}`);
@@ -61,7 +61,7 @@ export async function extendLock(key: string, additionalTtlSeconds: number = 10)
     end
   `;
   try {
-    const result = await redis.eval(luaScript, 1, `mutex:${key}`, additionalTtlSeconds.toString());
+    const result = await redis.eval(luaScript, [`mutex:${key}`], [additionalTtlSeconds.toString()]);
     return result === 1;
   } catch {
     return false;

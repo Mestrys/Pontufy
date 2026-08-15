@@ -15,6 +15,7 @@ interface CelebrationModalProps {
     name: string;
     color: string;
     icon: typeof Trophy | typeof Crown | typeof Medal;
+    maxPoints?: number;
   };
   previousTier?: string;
 }
