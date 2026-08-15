@@ -10,10 +10,11 @@ import { Loader2, Gift } from 'lucide-react';
 
 const categories = [
   { id: 'all', name: 'Todos' },
+  { id: 'coupons', name: 'Cupons de Desconto' },
+  { id: 'offers', name: 'Ofertas' },
   { id: 'tech', name: 'Tecnologia' },
   { id: 'health', name: 'Saúde' },
   { id: 'home', name: 'Utilidades' },
-  { id: 'coupons', name: 'Cupons de Desconto' },
 ];
 
 export default function MarketplacePage() {

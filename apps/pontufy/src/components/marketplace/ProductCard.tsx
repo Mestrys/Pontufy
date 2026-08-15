@@ -1,4 +1,4 @@
-import { Coins, CheckCircle2, Lock } from 'lucide-react';
+import { Coins, CheckCircle2, Lock, TicketPercent, ExternalLink } from 'lucide-react';
 
 interface ProductCardProps {
   product: {
@@ -9,6 +9,9 @@ interface ProductCardProps {
     partnerStore?: string;
     pointsRequired?: number;
     pricePoints?: number;
+    category?: string;
+    originalUrl?: string;
+    externalId?: string;
   };
   userPoints: number;
   onRedeem: (product: any) => void;
@@ -20,18 +23,35 @@ export default function ProductCard({ product, userPoints, onRedeem }: ProductCa
   const canRedeem = userPoints >= price;
   const progress = Math.min((userPoints / price) * 100, 100);
   const pointsMissing = price - userPoints;
+  const isLomadee = product.partner === 'LOMADEE' || product.externalId?.startsWith('coupon:') || product.externalId?.startsWith('offer:');
+  const category = product.category;
 
   return (
     <div className="bg-md-surface border border-md-outline rounded-xl overflow-hidden flex flex-col hover:border-md-primary/40 transition-all duration-200 group">
-      {/* Product Image */}
-      <div className="relative h-44 bg-md-surface-dim flex items-center justify-center p-4">
-        <img
-          src={product.imageUrl}
-          alt={product.title}
-          className="max-h-full max-w-full object-contain"
-          loading="lazy"
-        />
-        <div className="absolute top-3 left-3 bg-md-on-surface/80 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] font-bold text-md-surface uppercase tracking-wider">
+      {/* Partner Logo / Product Image - Grid Style */}
+      <div className="relative h-44 bg-white flex items-center justify-center p-6">
+        {product.imageUrl ? (
+          <img
+            src={product.imageUrl}
+            alt={`Logo ${partner}`}
+            className="max-h-full max-w-full object-contain"
+            loading="lazy"
+          />
+        ) : (
+          <div className="flex flex-col items-center gap-2 text-gray-400">
+            <Coins size={32} />
+            <span className="text-xs font-semibold">{partner}</span>
+          </div>
+        )}
+
+        {/* Coupon Badge - Top Left */}
+        <div className="absolute top-3 left-3 bg-md-primary text-md-on-primary px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+          <TicketPercent size={12} />
+          {isLomadee ? 'Cupom' : 'Benefício'}
+        </div>
+
+        {/* Partner Name Badge - Top Right */}
+        <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] font-bold text-white uppercase tracking-wider">
           {partner}
         </div>
       </div>
@@ -42,9 +62,23 @@ export default function ProductCard({ product, userPoints, onRedeem }: ProductCa
           {product.title}
         </h3>
 
-        <div className="flex items-center gap-1.5 text-md-tertiary font-black text-base mb-4">
-          <Coins size={16} />
-          {price.toLocaleString('pt-BR')} pts
+        <div className="flex items-center justify-between gap-2 mb-4">
+          <div className="flex items-center gap-1.5 text-md-tertiary font-black text-base">
+            <Coins size={16} />
+            {price.toLocaleString('pt-BR')} pts
+          </div>
+          
+          {product.originalUrl && (
+            <a
+              href={product.originalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-1.5 text-md-on-surface-variant/60 hover:text-md-primary hover:bg-md-surface-container-high rounded transition-colors"
+              title="Ver oferta original"
+            >
+              <ExternalLink size={14} />
+            </a>
+          )}
         </div>
 
         {canRedeem ? (

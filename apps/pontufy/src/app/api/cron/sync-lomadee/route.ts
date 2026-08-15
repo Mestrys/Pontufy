@@ -7,6 +7,7 @@ import { NextResponse } from 'next/server';
 import { getRawPrisma } from '@/backend/db';
 import { lomadeeService, LomadeeCoupon, LomadeeOffer } from '@/lib/lomadee';
 import { logAudit } from '@/lib/audit';
+import { cacheDeletePattern } from '@/lib/redis';
 
 const CRON_SECRET = process.env.CRON_SECRET;
 
@@ -112,6 +113,9 @@ async function handleSync(request: Request): Promise<NextResponse> {
         errors: result.errors.length,
       },
     });
+
+    // Invalida cache de recompensas de todos os tenants (recompensas são globais)
+    await cacheDeletePattern('rewards:*').catch(() => {});
 
     return NextResponse.json({
       success: true,

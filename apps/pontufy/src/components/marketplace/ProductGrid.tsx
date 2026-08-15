@@ -8,6 +8,9 @@ interface Product {
   partnerStore?: string;
   pointsRequired?: number;
   pricePoints?: number;
+  category?: string;
+  originalUrl?: string;
+  externalId?: string;
 }
 
 interface ProductGridProps {
@@ -19,7 +22,7 @@ interface ProductGridProps {
 export default function ProductGrid({ products, userPoints, onRedeem }: ProductGridProps) {
   if (products.length === 0) {
     return (
-      <div className="px-8 md:px-16 py-12 text-center text-brand-text">
+      <div className="px-8 md:px-16 py-12 text-center text-md-on-surface-variant">
         Nenhum item encontrado nesta categoria.
       </div>
     );
