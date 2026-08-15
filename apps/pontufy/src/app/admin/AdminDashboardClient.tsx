@@ -1,14 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { signOut } from 'next-auth/react';
-import Link from 'next/link';
+import { Loader2, RefreshCw, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import MetricCard from '@/components/admin/MetricCard';
 import AISelectionTable from '@/components/admin/AISelectionTable';
 import RewardToggleRow from '@/components/admin/RewardToggleRow';
 import AnalyticsDashboard from '@/components/admin/AnalyticsDashboard';
 import { getCachedCourses, reconcileWithApi } from '@/lib/local-courses';
-import { LayoutDashboard, LogOut, Sparkles, Loader2, BarChart3, ArrowLeft, Menu, X, RefreshCw } from 'lucide-react';
 
 type AdminView = 'overview' | 'analytics';
 
@@ -19,7 +17,6 @@ export default function AdminDashboardClient() {
   const [rewards, setRewards] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState<AdminView>('overview');
-  const [navOpen, setNavOpen] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
@@ -70,164 +67,97 @@ export default function AdminDashboardClient() {
       title: 'Colaboradores Ativos',
       value: String(summary.totalUsers ?? 0),
       trend: `${summary.totalCompletions ?? 0} conclusões`,
+      trendType: 'positive' as const,
     },
     {
       id: 'm2',
       title: 'Pontos Distribuídos',
       value: (summary.totalPointsAwarded ?? 0).toLocaleString('pt-BR'),
       trend: 'Total acumulado',
+      trendType: 'neutral' as const,
     },
     {
       id: 'm3',
       title: 'Pontos Resgatados',
       value: (summary.totalPointsRedeemed ?? 0).toLocaleString('pt-BR'),
       trend: `${rewards.filter((r) => r.active).length} recompensas ativas`,
+      trendType: 'neutral' as const,
     },
   ];
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="animate-spin text-emerald-500" size={48} />
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="animate-spin text-md-primary" size={48} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-brand-gray md:flex">
-      {/* Mobile top bar */}
-      <div className="md:hidden sticky top-0 z-30 flex items-center justify-between bg-brand-slate text-white px-4 py-3 shadow-md">
-        <div className="text-xl font-black tracking-tighter">
-          Pontufy <span className="text-emerald-400">Admin</span>
+    <div className="space-y-8">
+      {/* Page Header */}
+      <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+          <h1 className="text-headline-md font-extrabold text-md-on-surface">Painel do Gestor de RH</h1>
+          <p className="text-body-md text-md-on-surface-variant mt-1">
+            Bem-vindo ao centro de comando da {tenant?.name || 'empresa'}.
+          </p>
         </div>
         <button
           type="button"
-          onClick={() => setNavOpen(true)}
-          className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
-          aria-label="Abrir menu"
+          onClick={() => setReloadKey((k) => k + 1)}
+          className="md-btn md-btn-outlined sm:hidden"
+          title="Atualizar dados do painel"
         >
-          <Menu size={24} />
+          <RefreshCw size={18} /> Atualizar
         </button>
+      </header>
+
+      {/* Metrics Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        {metrics.map((m) => (
+          <MetricCard
+            key={m.id}
+            title={m.title}
+            value={m.value}
+            trend={m.trend}
+            trendType={m.trendType}
+          />
+        ))}
       </div>
 
-      {/* Mobile drawer overlay */}
-      {navOpen && (
-        <div
-          className="md:hidden fixed inset-0 bg-black/40 z-40"
-          onClick={() => setNavOpen(false)}
-        />
+      {/* Content Sections */}
+      {activeView === 'overview' && (
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 md:gap-8">
+          <section className="md-card-outlined md-elevation-1 overflow-hidden">
+            <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-md-outline flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-md-surface-container-high/50">
+              <div className="flex items-center gap-2">
+                <span className="text-md-primary" style={{fontSize: '20px'}}>✨</span>
+                <h2 className="text-title-lg font-bold text-md-on-surface">Cursos Gerados pela IA</h2>
+              </div>
+              <a
+                href="/admin/wizard"
+                className="md-btn md-btn-filled text-sm"
+              >
+                + Gerar Novo Curso
+              </a>
+            </div>
+            <AISelectionTable courses={courses} />
+          </section>
+
+          <section className="md-card-outlined md-elevation-1 overflow-hidden">
+            <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-md-outline flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-md-surface-container-high/50">
+              <div className="flex items-center gap-2">
+                <span style={{fontSize: '20px'}}>🎁</span>
+                <h2 className="text-title-lg font-bold text-md-on-surface">Catálogo de Recompensas</h2>
+              </div>
+            </div>
+            <RewardToggleRow catalog={rewards} />
+          </section>
+        </div>
       )}
 
-      <aside
-        className={`w-64 bg-brand-slate text-white flex flex-col fixed h-full z-50 transition-transform duration-200 md:translate-x-0 ${
-          navOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        <div className="p-6 border-b border-gray-700 flex items-start justify-between">
-          <div>
-            <div className="text-2xl font-black tracking-tighter text-white">
-              Pontufy <span className="text-emerald-400">Admin</span>
-            </div>
-            <div className="text-xs font-medium text-gray-400 mt-2 uppercase tracking-widest">
-              {tenant?.name || 'Empresa'}
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => setNavOpen(false)}
-            className="md:hidden p-1 rounded-lg hover:bg-white/10 transition-colors -mr-1"
-            aria-label="Fechar menu"
-          >
-            <X size={22} />
-          </button>
-        </div>
-        <nav className="flex-1 p-4 flex flex-col gap-2">
-          <button
-            type="button"
-            onClick={() => { setActiveView('overview'); setNavOpen(false); }}
-            className={`flex items-center gap-3 text-left w-full px-4 py-3 rounded-lg font-bold transition-colors ${
-              activeView === 'overview'
-                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                : 'text-gray-300 hover:bg-gray-800'
-            }`}
-          >
-            <LayoutDashboard size={20} /> Visão Geral
-          </button>
-          <button
-            type="button"
-            onClick={() => { setActiveView('analytics'); setNavOpen(false); }}
-            className={`flex items-center gap-3 text-left w-full px-4 py-3 rounded-lg font-bold transition-colors ${
-              activeView === 'analytics'
-                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                : 'text-gray-300 hover:bg-gray-800'
-            }`}
-          >
-            <BarChart3 size={20} /> Analytics
-          </button>
-          <Link
-            href="/admin/wizard"
-            onClick={() => setNavOpen(false)}
-            className="flex items-center gap-3 text-left w-full px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 transition-colors font-semibold"
-          >
-            <Sparkles size={20} /> IA Cursos
-          </Link>
-        </nav>
-        <div className="p-4 border-t border-gray-700 flex flex-col gap-2">
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-3 text-left w-full px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors font-semibold"
-          >
-            <ArrowLeft size={20} /> Visão do Colaborador
-          </Link>
-          <button
-            type="button"
-            onClick={() => signOut({ callbackUrl: '/login' })}
-            className="flex items-center gap-3 text-left w-full px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors font-semibold"
-          >
-            <LogOut size={20} /> Sair
-          </button>
-        </div>
-      </aside>
-
-      <main className="flex-1 md:ml-64 p-5 sm:p-8 md:p-12">
-        <header className="flex justify-between items-end mb-8 md:mb-10">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-slate mb-1">Painel do Gestor de RH</h1>
-            <p className="text-brand-text font-medium">
-              Bem-vindo ao centro de comando da {tenant?.name || 'empresa'}.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => setReloadKey((k) => k + 1)}
-            className="hidden sm:flex items-center gap-2 text-sm font-semibold text-brand-text hover:text-brand-slate px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-            title="Atualizar dados do painel"
-          >
-            <RefreshCw size={16} /> Atualizar
-          </button>
-        </header>
-
-        {activeView === 'overview' && (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-              {metrics.map((m) => (
-                <MetricCard key={m.id} title={m.title} value={m.value} trend={m.trend} />
-              ))}
-            </div>
-
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-              <div className="flex flex-col">
-                <AISelectionTable courses={courses} />
-              </div>
-              <div className="flex flex-col">
-                <RewardToggleRow catalog={rewards} />
-              </div>
-            </div>
-          </>
-        )}
-
-        {activeView === 'analytics' && <AnalyticsDashboard />}
-      </main>
+      {activeView === 'analytics' && <AnalyticsDashboard />}
     </div>
   );
 }

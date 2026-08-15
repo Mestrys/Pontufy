@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Loader2, Eye, EyeOff, CheckCircle2, Building2 } from 'lucide-react';
+import { Loader2, Eye, EyeOff, CheckCircle2, Building2, Mail, Lock, User } from 'lucide-react';
 
 interface InvitationInfo {
   email: string;
@@ -62,15 +62,20 @@ function RegisterForm() {
 
   if (!token) {
     return (
-      <div className="bg-[#141414] border border-[#2a2a2a] rounded-2xl p-8 text-center">
-        <p className="text-white font-semibold mb-2">Convite necessário</p>
-        <p className="text-sm text-gray-500 mb-6">
+      <div className="md-card-outlined md-elevation-3 p-8 text-center">
+        <Link href="/" className="inline-flex items-center gap-2 text-3xl font-black tracking-tight text-white mb-6">
+          <span className="text-md-primary">Pontu</span>fy
+        </Link>
+        <div className="text-md-error mb-4" style={{fontSize: '48px'}}>📨</div>
+        <h1 className="text-headline-sm font-bold text-md-on-surface mb-2">Convite necessário</h1>
+        <p className="text-body-md text-md-on-surface-variant mb-6">
           Para criar uma conta, você precisa de um convite do gestor da sua empresa.
         </p>
-        <Link href="/register/tenant" className="block w-full py-3 px-4 rounded-full text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors mb-3">
+        <Link href="/register/tenant" className="md-btn md-btn-filled w-full mb-3">
+          <Building2 size={18} className="mr-2" />
           Cadastrar minha empresa
         </Link>
-        <Link href="/login" className="inline-block text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors">
+        <Link href="/login" className="text-label-lg text-md-primary hover:text-md-primary-container transition-colors inline-block">
           Já tenho uma conta
         </Link>
       </div>
@@ -79,10 +84,14 @@ function RegisterForm() {
 
   if (inviteError) {
     return (
-      <div className="bg-[#141414] border border-[#2a2a2a] rounded-2xl p-8 text-center">
-        <p className="text-white font-semibold mb-2">Convite indisponível</p>
-        <p className="text-sm text-gray-500 mb-4">{inviteError}</p>
-        <Link href="/login" className="inline-block text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors">
+      <div className="md-card-outlined md-elevation-3 p-8 text-center">
+        <Link href="/" className="inline-flex items-center gap-2 text-3xl font-black tracking-tight text-white mb-6">
+          <span className="text-md-primary">Pontu</span>fy
+        </Link>
+        <div className="text-md-error mb-4" style={{fontSize: '48px'}}>⚠️</div>
+        <h1 className="text-headline-sm font-bold text-md-on-surface mb-2">Convite indisponível</h1>
+        <p className="text-body-md text-md-on-surface-variant mb-4">{inviteError}</p>
+        <Link href="/login" className="text-label-lg text-md-primary hover:text-md-primary-container transition-colors inline-block">
           Ir para o login
         </Link>
       </div>
@@ -91,13 +100,16 @@ function RegisterForm() {
 
   if (success) {
     return (
-      <div className="bg-[#141414] border border-[#2a2a2a] rounded-2xl p-8 text-center">
-        <CheckCircle2 size={40} className="text-emerald-400 mx-auto mb-4" />
-        <p className="text-white font-bold mb-2">Conta criada com sucesso!</p>
-        <p className="text-sm text-gray-500 mb-6">Agora você já pode acessar a plataforma.</p>
+      <div className="md-card-outlined md-elevation-3 p-8 text-center">
+        <Link href="/" className="inline-flex items-center gap-2 text-3xl font-black tracking-tight text-white mb-6">
+          <span className="text-md-primary">Pontu</span>fy
+        </Link>
+        <CheckCircle2 size={48} className="text-md-tertiary mx-auto mb-4" />
+        <h1 className="text-headline-sm font-bold text-md-on-surface mb-2">Conta criada com sucesso!</h1>
+        <p className="text-body-md text-md-on-surface-variant mb-6">Agora você já pode acessar a plataforma.</p>
         <button
           onClick={() => router.push('/login')}
-          className="w-full py-3 px-4 rounded-full text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors"
+          className="md-btn md-btn-filled w-full"
         >
           Ir para o login
         </button>
@@ -143,97 +155,122 @@ function RegisterForm() {
   };
 
   return (
-    <div className="bg-[#141414] border border-[#2a2a2a] rounded-2xl p-8">
-      <form className="space-y-4" onSubmit={handleSubmit}>
+    <div className="md-card-outlined md-elevation-3 p-8">
+      <form className="space-y-5" onSubmit={handleSubmit}>
+        <Link href="/" className="inline-flex items-center gap-2 text-3xl font-black tracking-tight text-white mb-4 block text-center">
+          <span className="text-md-primary">Pontu</span>fy
+        </Link>
+
+        <div className="text-center mb-6">
+          <h1 className="text-headline-sm font-bold text-md-on-surface mb-2">Criar conta</h1>
+          <p className="text-body-md text-md-on-surface-variant">Complete seus dados para começar</p>
+        </div>
+
         {inviteLoading && (
-          <div className="flex items-center justify-center gap-2 text-gray-500 text-sm py-2">
+          <div className="flex items-center justify-center gap-2 text-md-on-surface-variant text-body-sm py-2">
             <Loader2 className="animate-spin" size={16} /> Validando convite...
           </div>
         )}
 
         {invitation && (
-          <div className="p-4 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg">
+          <div className="p-4 bg-md-surface-container-high border border-md-outline rounded-xl">
             <div className="flex items-center gap-2">
-              <Building2 size={16} className="text-emerald-400" />
-              <span className="text-sm font-bold text-white">{invitation.companyName}</span>
+              <Building2 size={16} className="text-md-tertiary" />
+              <span className="text-body-md font-semibold text-md-on-surface">{invitation.companyName}</span>
             </div>
-            <p className="text-xs text-gray-500 mt-1.5">
+            <p className="text-body-sm text-md-on-surface-variant mt-1.5">
               {invitation.email} · {ROLE_LABELS[invitation.role] ?? invitation.role}
             </p>
           </div>
         )}
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3 rounded-lg text-center font-medium">
+          <div
+            role="alert"
+            className="bg-md-error/10 border border-md-error/30 text-md-error text-body-sm p-3 rounded-xl text-center font-medium"
+          >
             {error}
           </div>
         )}
 
         <div>
-          <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
+          <label htmlFor="name" className="text-label-lg text-md-on-surface-variant mb-1.5 block">
             Nome completo
           </label>
-          <input
-            type="text"
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Ex: Maria Silva"
-            className="w-full px-4 py-3 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 text-sm transition-colors"
-          />
+          <div className="relative">
+            <User className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-variant/60 size-5 pointer-events-none" aria-hidden="true" />
+            <input
+              id="name"
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Ex: Maria Silva"
+              className="w-full pl-12 pr-4 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-variant/50 focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
+            />
+          </div>
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
+          <label htmlFor="password" className="text-label-lg text-md-on-surface-variant mb-1.5 block">
             Criar senha
           </label>
           <div className="relative">
+            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-variant/60 size-5 pointer-events-none" aria-hidden="true" />
             <input
+              id="password"
               type={showPassword ? 'text' : 'password'}
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Mínimo 8 caracteres"
-              className="w-full px-4 py-3 pr-11 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 text-sm transition-colors"
+              className="w-full pl-12 pr-14 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-variant/50 focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-600 hover:text-gray-400 transition-colors"
+              className="absolute inset-y-0 right-0 pr-4 flex items-center text-md-on-surface-variant/60 hover:text-md-on-surface transition-colors"
             >
-              {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
+          <label htmlFor="confirmPassword" className="text-label-lg text-md-on-surface-variant mb-1.5 block">
             Confirmar senha
           </label>
-          <input
-            type={showPassword ? 'text' : 'password'}
-            required
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full px-4 py-3 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 text-sm transition-colors"
-          />
+          <div className="relative">
+            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-variant/60 size-5 pointer-events-none" aria-hidden="true" />
+            <input
+              id="confirmPassword"
+              type={showPassword ? 'text' : 'password'}
+              required
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full pl-12 pr-4 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-variant/50 focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
+              placeholder="Confirme a senha"
+            />
+          </div>
         </div>
 
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full flex justify-center items-center py-3 px-4 rounded-full text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed gap-2 mt-2"
+          className="md-btn md-btn-filled w-full mt-2"
         >
           {isLoading ? (
-            <><Loader2 className="animate-spin" size={18} /> Criando conta...</>
+            <>
+              <Loader2 className="animate-spin" size={20} /> Criando conta...
+            </>
           ) : (
             'Criar minha conta'
           )}
         </button>
 
-        <p className="text-center text-sm text-gray-600">
+        <p className="text-center text-body-sm text-md-on-surface-variant pt-2">
           Já tem conta?{' '}
-          <Link href="/login" className="font-bold text-emerald-400 hover:text-emerald-300 transition-colors">
+          <Link href="/login" className="font-semibold text-md-primary hover:text-md-primary-container transition-colors">
             Fazer login
           </Link>
         </p>
@@ -244,27 +281,20 @@ function RegisterForm() {
 
 export default function RegisterPage() {
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center px-4 relative">
+    <main className="min-h-screen bg-md-surface-dim flex flex-col items-center justify-center px-4 relative">
       <div
+        aria-hidden
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'radial-gradient(ellipse 60% 40% at 50% 0%, rgba(16,185,129,0.07) 0%, transparent 70%)',
+          background: 'radial-gradient(ellipse 60% 40% at 50% 0%, rgba(92,65,82,0.12) 0%, transparent 70%)',
         }}
       />
 
-      <Link href="/" className="mb-10 text-3xl font-black tracking-tight text-white">
-        <span className="text-emerald-400">Pontu</span>fy
-      </Link>
-
-      <div className="w-full max-w-sm">
-        <div className="mb-6">
-          <h1 className="text-xl font-bold text-white">Criar conta</h1>
-          <p className="text-gray-500 text-sm mt-1">Complete seus dados para começar</p>
-        </div>
-        <Suspense fallback={<div className="text-center text-gray-600 py-8">Carregando...</div>}>
+      <div className="w-full max-w-md">
+        <Suspense fallback={<div className="text-center text-md-on-surface-variant py-8">Carregando...</div>}>
           <RegisterForm />
         </Suspense>
       </div>
-    </div>
+    </main>
   );
 }

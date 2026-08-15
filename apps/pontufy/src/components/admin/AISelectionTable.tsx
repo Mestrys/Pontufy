@@ -1,48 +1,87 @@
-import { Sparkles, Users } from 'lucide-react';
 import Link from 'next/link';
+import { Sparkles, Users, Edit, Eye, Trash2, MoreVertical } from 'lucide-react';
 
-export default function AISelectionTable({ courses }: { courses: any[] }) {
-  return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-8">
-      <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-gray-50/50">
-        <div className="flex items-center gap-2">
-          <Sparkles className="text-brand-slate flex-shrink-0" size={20} />
-          <h2 className="text-base sm:text-lg font-bold text-brand-slate">Cursos Gerados pela IA</h2>
-        </div>
-        <Link href="/admin/wizard" className="bg-gradient-pontufy text-emerald-900 font-bold px-4 py-2 rounded-full text-sm shadow-sm hover:shadow-md transition-shadow text-center">
-          + Gerar Novo Curso
+interface CourseRow {
+  id: string;
+  title: string;
+  status: 'Publicado' | 'Rascunho';
+  enrolled: number;
+  date: string;
+}
+
+export default function AISelectionTable({ courses }: { courses: CourseRow[] }) {
+  if (courses.length === 0) {
+    return (
+      <div className="p-8 text-center">
+        <Sparkles size={48} className="mx-auto text-md-on-surface-variant/30 mb-4" />
+        <p className="text-body-md text-md-on-surface-variant">Nenhum curso gerado ainda</p>
+        <p className="text-body-sm text-md-on-surface-variant/60 mt-1">Use o assistente de IA para criar o primeiro curso</p>
+        <Link href="/admin/wizard" className="md-btn md-btn-filled mt-4 inline-flex">
+          <Sparkles size={18} className="mr-2" />
+          Gerar primeiro curso
         </Link>
       </div>
-      
+    );
+  }
+
+  return (
+    <div className="md-card-outlined md-elevation-1 overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse min-w-[500px]">
+        <table className="w-full text-left border-collapse min-w-[600px]">
           <thead>
-            <tr className="bg-white text-brand-text text-xs uppercase tracking-wider border-b border-gray-100">
+            <tr className="bg-md-surface-container-high/50 text-md-on-surface-variant text-label-sm uppercase tracking-wider border-b border-md-outline">
               <th className="px-4 sm:px-6 py-3 font-semibold">Título do Curso</th>
               <th className="px-3 sm:px-6 py-3 font-semibold text-center">Status</th>
               <th className="px-3 sm:px-6 py-3 font-semibold text-center">Engajamento</th>
               <th className="px-3 sm:px-6 py-3 font-semibold text-right whitespace-nowrap">Data</th>
+              <th className="px-4 py-3 font-semibold text-right">Ações</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-md-outline">
             {courses.map((course) => (
-              <tr key={course.id} className="hover:bg-gray-50/50 transition-colors">
-                <td className="px-4 sm:px-6 py-4 font-bold text-brand-slate">{course.title}</td>
+              <tr key={course.id} className="hover:bg-md-surface-container-high/50 transition-colors">
+                <td className="px-4 sm:px-6 py-4 font-medium text-md-on-surface max-w-[300px] truncate">{course.title}</td>
                 <td className="px-3 sm:px-6 py-4 text-center">
-                  <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-bold ${
+                  <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-label-sm font-semibold ${
                     course.status === 'Publicado'
-                      ? 'bg-emerald-50 text-emerald-600'
-                      : 'bg-gray-100 text-gray-500'
+                      ? 'bg-md-tertiary-container text-md-on-tertiary-container'
+                      : 'bg-md-surface-container-high text-md-on-surface-variant'
                   }`}>
                     {course.status}
                   </span>
                 </td>
-                <td className="px-3 sm:px-6 py-4 text-center text-brand-slate font-medium">
-                  <span className="inline-flex items-center gap-1.5">
-                    <Users size={16} className="text-brand-text" /> {course.enrolled}
+                <td className="px-3 sm:px-6 py-4 text-center text-md-on-surface-variant font-medium">
+                  <span className="inline-flex items-center justify-center gap-1.5">
+                    <Users size={16} className="text-md-on-surface-variant/60" />
+                    {course.enrolled}
                   </span>
                 </td>
-                <td className="px-3 sm:px-6 py-4 text-right text-brand-text text-sm whitespace-nowrap">{course.date}</td>
+                <td className="px-3 sm:px-6 py-4 text-right text-md-on-surface-variant text-body-sm whitespace-nowrap">{course.date}</td>
+                <td className="px-4 py-3 text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    <Link
+                      href={`/admin/wizard?edit=${course.id}`}
+                      className="p-2 rounded-xl text-md-on-surface-variant hover:bg-md-surface-container-high hover:text-md-primary transition-colors"
+                      title="Editar"
+                    >
+                      <Edit size={18} />
+                    </Link>
+                    <button
+                      type="button"
+                      className="p-2 rounded-xl text-md-on-surface-variant hover:bg-md-surface-container-high hover:text-md-secondary transition-colors"
+                      title="Visualizar"
+                    >
+                      <Eye size={18} />
+                    </button>
+                    <button
+                      type="button"
+                      className="p-2 rounded-xl text-md-on-surface-variant hover:bg-md-error/10 hover:text-md-error transition-colors"
+                      title="Excluir"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>

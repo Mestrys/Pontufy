@@ -27,6 +27,45 @@ interface SummaryData {
   totalPointsRedeemed: number;
 }
 
+const CHART_COLORS = {
+  primary: '#5c4152',
+  secondary: '#d97f76',
+  tertiary: '#a1c0ae',
+  highlight: '#f7d0a9',
+};
+
+function StatCard({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="md-card-outlined md-elevation-1 p-5 hover:md-elevation-2 transition-all duration-200">
+      <p className="text-label-lg text-md-on-surface-variant mb-1">{label}</p>
+      <p className="text-display-sm font-bold text-md-on-surface">{value.toLocaleString('pt-BR')}</p>
+    </div>
+  );
+}
+
+function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="md-card-outlined md-elevation-1 p-6">
+      <h3 className="text-title-lg font-bold text-md-on-surface mb-5">{title}</h3>
+      <div style={{ height: 300 }}>{children}</div>
+    </div>
+  );
+}
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload) return null;
+  return (
+    <div className="bg-md-surface-container border border-md-outline rounded-xl p-3 md-elevation-3">
+      <p className="text-label-md text-md-on-surface-variant mb-1">{label}</p>
+      {payload.map((entry: any, idx: number) => (
+        <p key={idx} className="text-body-md font-semibold" style={{ color: entry.color }}>
+          {entry.name}: {entry.value.toLocaleString('pt-BR')}
+        </p>
+      ))}
+    </div>
+  );
+};
+
 export default function AnalyticsDashboard() {
   const [engagement, setEngagement] = useState<EngagementData[]>([]);
   const [summary, setSummary] = useState<SummaryData | null>(null);
@@ -46,7 +85,7 @@ export default function AnalyticsDashboard() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Loader2 className="animate-spin text-emerald-500" size={32} />
+        <Loader2 className="animate-spin text-md-primary" size={32} />
       </div>
     );
   }
@@ -62,48 +101,49 @@ export default function AnalyticsDashboard() {
         </div>
       )}
 
-      <div className="bg-white rounded-2xl border border-gray-100 p-6">
-        <h3 className="text-lg font-bold text-brand-slate mb-4">Aulas Concluídas por Dia</h3>
+      <ChartCard title="Aulas Concluídas por Dia">
         {engagement.length === 0 ? (
-          <p className="text-brand-text text-sm">Sem dados de engajamento ainda.</p>
+          <div className="h-full flex items-center justify-center text-md-on-surface-variant">
+            Sem dados de engajamento ainda.
+          </div>
         ) : (
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={engagement}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip />
-              <Bar dataKey="completions" fill="#10b981" radius={[4, 4, 0, 0]} name="Conclusões" />
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={engagement} layout="vertical">
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-md-outline-variant)" vertical={false} />
+              <XAxis type="number" tick={{ fontSize: 12, fill: 'var(--color-md-on-surface-variant)' }} />
+              <YAxis dataKey="date" type="category" width={80} tick={{ fontSize: 12, fill: 'var(--color-md-on-surface-variant)' }} />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar dataKey="completions" fill="var(--color-md-primary)" radius={[0, 4, 4, 0]} name="Conclusões" />
             </BarChart>
           </ResponsiveContainer>
         )}
-      </div>
+      </ChartCard>
 
-      <div className="bg-white rounded-2xl border border-gray-100 p-6">
-        <h3 className="text-lg font-bold text-brand-slate mb-4">Pontos Distribuídos por Dia</h3>
+      <ChartCard title="Pontos Distribuídos por Dia">
         {engagement.length === 0 ? (
-          <p className="text-brand-text text-sm">Sem dados de pontos ainda.</p>
+          <div className="h-full flex items-center justify-center text-md-on-surface-variant">
+            Sem dados de pontos ainda.
+          </div>
         ) : (
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height="100%">
             <LineChart data={engagement}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip />
-              <Line type="monotone" dataKey="points" stroke="#10b981" strokeWidth={2} dot={{ r: 3 }} name="Pontos" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-md-outline-variant)" />
+              <XAxis dataKey="date" tick={{ fontSize: 12, fill: 'var(--color-md-on-surface-variant)' }} />
+              <YAxis tick={{ fontSize: 12, fill: 'var(--color-md-on-surface-variant)' }} />
+              <Tooltip content={<CustomTooltip />} />
+              <Line
+                type="monotone"
+                dataKey="points"
+                stroke="var(--color-md-tertiary)"
+                strokeWidth={3}
+                dot={{ r: 4, fill: 'var(--color-md-tertiary)', strokeWidth: 2 }}
+                activeDot={{ r: 6, fill: 'var(--color-md-tertiary)' }}
+                name="Pontos"
+              />
             </LineChart>
           </ResponsiveContainer>
         )}
-      </div>
-    </div>
-  );
-}
-
-function StatCard({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="bg-white rounded-xl border border-gray-100 p-4">
-      <p className="text-sm text-brand-text">{label}</p>
-      <p className="text-2xl font-black text-brand-slate">{value.toLocaleString('pt-BR')}</p>
+      </ChartCard>
     </div>
   );
 }

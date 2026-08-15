@@ -40,9 +40,16 @@ export const metadata: Metadata = {
     icon: "/icons/icon-192x192.png",
     apple: "/icons/icon-192x192.png",
   },
+  metadataBase: new URL("https://pontufy.com"),
   other: {
     lomadee: "2324685",
     "theme-color": "#0a0a0a",
+  },
+  // Explicit meta tags for lomadee verification
+  verification: {
+    other: {
+      lomadee: "2324685",
+    },
   },
 };
 

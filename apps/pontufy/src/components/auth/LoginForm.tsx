@@ -4,9 +4,8 @@ import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Loader2, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Eye, EyeOff, Mail, Lock } from 'lucide-react';
 
-// Mensagens diferenciadas por origem do erro (nunca expor detalhes internos).
 function errorMessage(error: string | null): string | null {
   if (!error) return null;
   switch (error) {
@@ -31,7 +30,6 @@ export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Erro vindo do fluxo de redirect do NextAuth (ex.: ?error=CredentialsSignin).
   const redirectError = errorMessage(searchParams.get('error'));
   const callbackUrlParam = searchParams.get('callbackUrl');
 
@@ -52,7 +50,6 @@ export function LoginForm() {
         return;
       }
 
-      // callbackUrl só é aceito se for um caminho interno (evita open redirect).
       const callbackUrl =
         callbackUrlParam && callbackUrlParam.startsWith('/') && !callbackUrlParam.startsWith('//')
           ? callbackUrlParam
@@ -70,43 +67,52 @@ export function LoginForm() {
   const showError = error ?? redirectError;
 
   return (
-    <div className="bg-[#141414] border border-[#2a2a2a] rounded-2xl p-8 shadow-2xl shadow-black/50">
-      <h1 className="text-xl font-bold text-white mb-1">Entrar</h1>
-      <p className="text-gray-500 text-sm mb-6">Acesse sua conta corporativa</p>
+    <div className="md-card-outlined md-elevation-3 p-8 w-full max-w-md mx-auto">
+      <div className="text-center mb-8">
+        <Link href="/" className="inline-flex items-center gap-2 text-3xl font-black tracking-tight text-white mb-6">
+          <span className="text-md-primary">Pontu</span>fy
+        </Link>
+        <h1 className="text-headline-sm font-bold text-md-on-surface mb-2">Entrar</h1>
+        <p className="text-body-md text-md-on-surface-variant">Acesse sua conta corporativa</p>
+      </div>
 
-      <form className="space-y-4" onSubmit={handleSubmit} noValidate={false}>
+      <form className="space-y-5" onSubmit={handleSubmit} noValidate={false}>
         {showError && (
           <div
             role="alert"
-            className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3 rounded-lg text-center font-medium"
+            className="bg-md-error/10 border border-md-error/30 text-md-error text-body-sm p-3 rounded-xl text-center font-medium"
           >
             {showError}
           </div>
         )}
 
         <div>
-          <label htmlFor="email" className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
-            E-mail
+          <label htmlFor="email" className="text-label-lg text-md-on-surface-variant mb-1.5 block">
+            E-mail corporativo
           </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            disabled={isLoading}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-3 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 text-sm transition-colors disabled:opacity-60"
-            placeholder="voce@empresa.com"
-          />
+          <div className="relative">
+            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-variant/60 size-5 pointer-events-none" aria-hidden="true" />
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              disabled={isLoading}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full pl-12 pr-4 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-variant/50 focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              placeholder="voce@empresa.com"
+            />
+          </div>
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
+          <label htmlFor="password" className="text-label-lg text-md-on-surface-variant mb-1.5 block">
             Senha
           </label>
           <div className="relative">
+            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-variant/60 size-5 pointer-events-none" aria-hidden="true" />
             <input
               id="password"
               name="password"
@@ -116,24 +122,24 @@ export function LoginForm() {
               disabled={isLoading}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 pr-11 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 text-sm transition-colors disabled:opacity-60"
+              className="w-full pl-12 pr-14 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-variant/50 focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               placeholder="••••••••"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-              className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-600 hover:text-gray-400 transition-colors"
+              className="absolute inset-y-0 right-0 pr-4 flex items-center text-md-on-surface-variant/60 hover:text-md-on-surface transition-colors"
             >
-              {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
         </div>
 
-        <div className="flex justify-end pt-0.5">
+        <div className="flex justify-end pt-1">
           <Link
             href="/forgot-password"
-            className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors font-medium"
+            className="text-label-lg text-md-primary hover:text-md-primary-container transition-colors"
           >
             Esqueceu a senha?
           </Link>
@@ -142,11 +148,11 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full flex justify-center items-center py-3 px-4 rounded-full text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 focus:ring-offset-[#141414] disabled:opacity-50 disabled:cursor-not-allowed gap-2"
+          className="md-btn md-btn-filled w-full mt-2"
         >
           {isLoading ? (
             <>
-              <Loader2 className="animate-spin" size={18} aria-hidden />
+              <Loader2 className="animate-spin" size={20} aria-hidden />
               Entrando...
             </>
           ) : (
@@ -154,6 +160,13 @@ export function LoginForm() {
           )}
         </button>
       </form>
+
+      <p className="mt-6 text-center text-body-sm text-md-on-surface-variant">
+        Recebeu um convite?{' '}
+        <Link href="/register" className="font-semibold text-md-primary hover:text-md-primary-container transition-colors">
+          Criar minha conta
+        </Link>
+      </p>
     </div>
   );
 }
