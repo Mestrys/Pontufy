@@ -1,5 +1,4 @@
 import crypto from 'crypto';
-import { promisify } from 'util';
 import NextAuth, { type DefaultSession } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from '@/backend/db';
@@ -20,12 +19,12 @@ declare module 'next-auth' {
   }
 }
 
-const scryptAsync = promisify(crypto.scrypt);
-
+// Pontufy scrypt specification: `salt:hash` (hex), 16-byte salt, 64-byte key.
+// Matches prisma/seed.ts, register, forgot-password and every other hashing path.
 export async function hashPassword(password: string): Promise<string> {
   const salt = crypto.randomBytes(16).toString('hex');
-  const derived = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${salt}:${derived.toString('hex')}`;
+  const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+  return `${salt}:${hash}`;
 }
 
 export async function verifyPassword(password: string, storedHash: string): Promise<boolean> {
@@ -33,9 +32,11 @@ export async function verifyPassword(password: string, storedHash: string): Prom
     if (!storedHash || !storedHash.includes(':')) return false;
     const [salt, key] = storedHash.split(':');
     if (!salt || !key) return false;
-    const derivedKey = (await scryptAsync(password, salt, 64)) as Buffer;
-    return crypto.timingSafeEqual(derivedKey, Buffer.from(key, 'hex'));
-  } catch {
+    const keyBuffer = Buffer.from(key, 'hex');
+    const derivedKey = crypto.scryptSync(password, salt, 64);
+    return crypto.timingSafeEqual(keyBuffer, derivedKey);
+  } catch (err) {
+    console.error('[Crypto Error]:', err);
     return false;
   }
 }
