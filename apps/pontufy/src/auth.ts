@@ -1,5 +1,6 @@
-import { scrypt, timingSafeEqual } from 'crypto';
-import NextAuth, type DefaultSession from 'next-auth';
+import crypto from 'crypto';
+import { promisify } from 'util';
+import NextAuth, { type DefaultSession } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from '@/backend/db';
 import { authConfig } from '@/auth.config';
@@ -19,7 +20,7 @@ declare module 'next-auth' {
   }
 }
 
-const scryptAsync = promisify(scrypt);
+const scryptAsync = promisify(crypto.scrypt);
 
 export async function hashPassword(password: string): Promise<string> {
   const salt = crypto.randomBytes(16).toString('hex');
@@ -33,7 +34,7 @@ export async function verifyPassword(password: string, storedHash: string): Prom
     const [salt, key] = storedHash.split(':');
     if (!salt || !key) return false;
     const derivedKey = (await scryptAsync(password, salt, 64)) as Buffer;
-    return timingSafeEqual(derivedKey, Buffer.from(key, 'hex'));
+    return crypto.timingSafeEqual(derivedKey, Buffer.from(key, 'hex'));
   } catch {
     return false;
   }
