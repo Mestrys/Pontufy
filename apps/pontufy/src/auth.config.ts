@@ -78,11 +78,16 @@ export const authConfig = {
   session: {
     strategy: 'jwt',
     maxAge: 7 * 24 * 60 * 60,
+    // 7.5 — Rotação/renovação contínua: re-emite o JWT (sem relogar) quando o
+    // cookie tem mais de 24h, renovando a expiração de sessões ativas.
+    updateAge: 24 * 60 * 60,
   },
   cookies: {
     sessionToken: {
+      // 7.4 — __Host- em produção: exige Secure + path=/ + sem Domain (mais
+      // restritivo que __Secure-). Em dev usa nome simples (HTTP local).
       name: process.env.NODE_ENV === 'production'
-        ? '__Secure-authjs.session-token'
+        ? '__Host-authjs.session-token'
         : 'authjs.session-token',
       options: {
         httpOnly: true,

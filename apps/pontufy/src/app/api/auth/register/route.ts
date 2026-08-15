@@ -2,24 +2,32 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/backend/db';
 import { hashPassword } from '@/lib/crypto';
 import { sendWelcomeEmail } from '@/lib/email';
+import { getClientIp, ipRateLimit } from '@/lib/security/auth-guard';
+import { registerSchema, parseBody } from '@/lib/validations';
+
+const REGISTER_MAX = 10;
+const REGISTER_WINDOW = 15 * 60;
 
 export async function POST(request: Request) {
   try {
-    const { token, name, password } = await request.json();
-
-    if (!token || !name || !password) {
+    // 6.1 — Rate limiting por IP (10 criações de conta / 15 min)
+    const ip = getClientIp(request);
+    const rate = await ipRateLimit(ip, 'register', REGISTER_MAX, REGISTER_WINDOW);
+    if (!rate.allowed) {
       return NextResponse.json(
-        { error: 'Token, nome e senha são obrigatórios.' },
-        { status: 400 },
+        { error: 'Muitas tentativas. Aguarde alguns minutos.' },
+        { status: 429 },
       );
     }
 
-    if (typeof password !== 'string' || password.length < 8) {
-      return NextResponse.json(
-        { error: 'A senha deve ter pelo menos 8 caracteres.' },
-        { status: 400 },
-      );
+    // 8.1 — Validação centralizada via Zod
+    const raw = await request.json().catch(() => null);
+    const { data: body, error: validationError } = parseBody(registerSchema, raw);
+    if (validationError) {
+      return NextResponse.json({ error: validationError }, { status: 400 });
     }
+
+    const { token, name, password } = body;
 
     const invitation = await prisma.invitation.findUnique({ where: { token } });
 

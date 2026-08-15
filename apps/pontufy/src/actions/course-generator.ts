@@ -9,6 +9,8 @@ import { auth } from '@/auth';
 import { getTenantDb } from '@/backend/db';
 import { rateLimitCheck } from '@/lib/redis';
 import { buildProviderChain } from '@/lib/ai-providers';
+import { sanitizeAiHtml, sanitizeAiText } from '@/lib/validations/security';
+import { logAudit } from '@/lib/audit';
 import { generatedCourseSchema } from '@/schemas/course-schema';
 import type { GeneratedCourse } from '@/schemas/course-schema';
 
@@ -341,21 +343,23 @@ export async function generateTrainingCourse(
   const now = new Date();
   // Ordena pelas aulas pela ordem didática definida pelo gerador.
   const orderedLessons = [...generated.data.lessons].sort((a, b) => a.order - b.order);
+  // 8.2 — Sanitização de conteúdo gerado por IA antes da persistência:
+  // títulos/aulas/quiz não podem carregar HTML perigoso para os colaboradores.
   const lessonsToCreate = orderedLessons.map((lesson) => ({
-    title: lesson.title,
+    title: sanitizeAiText(lesson.title).slice(0, 160),
     type: 'text' as const,
     pointsAssigned: Math.max(10, Math.min(100, Math.round(lesson.pointsAwarded))),
-    contentUrl: lesson.content,
+    contentUrl: sanitizeAiHtml(lesson.content),
   }));
 
   const quizJson = generated.data.quiz && generated.data.quiz.length > 0
     ? JSON.stringify([{
         module: 'Avaliação do Curso',
         questions: generated.data.quiz.map((q) => ({
-          question: q.question,
-          options: q.options.map((o) => ({ text: o })),
+          question: sanitizeAiText(q.question).slice(0, 500),
+          options: q.options.map((o) => ({ text: sanitizeAiText(o).slice(0, 200) })),
           correctIndex: q.correctIndex,
-          explanation: q.explanation,
+          explanation: sanitizeAiText(q.explanation ?? '').slice(0, 500),
         })),
       }])
     : null;
@@ -408,6 +412,20 @@ export async function generateTrainingCourse(
     creditsRemaining = result.creditsRemaining;
     persisted = true;
     console.log('[course-generator] Curso persistido no DB:', courseId);
+
+    // 9.1 — Auditoria de geração de curso (custo de crédito de IA).
+    await logAudit({
+      tenantId,
+      userId: session.user.id,
+      action: 'COURSE_GENERATED',
+      entity: 'Course',
+      entityId: courseId,
+      newValue: {
+        provider: generated.provider,
+        lessonsCount: lessonRecords.length,
+        creditsSpent: 1,
+      },
+    });
   } catch (err) {
     if (err instanceof Error && err.message === 'INSUFFICIENT_CREDITS') {
       return { success: false, error: 'Créditos de IA insuficientes para este tenant (concorrência).' };

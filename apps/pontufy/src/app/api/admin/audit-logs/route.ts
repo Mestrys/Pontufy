@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { createHash } from 'crypto';
 import { getSessionContext } from '@/backend/session';
 import { getTenantDb } from '@/backend/db';
 import { sanitizeCsvField } from '@/lib/csv-sanitizer';
@@ -98,10 +99,16 @@ export async function GET(request: Request) {
         .join('\n');
 
       const filename = `audit_logs_${tenantId}_${new Date().toISOString().slice(0, 10)}.csv`;
+
+      // 9.3 — Hash de integridade (tamper-evidence): qualquer alteração nos
+      // bytes do CSV após a exportação invalida o SHA-256.
+      const integrityHash = createHash('sha256').update(`\uFEFF${csv}`).digest('hex');
+
       return new NextResponse(`\uFEFF${csv}`, {
         headers: {
           'Content-Type': 'text/csv; charset=utf-8',
           'Content-Disposition': `attachment; filename="${filename}"`,
+          'X-Pontufy-Integrity-SHA256': integrityHash,
         },
       });
     }

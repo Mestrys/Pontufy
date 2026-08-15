@@ -3,12 +3,33 @@ import { randomBytes } from 'crypto';
 import { prisma } from '@/backend/db';
 import { hashPassword } from '@/lib/crypto';
 import { sendPasswordResetEmail } from '@/lib/email';
+import { getClientIp, ipRateLimit } from '@/lib/security/auth-guard';
+import { forgotPasswordSchema, resetPasswordSchema, parseBody } from '@/lib/validations';
 
 const TOKEN_EXPIRY_HOURS = 1;
+const FORGOT_MAX = 5;
+const FORGOT_WINDOW = 15 * 60;
 
 export async function POST(request: Request) {
   try {
-    const { email } = await request.json();
+    // 6.1 — Rate limiting por IP (5 solicitações / 15 min) — anti-spam
+    const ip = getClientIp(request);
+    const rate = await ipRateLimit(ip, 'forgot-password', FORGOT_MAX, FORGOT_WINDOW);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: 'Muitas solicitações. Aguarde 15 minutos.' },
+        { status: 429 },
+      );
+    }
+
+    // 8.1 — Validação centralizada via Zod
+    const raw = await request.json().catch(() => null);
+    const { data: body, error: validationError } = parseBody(forgotPasswordSchema, raw);
+    if (validationError) {
+      return NextResponse.json({ error: validationError }, { status: 400 });
+    }
+
+    const { email } = body;
 
     if (!email || typeof email !== 'string' || !email.includes('@')) {
       return NextResponse.json({ error: 'Email inválido.' }, { status: 400 });
@@ -41,15 +62,14 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const { token, newPassword } = await request.json();
-
-    if (!token || typeof token !== 'string') {
-      return NextResponse.json({ error: 'Token inválido.' }, { status: 400 });
+    // 8.1 — Validação centralizada via Zod
+    const raw = await request.json().catch(() => null);
+    const { data: body, error: validationError } = parseBody(resetPasswordSchema, raw);
+    if (validationError) {
+      return NextResponse.json({ error: validationError }, { status: 400 });
     }
 
-    if (!newPassword || typeof newPassword !== 'string' || newPassword.length < 8) {
-      return NextResponse.json({ error: 'A senha deve ter pelo menos 8 caracteres.' }, { status: 400 });
-    }
+    const { token, newPassword } = body;
 
     const reset = await prisma.passwordReset.findUnique({ where: { token } });
 

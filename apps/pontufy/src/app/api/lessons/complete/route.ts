@@ -4,13 +4,44 @@ import { getTenantDb } from '@/backend/db';
 import { acquireLock, releaseLock } from '@/lib/redis/mutex';
 import { checkVelocityLimit } from '@/lib/security/velocity';
 import { notifyLessonCompleted } from '@/lib/notifications';
+import { getClientIp, ipRateLimit } from '@/lib/security/auth-guard';
+import { tenantRateLimit } from '@/lib/security/rate-limit';
+import { completeLessonSchema, parseBody } from '@/lib/validations';
+
+const LESSON_IP_MAX = 60;
+const LESSON_IP_WINDOW = 60; // 60 req/min/IP
+const LESSON_TENANT_MAX = 1200;
+const LESSON_TENANT_WINDOW = 60;
 
 export async function POST(request: Request) {
   try {
-    const { tenantId, userId } = await getSessionContext();
-    const { lessonId } = await request.json();
+    // 6.2 — Rate limiting por IP E por tenant (rotas críticas de crédito).
+    const ip = getClientIp(request);
+    const ipRate = await ipRateLimit(ip, 'lessons-complete', LESSON_IP_MAX, LESSON_IP_WINDOW);
+    if (!ipRate.allowed) {
+      return NextResponse.json(
+        { error: 'Muitas requisições. Aguarde um instante.' },
+        { status: 429 },
+      );
+    }
 
-    if (!lessonId) return NextResponse.json({ error: 'lessonId é obrigatório' }, { status: 400 });
+    const { tenantId, userId } = await getSessionContext();
+
+    const tenantRate = await tenantRateLimit(tenantId, 'lessons-complete', LESSON_TENANT_MAX, LESSON_TENANT_WINDOW);
+    if (!tenantRate.allowed) {
+      return NextResponse.json(
+        { error: 'Limite da empresa atingido. Tente novamente em instantes.' },
+        { status: 429 },
+      );
+    }
+
+    // 8.1 — Validação centralizada via Zod (UUID estrito)
+    const raw = await request.json().catch(() => null);
+    const { data: body, error: validationError } = parseBody(completeLessonSchema, raw);
+    if (validationError) {
+      return NextResponse.json({ error: validationError }, { status: 400 });
+    }
+    const { lessonId } = body;
 
     const db = getTenantDb(tenantId);
 

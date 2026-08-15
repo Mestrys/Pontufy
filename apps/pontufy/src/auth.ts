@@ -3,6 +3,16 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from '@/backend/db';
 import { authConfig } from '@/auth.config';
 import { verifyPassword } from '@/lib/crypto';
+import {
+  isAccountLocked,
+  recordFailedLogin,
+  createUnlockToken,
+  clearAccountLockout,
+} from '@/lib/security/auth-guard';
+import { resolveBaseUrl, sendAccountLockedEmail } from '@/lib/email';
+import { getRedis } from '@/lib/redis';
+import { logAudit } from '@/lib/audit';
+import { getTenantDb } from '@/backend/db';
 
 declare module 'next-auth' {
   interface Session {
@@ -24,6 +34,26 @@ declare module 'next-auth' {
 // Prisma e crypto). auth.config.ts permanece Edge-safe (proxy/middleware).
 // ═══════════════════════════════════════════════════════════════════════════
 
+// 7.2/7.3 — Versão de sessão (revogação instantânea). Cada login carrega a
+// versão atual do usuário; /api/auth/revoke-all incrementa a versão e derruba
+// todas as sessões imediatamente (JWT stateless não permite revogação direta).
+async function getSessionVersion(userId: string): Promise<number> {
+  const redis = getRedis();
+  if (!redis) return 1; // sem Redis: comportamento padrão (sem revogação ativa)
+  const v = await redis.get<number>(`session-version:${userId}`);
+  if (v === null) {
+    await redis.set(`session-version:${userId}`, 1);
+    return 1;
+  }
+  return v;
+}
+
+async function isSingleSessionEnabled(tenantId: string): Promise<boolean> {
+  const redis = getRedis();
+  if (!redis) return false;
+  return (await redis.get<number>(`single-session:${tenantId}`)) === 1;
+}
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   providers: [
@@ -39,6 +69,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
           const email = String(credentials.email).trim().toLowerCase();
 
+          // 6.1/6.3 — Lockout de conta (5 falhas / 15min) antes de verificar
+          // credenciais. Falha de sessão não informa se o bloqueio existia.
+          if (await isAccountLocked(email)) {
+            console.warn(`[auth] Login recusado: conta bloqueada temporariamente (${email}).`);
+            return null;
+          }
+
           let user = await prisma.user.findUnique({
             where: { email },
           });
@@ -52,7 +89,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           }
 
           if (!user || !user.passwordHash) {
+            // Enumeração de usuários: não distingue usuário inexistente.
+            await recordFailedLogin(email);
             console.warn(`[auth] Login recusado: usuário não encontrado (${email}).`);
+            return null;
+          }
+
+          // 7.1 — Status ativo: usuário removido = sessão recusada; tenant
+          // suspenso/cancelado bloqueia o acesso (sem isActive no modelo User —
+          // evitando migration sem acesso ao banco; a coluna pode ser adicionada
+          // depois via migration normal).
+          const tenant = await prisma.tenant.findUnique({ where: { id: user.tenantId } });
+          const tenantBlocked =
+            !tenant ||
+            tenant.contractStatus === 'suspended' ||
+            tenant.contractStatus === 'cancelled' ||
+            tenant.subscriptionStatus === 'canceled';
+          if (tenantBlocked) {
+            console.warn(`[auth] Login recusado: tenant inativo (${user.tenantId}).`);
             return null;
           }
 
@@ -62,7 +116,34 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           );
 
           if (!isValid) {
+            // 6.3 — Registra a falha; na 5ª, bloqueia a conta e envia alerta
+            // de segurança com link mágico de desbloqueio (6.4).
+            const state = await recordFailedLogin(email);
             console.warn(`[auth] Login recusado: senha inválida (${email}).`);
+            // 9.1 — Auditoria de falha de autenticação (forense de brute force).
+            await logAudit({
+              tenantId: user.tenantId,
+              userId: user.id,
+              action: 'LOGIN_FAILED',
+              entity: 'User',
+              entityId: user.id,
+              newValue: { reason: 'invalid_password', attempt: state.remainingAttempts },
+            });
+            if (state.locked && state.shouldNotify) {
+              const unlockToken = await createUnlockToken(email);
+              const unlockUrl = unlockToken
+                ? `${resolveBaseUrl()}/unlock-account?token=${unlockToken}`
+                : `${resolveBaseUrl()}/forgot-password`;
+              await sendAccountLockedEmail(email, 'não informado', unlockUrl);
+              await logAudit({
+                tenantId: user.tenantId,
+                userId: user.id,
+                action: 'ACCOUNT_LOCKED',
+                entity: 'User',
+                entityId: user.id,
+                newValue: { reason: 'max_attempts', windowSeconds: 15 * 60 },
+              });
+            }
             return null;
           }
 
@@ -71,6 +152,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             console.warn(`[auth] Login recusado: super_admin fora do domínio @pontufy.com (${email}).`);
             return null;
           }
+
+          // Login bem-sucedido limpa qualquer contagem de falhas acumulada.
+          await clearAccountLockout(email);
+
+          // 9.1 — Auditoria de login bem-sucedido.
+          await logAudit({
+            tenantId: user.tenantId,
+            userId: user.id,
+            action: 'LOGIN_SUCCESS',
+            entity: 'User',
+            entityId: user.id,
+            newValue: { role: user.role },
+          });
 
           console.log(`[auth] Login OK: ${email} (${user.role}).`);
           return {
@@ -87,4 +181,43 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
     }),
   ],
+  callbacks: {
+    // 7.3 — Validação da versão de sessão a cada requisição: revogada →
+    // token nulo (sessão invalidada sem depender do cookie).
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.tenantId = user.tenantId;
+        token.role = user.role;
+
+        // 7.2 — Single-device: se ativado para o tenant, cada login gera uma
+        // nova versão e invalida sessões anteriores.
+        const uid = user.id as string;
+        const single = await isSingleSessionEnabled(user.tenantId as string);
+        const version = single
+          ? (await getSessionVersion(uid)) + 1
+          : await getSessionVersion(uid);
+        if (single) {
+          const redis = getRedis();
+          if (redis) await redis.set(`session-version:${uid}`, version);
+        }
+        token.sessionVersion = version;
+      } else if (token.sessionVersion !== undefined) {
+        const current = await getSessionVersion(token.id as string);
+        if (current !== token.sessionVersion) {
+          // Sessão revogada (revoke-all ou novo login single-device).
+          return null;
+        }
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token && session.user) {
+        session.user.id = token.id as string;
+        session.user.tenantId = token.tenantId as string;
+        session.user.role = token.role as string;
+      }
+      return session;
+    },
+  },
 });

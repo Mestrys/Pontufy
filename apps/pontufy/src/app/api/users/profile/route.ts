@@ -3,6 +3,8 @@ import { scrypt, randomBytes } from 'crypto';
 import { promisify } from 'util';
 import { getSessionContext } from '@/backend/session';
 import { getTenantDb } from '@/backend/db';
+import { sanitizeAiText, stripSensitive } from '@/lib/validations/security';
+import { logAudit, extractRequestMeta } from '@/lib/audit';
 
 const scryptAsync = promisify(scrypt);
 
@@ -19,7 +21,8 @@ export async function PATCH(request: Request) {
       if (typeof name !== 'string' || name.trim().length < 2) {
         return NextResponse.json({ error: 'Nome deve ter pelo menos 2 caracteres.' }, { status: 400 });
       }
-      data.name = name.trim();
+      // 8.2 — Nome renderizado na UI: strip de markup antes de persistir.
+      data.name = sanitizeAiText(name.trim()).slice(0, 120);
     }
 
     if (newPassword) {
@@ -58,7 +61,24 @@ export async function PATCH(request: Request) {
       select: { name: true, email: true, role: true },
     });
 
-    return NextResponse.json({ success: true, user: updated });
+    // 8.4 — Interceptor de serialização: nunca vazar campos sensíveis no JSON.
+    // 9.1 — Auditoria de mutações no próprio perfil (senha = evento sensível).
+    const meta = extractRequestMeta(request);
+    await logAudit({
+      tenantId,
+      userId,
+      action: data.passwordHash ? 'PASSWORD_CHANGED' : 'PROFILE_UPDATED',
+      entity: 'User',
+      entityId: userId,
+      ipAddress: meta.ipAddress,
+      userAgent: meta.userAgent,
+      oldValue: data.passwordHash ? { field: 'passwordHash' } : { name: body.name },
+      newValue: data.passwordHash
+        ? { field: 'passwordHash', rotated: true }
+        : { name: data.name },
+    });
+
+    return NextResponse.json({ success: true, user: stripSensitive(updated as Record<string, unknown>) });
   } catch (error: any) {
     if (error.message === 'Não autenticado.') {
       return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 });

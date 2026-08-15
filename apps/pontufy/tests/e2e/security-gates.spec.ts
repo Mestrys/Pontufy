@@ -52,4 +52,10 @@ test.describe('Barreiras de UI', () => {
     const response = await page.goto('/superadmin', { waitUntil: 'domcontentloaded' });
     expect(response?.status()).toBe(403);
   });
+
+  test('/unlock-account é rota pública (não redireciona para /login)', async ({ page }) => {
+    const response = await page.goto('/unlock-account', { waitUntil: 'domcontentloaded' });
+    expect(response?.status()).toBe(200);
+    expect(page.url()).toContain('/unlock-account');
+  });
 });

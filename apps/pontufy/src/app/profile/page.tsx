@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useStore } from '@/store/useStore';
 import { useUserStore } from '@/store/useUserStore';
 import { isSoundEnabled, setSoundEnabled } from '@/lib/feedback';
-import { Loader2, User, Coins, Save, ShieldCheck, Building2, Volume2, VolumeX } from 'lucide-react';
+import { Loader2, User, Coins, Save, ShieldCheck, Building2, Volume2, VolumeX, LogOut } from 'lucide-react';
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
@@ -163,6 +163,30 @@ export default function ProfilePage() {
                   }`}
                 />
               </span>
+            </button>
+          </section>
+
+          {/* Segurança (7.3) — revogação instantânea de sessões */}
+          <section className="bg-md-surface border border-md-outline rounded-xl p-6">
+            <h3 className="font-bold text-white mb-1">Sessões Ativas</h3>
+            <p className="text-sm text-gray-500 mb-4">
+              Encerra todas as sessões em outros dispositivos imediatamente (útil se seu
+              dispositivo for perdido ou roubado).
+            </p>
+            <button
+              type="button"
+              onClick={async () => {
+                const res = await fetch('/api/auth/revoke-all', { method: 'POST' });
+                if (res.ok) {
+                  setMessage({ type: 'success', text: 'Todas as sessões foram encerradas.' });
+                } else {
+                  setMessage({ type: 'error', text: 'Erro ao encerrar sessões.' });
+                }
+              }}
+              className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 transition-colors text-sm"
+            >
+              <LogOut size={15} />
+              Encerrar sessões em todos os dispositivos
             </button>
           </section>
 

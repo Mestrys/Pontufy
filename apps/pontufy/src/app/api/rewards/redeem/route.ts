@@ -5,6 +5,15 @@ import { acquireLock, releaseLock } from '@/lib/redis/mutex';
 import { generateAffiliateUrl, type Partner } from '@/lib/affiliate-engine';
 import { logAudit, extractRequestMeta } from '@/lib/audit';
 import { notifyRewardRedeemed } from '@/lib/notifications';
+import { getClientIp, ipRateLimit } from '@/lib/security/auth-guard';
+import { tenantRateLimit } from '@/lib/security/rate-limit';
+import { parseBody, redeemSchema } from '@/lib/validations';
+import { validateAffiliateUrl, sanitizeAiText } from '@/lib/validations/security';
+
+const REDEEM_IP_MAX = 20;
+const REDEEM_IP_WINDOW = 60; // 20 resgates/min/IP
+const REDEEM_TENANT_MAX = 200;
+const REDEEM_TENANT_WINDOW = 60;
 
 class RedeemError extends Error {
   constructor(
@@ -19,12 +28,40 @@ class RedeemError extends Error {
 
 export async function POST(request: Request) {
   try {
+    // 6.2 — Rate limiting por IP E por tenant (resgate = desembolso de pontos).
+    const ip = getClientIp(request);
+    const ipRate = await ipRateLimit(ip, 'rewards-redeem', REDEEM_IP_MAX, REDEEM_IP_WINDOW);
+    if (!ipRate.allowed) {
+      return NextResponse.json(
+        { error: 'Muitos resgates em sequência. Aguarde um instante.' },
+        { status: 429 },
+      );
+    }
+
     const { tenantId, userId } = await getSessionContext();
-    const body = await request.json();
+
+    const tenantRate = await tenantRateLimit(tenantId, 'rewards-redeem', REDEEM_TENANT_MAX, REDEEM_TENANT_WINDOW);
+    if (!tenantRate.allowed) {
+      return NextResponse.json(
+        { error: 'Limite da empresa atingido. Tente novamente em instantes.' },
+        { status: 429 },
+      );
+    }
+
+    // 8.1 — Validação centralizada via Zod + allowlist de URLs (8.3)
+    const raw = await request.json().catch(() => null);
+    const { data: body, error: validationError } = parseBody(redeemSchema, raw);
+    if (validationError) {
+      return NextResponse.json({ error: validationError }, { status: 400 });
+    }
+
     const { rewardId, productUrl } = body;
 
-    if (!rewardId && !productUrl) {
-      return NextResponse.json({ error: 'rewardId ou productUrl é obrigatório.' }, { status: 400 });
+    if (productUrl) {
+      const check = validateAffiliateUrl(productUrl);
+      if (!check.valid) {
+        return NextResponse.json({ error: check.reason }, { status: 400 });
+      }
     }
 
     const db = getTenantDb(tenantId);
@@ -130,7 +167,8 @@ export async function POST(request: Request) {
 
     // Lomadee direct product URL redemption (from search results)
     if (productUrl) {
-      const pointsCost = body.pointsCost || 0;
+      const pointsCost = typeof body.pointsCost === 'number' && body.pointsCost > 0 ? body.pointsCost : 0;
+      const productTitle = sanitizeAiText(String(body.productTitle ?? productUrl).slice(0, 200));
 
       if (pointsCost > 0) {
         const lockKey = `lock:redeem:${tenantId}:${userId}`;
@@ -161,7 +199,7 @@ export async function POST(request: Request) {
                 tenantId,
                 type: 'loss',
                 pointsAmount: pointsCost,
-                description: `Resgate Lomadee: ${body.productTitle || productUrl}`,
+                description: `Resgate Lomadee: ${productTitle}`,
               },
             });
 

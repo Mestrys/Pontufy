@@ -2,13 +2,14 @@ import { NextResponse } from 'next/server';
 import { randomBytes } from 'crypto';
 import { getSessionContext } from '@/backend/session';
 import { getTenantDb, prisma } from '@/backend/db';
+import { logAudit, extractRequestMeta } from '@/lib/audit';
 
 const VALID_ROLES = ['employee', 'guest'] as const;
 const TOKEN_EXPIRY_HOURS = 72;
 
 export async function POST(request: Request) {
   try {
-    const { tenantId, role } = await getSessionContext();
+    const { tenantId, role, userId: sessionUserId } = await getSessionContext();
 
     if (role !== 'admin_rh') {
       return NextResponse.json({ error: 'Acesso restrito a administradores.' }, { status: 403 });
@@ -53,6 +54,19 @@ export async function POST(request: Request) {
         role: inviteRole,
         expiresAt,
       },
+    });
+
+    // 9.1 — Auditoria de eventos administrativos sensíveis.
+    const meta = extractRequestMeta(request);
+    await logAudit({
+      tenantId,
+      userId: sessionUserId,
+      action: 'INVITATION_CREATED',
+      entity: 'Invitation',
+      entityId: invitation.id,
+      ipAddress: meta.ipAddress,
+      userAgent: meta.userAgent,
+      newValue: { email, role: inviteRole, expiresAt: expiresAt.toISOString() },
     });
 
     return NextResponse.json({

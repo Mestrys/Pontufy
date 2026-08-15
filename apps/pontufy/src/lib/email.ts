@@ -129,3 +129,29 @@ export async function sendRedemptionEmail(
     `,
   });
 }
+
+export async function sendAccountLockedEmail(
+  to: string,
+  ip: string,
+  unlockUrl: string,
+): Promise<boolean> {
+  return sendEmail({
+    to,
+    subject: 'Pontufy - Alerta de Segurança: Conta Temporariamente Bloqueada',
+    html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+        <h2 style="color: #10b981;">Pontufy</h2>
+        <p>Detectamos <strong>5 tentativas de login falhas</strong> na sua conta.</p>
+        <p><strong>IP de origem:</strong> ${ip}</p>
+        <p>Por segurança, sua conta foi temporariamente bloqueada por 15 minutos.</p>
+        <p>Se você reconhece esta atividade, desbloqueie sua conta agora:</p>
+        <a href="${unlockUrl}" style="display: inline-block; padding: 12px 24px; background: #10b981; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">
+          Desbloquear minha conta
+        </a>
+        <p style="color: #666; font-size: 12px; margin-top: 24px;">
+          Este link é de uso único e expira em 30 minutos. Se não foi você, ignore este email e considere trocar sua senha.
+        </p>
+      </div>
+    `,
+  });
+}
