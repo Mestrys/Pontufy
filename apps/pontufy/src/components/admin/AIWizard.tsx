@@ -1,7 +1,8 @@
 'use client';
+
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Sparkles, CheckCircle, ChevronRight, ArrowLeft, AlertCircle, Upload, X, FileText, AlertTriangle, Zap } from 'lucide-react';
+import { Sparkles, CheckCircle, ChevronRight, ArrowLeft, AlertCircle, Upload, X, FileText, AlertTriangle, Zap, Loader2 } from 'lucide-react';
 import { generateTrainingCourse, checkAIProviders } from '@/actions/course-generator';
 import type { GenerateTrainingResult } from '@/actions/course-generator';
 import { saveCourse } from '@/lib/local-courses';
@@ -185,40 +186,76 @@ export default function AIWizard() {
     }
   }, [step, checklistItems.length]);
 
+  const renderStepIndicator = () => (
+    <div className="flex items-center justify-center gap-2 mb-8">
+      {[1, 2, 3].map((s) => (
+        <div key={s} className="flex items-center gap-2">
+          <div
+            className={`w-10 h-10 rounded-full flex items-center justify-center text-label-lg font-bold transition-all ${
+              step > s
+                ? 'bg-md-tertiary text-md-on-tertiary'
+                : step === s
+                ? 'bg-md-primary text-md-on-primary'
+                : 'bg-md-surface-container-high text-md-on-surface-variant border border-md-outline'
+            }`}
+          >
+            {step > s ? <CheckCircle size={20} /> : s}
+          </div>
+          {s < 3 && (
+            <div
+              className={`w-16 h-1 rounded-full hidden sm:block ${
+                step > s ? 'bg-md-tertiary' : 'bg-md-outline'
+              }`}
+            />
+          )}
+          <span
+            className={`hidden md:block text-label-sm font-medium ${
+              step >= s ? 'text-md-on-surface' : 'text-md-on-surface-variant'
+            }`}
+          >
+            {['Escopo', 'Geração', 'Revisão'][s - 1]}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+
   if (step === 1) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 animate-[fadeIn_0.3s_ease-out]">
+      <div className="md-card-outlined md-elevation-1 p-6 sm:p-8 animate-[fadeIn_0.3s_ease-out]">
+        {renderStepIndicator()}
+
         <div className="mb-8">
-          <h2 className="text-2xl font-black text-brand-slate flex items-center gap-2">
-            <Sparkles className="text-emerald-500" /> Assistente de IA
+          <h2 className="text-headline-sm font-bold text-md-on-surface flex items-center gap-2 mb-2">
+            <Sparkles className="text-md-primary" size={24} /> Assistente de IA
           </h2>
-          <p className="text-brand-text mt-1">Crie treinamentos corporativos engajadores em segundos.</p>
+          <p className="text-body-md text-md-on-surface-variant">Crie treinamentos corporativos engajadores em segundos.</p>
         </div>
 
         {providerStatus && !providerStatus.configured && (
-          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-            <div className="flex items-start gap-3 text-amber-800">
+          <div className="mb-6 p-4 bg-md-highlight/10 border border-md-highlight/30 rounded-xl">
+            <div className="flex items-start gap-3 text-md-on-highlight">
               <AlertTriangle size={20} className="flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-bold">Motor de IA nao configurado</p>
-                <p className="text-sm mt-1">
-                  Nenhuma chave de API de IA esta configurada. Os cursos serao gerados com um <strong>template basico</strong>.
+                <p className="text-body-md font-bold">Motor de IA não configurado</p>
+                <p className="text-body-sm mt-1">
+                  Nenhuma chave de API de IA está configurada. Os cursos serão gerados com um <strong>template básico</strong>.
                 </p>
-                <p className="text-sm mt-2 font-medium">
-                  Para geracao inteligente, configure no Vercel (Settings → Environment Variables):
+                <p className="text-body-sm mt-2 font-medium">
+                  Para geração inteligente, configure no Vercel (Settings → Environment Variables):
                 </p>
-                <ul className="text-sm mt-1 space-y-1 ml-4 list-disc">
-                  <li><code className="bg-amber-100 px-1 rounded text-xs">GEMINI_API_KEY</code> — Gratuito em aistudio.google.com</li>
-                  <li><code className="bg-amber-100 px-1 rounded text-xs">OPENAI_API_KEY</code> — platform.openai.com</li>
-                  <li><code className="bg-amber-100 px-1 rounded text-xs">ANTHROPIC_API_KEY</code> — console.anthropic.com</li>
+                <ul className="text-body-sm mt-1 space-y-1 ml-4 list-disc">
+                  <li><code className="bg-md-highlight/20 px-1 rounded text-xs">GEMINI_API_KEY</code> — Gratuito em aistudio.google.com</li>
+                  <li><code className="bg-md-highlight/20 px-1 rounded text-xs">OPENAI_API_KEY</code> — platform.openai.com</li>
+                  <li><code className="bg-md-highlight/20 px-1 rounded text-xs">ANTHROPIC_API_KEY</code> — console.anthropic.com</li>
                 </ul>
-                <p className="text-xs mt-3 text-amber-600 font-medium">
-                  Importante: Configure a variavel para TODOS os ambientes (Production, Preview e Development) no Vercel.
+                <p className="text-xs mt-3 text-md-on-highlight/70 font-medium">
+                  Importante: Configure a variável para TODOS os ambientes (Production, Preview e Development) no Vercel.
                 </p>
                 {providerStatus.diagnostics && (
                   <details className="mt-2">
-                    <summary className="cursor-pointer text-xs font-medium text-amber-700">Diagnostico do servidor</summary>
-                    <ul className="mt-1 space-y-0.5 text-xs text-amber-600">
+                    <summary className="cursor-pointer text-xs font-medium text-md-on-highlight/70">Diagnóstico do servidor</summary>
+                    <ul className="mt-1 space-y-0.5 text-xs text-md-on-highlight/60">
                       {Object.entries(providerStatus.diagnostics).map(([k, v]) => (
                         <li key={k}><strong>{k}:</strong> {v}</li>
                       ))}
@@ -231,12 +268,12 @@ export default function AIWizard() {
         )}
 
         {providerStatus && providerStatus.configured && (
-          <div className="mb-6 p-3 bg-emerald-50 border border-emerald-200 rounded-lg flex items-center gap-3 text-emerald-700">
+          <div className="mb-6 p-3 bg-md-tertiary-container/20 border border-md-tertiary-container/30 rounded-xl flex items-center gap-3 text-md-on-tertiary-container">
             <Zap size={18} />
-            <span className="text-sm font-medium">
+            <span className="text-body-sm font-medium">
               IA ativa: {providerStatus.available.join(', ')}
               {providerStatus.chainOrder && providerStatus.chainOrder.length > 0 && (
-                <span className="text-emerald-600/80 ml-1">
+                <span className="text-md-on-tertiary-container/80 ml-1">
                   (ordem: {providerStatus.chainOrder.join(' → ')})
                 </span>
               )}
@@ -245,44 +282,44 @@ export default function AIWizard() {
         )}
 
         {error && (
-          <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-lg flex items-center gap-3 text-rose-700">
+          <div className="mb-6 p-4 bg-md-error/10 border border-md-error/30 rounded-xl flex items-center gap-3 text-md-error">
             <AlertCircle size={20} />
-            <span className="text-sm font-medium">{error}</span>
+            <span className="text-body-sm font-medium">{error}</span>
           </div>
         )}
 
         <div className="space-y-6">
           <div>
-            <label className="block text-sm font-bold text-brand-slate mb-2">
-              Setor/Vertical de Atua&ccedil;&atilde;o
+            <label className="text-label-lg text-md-on-surface-variant mb-2 block">
+              Setor/Vertical de Atuação
             </label>
             <select
               value={sector}
               onChange={(e) => setSector(e.target.value)}
-              className="w-full bg-gray-50 border border-gray-200 text-brand-slate rounded-lg p-3 outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all"
+              className="w-full bg-md-surface-container border border-md-outline text-md-on-surface rounded-xl p-3 outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 transition-all text-body-md"
             >
-              <option value="tech">Tecnologia e Inova&ccedil;&atilde;o</option>
-              <option value="health">Sa&uacute;de e Bem-Estar</option>
+              <option value="tech">Tecnologia e Inovação</option>
+              <option value="health">Saúde e Bem-Estar</option>
               <option value="retail">Varejo e Vendas</option>
-              <option value="industry">Ind&uacute;stria e Manufatura</option>
+              <option value="industry">Indústria e Manufatura</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-brand-slate mb-2">
-              O que voc&ecirc; deseja ensinar?
+            <label className="text-label-lg text-md-on-surface-variant mb-2 block">
+              O que você deseja ensinar?
             </label>
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              className="w-full h-32 bg-gray-50 border border-gray-200 text-brand-slate rounded-lg p-3 outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all resize-none"
+              className="w-full h-32 bg-md-surface-container border border-md-outline text-md-on-surface rounded-xl p-3 outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 transition-all resize-none text-body-md placeholder:text-md-on-surface-variant/50"
               placeholder="Ex: Crie um treinamento de LGPD focado na equipe de atendimento ao cliente, com foco prático em proteção de dados e cenários de call center..."
             />
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-brand-slate mb-2">
-              Material de Refer&ecirc;ncia <span className="text-brand-text font-normal">(opcional)</span>
+            <label className="text-label-lg text-md-on-surface-variant mb-2 block">
+              Material de Referência <span className="text-md-on-surface-variant/60 font-normal">(opcional)</span>
             </label>
             <div
               onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
@@ -293,10 +330,10 @@ export default function AIWizard() {
                 if (e.dataTransfer.files.length > 0) addFiles(e.dataTransfer.files);
               }}
               onClick={() => fileInputRef.current?.click()}
-              className={`relative border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-all ${
+              className={`relative border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${
                 dragOver
-                  ? 'border-emerald-400 bg-emerald-50'
-                  : 'border-gray-200 hover:border-emerald-300 hover:bg-gray-50'
+                  ? 'border-md-primary bg-md-primary/5'
+                  : 'border-md-outline hover:border-md-primary hover:bg-md-surface-container-high/50'
               }`}
             >
               <input
@@ -307,28 +344,28 @@ export default function AIWizard() {
                 onChange={(e) => { if (e.target.files) addFiles(e.target.files); e.target.value = ''; }}
                 className="hidden"
               />
-              <Upload size={24} className="mx-auto mb-2 text-gray-400" />
-              <p className="text-sm text-brand-text">
-                Arraste arquivos aqui ou <span className="text-emerald-600 font-semibold">clique para selecionar</span>
+              <Upload size={24} className="mx-auto mb-2 text-md-on-surface-variant/50" />
+              <p className="text-body-sm text-md-on-surface-variant">
+                Arraste arquivos aqui ou <span className="text-md-primary font-semibold">clique para selecionar</span>
               </p>
-              <p className="text-xs text-gray-400 mt-1">
-                PDF, Word, TXT, PowerPoint, Excel, MD, MP4, MP3 — at&eacute; {MAX_FILES} arquivos, 10MB cada
+              <p className="text-xs text-md-on-surface-variant/50 mt-1">
+                PDF, Word, TXT, PowerPoint, Excel, MD, MP4, MP3 — até {MAX_FILES} arquivos, 10MB cada
               </p>
             </div>
 
             {files.length > 0 && (
               <div className="mt-3 space-y-2">
                 {files.map((f, i) => (
-                  <div key={i} className="flex items-center gap-3 bg-gray-50 rounded-lg px-3 py-2 group">
-                    <FileText size={16} className="text-emerald-600 flex-shrink-0" />
-                    <span className="text-sm text-brand-slate truncate flex-1">{f.name}</span>
-                    <span className="text-xs text-gray-400">{formatFileSize(f.size)}</span>
+                  <div key={i} className="flex items-center gap-3 bg-md-surface-container-high rounded-lg px-3 py-2 group">
+                    <FileText size={16} className="text-md-primary flex-shrink-0" />
+                    <span className="text-body-sm text-md-on-surface truncate flex-1">{f.name}</span>
+                    <span className="text-xs text-md-on-surface-variant/60">{formatFileSize(f.size)}</span>
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); removeFile(i); }}
-                      className="p-1 rounded hover:bg-gray-200 transition-colors opacity-0 group-hover:opacity-100"
+                      className="p-1 rounded hover:bg-md-outline transition-colors opacity-0 group-hover:opacity-100"
                     >
-                      <X size={14} className="text-gray-500" />
+                      <X size={14} className="text-md-on-surface-variant/50" />
                     </button>
                   </div>
                 ))}
@@ -336,20 +373,21 @@ export default function AIWizard() {
             )}
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-4 border-t border-gray-100">
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-brand-text">Custo da opera&ccedil;&atilde;o:</span>
-              <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
-                1 Cr&eacute;dito de IA
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-4 border-t border-md-outline">
+            <div className="flex items-center gap-2 text-body-sm">
+              <span className="text-md-on-surface-variant">Custo da operação:</span>
+              <span className="font-bold text-md-primary bg-md-primary-container px-2 py-0.5 rounded-full">
+                1 Crédito de IA
               </span>
             </div>
 
             <button
               onClick={handleGenerate}
-              className={`flex items-center justify-center gap-2 font-bold px-8 py-3 rounded-lg shadow-sm transition-all ${
+              disabled={!prompt.trim()}
+              className={`md-btn md-btn-filled flex items-center justify-center gap-2 px-8 transition-all ${
                 prompt.trim()
-                  ? 'bg-gradient-pontufy text-emerald-900 hover:shadow-md hover:scale-[1.02]'
-                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  ? ''
+                  : 'opacity-50 cursor-not-allowed'
               }`}
             >
               Gerar Treinamento <ChevronRight size={18} />
@@ -362,16 +400,18 @@ export default function AIWizard() {
 
   if (step === 2) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-12 text-center animate-[fadeIn_0.3s_ease-out]">
-        <div className="w-16 h-16 bg-gradient-pontufy rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-100 animate-pulse">
-          <Sparkles className="text-emerald-900" size={32} />
-        </div>
-        <h2 className="text-2xl font-black text-brand-slate mb-2">A IA est&aacute; trabalhando...</h2>
-        <p className="text-brand-text mb-10">Isso pode levar at&eacute; 30 segundos.</p>
+      <div className="md-card-outlined md-elevation-1 p-6 sm:p-12 text-center animate-[fadeIn_0.3s_ease-out]">
+        {renderStepIndicator()}
 
-        <div className="w-full max-w-xl mx-auto h-2 bg-gray-100 rounded-full overflow-hidden mb-8">
+        <div className="w-16 h-16 bg-md-primary rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-md-primary/30 animate-pulse">
+          <Sparkles className="text-md-on-primary" size={32} />
+        </div>
+        <h2 className="text-headline-sm font-bold text-md-on-surface mb-2">A IA está trabalhando...</h2>
+        <p className="text-body-md text-md-on-surface-variant mb-10">Isso pode levar até 30 segundos.</p>
+
+        <div className="w-full max-w-xl mx-auto h-2 bg-md-outline rounded-full overflow-hidden mb-8">
           <div
-            className="h-full bg-gradient-pontufy rounded-full transition-all duration-300 ease-out"
+            className="h-full bg-md-primary rounded-full transition-all duration-300 ease-out"
             style={{ width: `${loadingProgress}%` }}
           />
         </div>
@@ -384,7 +424,7 @@ export default function AIWizard() {
               <div
                 key={index}
                 className={`flex items-center gap-3 transition-all duration-500 ${
-                  isCompleted ? 'text-emerald-600' : isActive ? 'text-brand-slate font-semibold' : 'text-gray-300'
+                  isCompleted ? 'text-md-tertiary' : isActive ? 'text-md-on-surface font-semibold' : 'text-md-on-surface-variant/60'
                 }`}
               >
                 {isCompleted ? (
@@ -392,11 +432,11 @@ export default function AIWizard() {
                 ) : (
                   <div
                     className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${
-                      isActive ? 'border-brand-slate border-t-emerald-500 animate-spin' : 'border-gray-200'
+                      isActive ? 'border-md-primary border-t-md-tertiary animate-spin' : 'border-md-outline'
                     }`}
                   />
                 )}
-                <span className="text-sm">{item}</span>
+                <span className="text-body-sm">{item}</span>
               </div>
             );
           })}
@@ -410,13 +450,15 @@ export default function AIWizard() {
     const isTemplate = result.provider.startsWith('local:');
 
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 animate-[fadeIn_0.3s_ease-out]">
+      <div className="md-card-outlined md-elevation-1 p-6 sm:p-8 animate-[fadeIn_0.3s_ease-out]">
+        {renderStepIndicator()}
+
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-black text-brand-slate flex items-center gap-2">
-              <CheckCircle className="text-emerald-500" /> Curso Criado!
+            <h2 className="text-headline-sm font-bold text-md-on-surface flex items-center gap-2">
+              <CheckCircle className="text-md-tertiary" /> Curso Criado!
             </h2>
-            <p className="text-brand-text mt-1">
+            <p className="text-body-md text-md-on-surface-variant mt-1">
               <strong>{result.course.title}</strong> foi publicado com sucesso.
             </p>
           </div>
@@ -427,25 +469,25 @@ export default function AIWizard() {
               setFiles([]);
               setResult(null);
             }}
-            className="text-sm font-semibold text-brand-text hover:text-brand-slate flex items-center gap-1 transition-colors"
+            className="text-body-sm font-semibold text-md-on-surface-variant hover:text-md-primary flex items-center gap-1 transition-colors"
           >
             <ArrowLeft size={16} /> Criar outro
           </button>
         </div>
 
         {isTemplate && (
-          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3 text-amber-800">
+          <div className="mb-6 p-4 bg-md-highlight/10 border border-md-highlight/30 rounded-xl flex items-start gap-3 text-md-on-highlight">
             <AlertTriangle size={18} className="flex-shrink-0 mt-0.5" />
-            <div className="text-sm">
-              <p className="font-bold">Conteudo gerado por template</p>
+            <div className="text-body-sm">
+              <p className="font-bold">Conteúdo gerado por template</p>
               <p className="mt-1">
-                Este curso foi criado com um modelo basico porque nenhuma IA esta configurada ou todos os provedores falharam.
-                Para cursos personalizados e inteligentes, configure uma <code className="bg-amber-100 px-1 rounded text-xs">GEMINI_API_KEY</code> no Vercel.
+                Este curso foi criado com um modelo básico porque nenhuma IA está configurada ou todos os provedores falharam.
+                Para cursos personalizados e inteligentes, configure uma <code className="bg-md-highlight/20 px-1 rounded text-xs">GEMINI_API_KEY</code> no Vercel.
               </p>
               {result.aiErrors && result.aiErrors.length > 0 && (
                 <details className="mt-2">
-                  <summary className="cursor-pointer font-medium text-amber-700">Ver erros dos provedores</summary>
-                  <ul className="mt-1 space-y-1 ml-4 list-disc text-xs text-amber-700">
+                  <summary className="cursor-pointer font-medium text-md-on-highlight/70">Ver erros dos provedores</summary>
+                  <ul className="mt-1 space-y-1 ml-4 list-disc text-xs text-md-on-highlight/60">
                     {result.aiErrors.map((e, i) => <li key={i}>{e}</li>)}
                   </ul>
                 </details>
@@ -454,33 +496,33 @@ export default function AIWizard() {
           </div>
         )}
 
-        <div className="flex flex-wrap items-center gap-3 mb-6 text-sm">
-          <span className="bg-emerald-50 text-emerald-700 font-bold px-3 py-1 rounded-full">
+        <div className="flex flex-wrap items-center gap-3 mb-6 text-body-sm">
+          <span className="bg-md-tertiary-container text-md-on-tertiary-container font-bold px-3 py-1 rounded-full">
             {result.lessonsCount} aulas
           </span>
           <span className={`font-medium px-3 py-1 rounded-full ${
-            isTemplate ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'
+            isTemplate ? 'bg-md-highlight/10 text-md-on-highlight' : 'bg-md-tertiary-container text-md-on-tertiary-container'
           }`}>
             {isTemplate ? 'Template local' : `IA: ${result.provider}`}
           </span>
-          <span className="bg-gray-100 text-brand-text font-medium px-3 py-1 rounded-full">
-            Cr&eacute;ditos restantes: {result.creditsRemaining}
+          <span className="bg-md-surface-container-high text-md-on-surface-variant font-medium px-3 py-1 rounded-full">
+            Créditos restantes: {result.creditsRemaining}
           </span>
           {!result.persisted && (
-            <span className="bg-amber-50 text-amber-700 font-medium px-3 py-1 rounded-full">
+            <span className="bg-md-highlight/10 text-md-on-highlight font-medium px-3 py-1 rounded-full">
               Salvo localmente
             </span>
           )}
         </div>
 
         {lessons.length > 0 && (
-          <div className="bg-gray-50 border border-gray-100 rounded-lg p-6 mb-8">
-            <h3 className="font-bold text-brand-slate mb-4 text-lg">Estrutura do Curso</h3>
-            <div className="divide-y divide-gray-100 bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+          <div className="bg-md-surface-container border border-md-outline rounded-xl p-6 mb-8">
+            <h3 className="text-title-lg font-bold text-md-on-surface mb-4">Estrutura do Curso</h3>
+            <div className="divide-y divide-md-outline bg-md-surface-container-high border border-md-outline rounded-lg overflow-hidden shadow-sm">
               {lessons.map((lesson, i) => (
                 <div key={i} className="px-4 py-3 flex justify-between items-center">
-                  <span className="text-sm font-medium text-brand-slate">{lesson.title}</span>
-                  <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">
+                  <span className="text-body-md font-medium text-md-on-surface">{lesson.title}</span>
+                  <span className="text-label-sm font-bold text-md-primary bg-md-primary-container px-2 py-1 rounded-full">
                     +{lesson.pointsAssigned} pts
                   </span>
                 </div>
@@ -494,7 +536,7 @@ export default function AIWizard() {
             onClick={() => {
               window.location.href = '/admin';
             }}
-            className="flex items-center gap-2 bg-gradient-pontufy text-emerald-900 font-bold px-8 py-3 rounded-full shadow-sm hover:shadow-md hover:scale-[1.02] transition-all"
+            className="md-btn md-btn-filled"
           >
             Voltar ao Painel
           </button>

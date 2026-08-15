@@ -1,10 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Loader2, TreePine, Target, ArrowLeft, Send } from 'lucide-react';
-import Link from 'next/link';
+import { Loader2, TreePine, Target, ArrowLeft, Send, Users, Plus, BookOpen } from 'lucide-react';
 
-// TAREFA 12.5 — Painel de trilhas + PDI do RH (paleta admin legada).
+// TAREFA 12.5 — Painel de trilhas + PDI do RH (MD3).
 
 interface NodeRow {
   id: string;
@@ -137,185 +136,188 @@ export default function AdminSkillsClient() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] px-4 py-8">
-      <div className="max-w-5xl mx-auto space-y-6">
-        <div>
-          <Link
-            href="/admin"
-            className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-300 transition-colors mb-2"
-          >
-            <ArrowLeft size={15} /> Voltar ao painel
-          </Link>
-          <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-            <TreePine className="text-emerald-400" /> Trilhas de Competência
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Crie competências corporativas e vincule nós de PDI ao desenvolvimento individual dos colaboradores.
-          </p>
+    <div className="space-y-8">
+      <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div>
+            <h1 className="text-headline-md font-extrabold text-md-on-surface flex items-center gap-2">
+              <TreePine className="text-md-primary" size={28} /> Trilhas de Competência
+            </h1>
+            <p className="text-body-md text-md-on-surface-variant mt-1">
+              Crie competências corporativas e vincule nós de PDI ao desenvolvimento individual dos colaboradores.
+            </p>
+          </div>
         </div>
+      </header>
 
-        {message && (
-          <div
-            className={`text-sm p-3 rounded-lg text-center font-medium ${
-              message.type === 'success'
-                ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-                : 'bg-red-500/10 border border-red-500/20 text-red-400'
-            }`}
-          >
-            {message.text}
-          </div>
-        )}
+      {message && (
+        <div
+          className={`text-body-sm p-3 rounded-xl text-center font-medium ${
+            message.type === 'success'
+              ? 'bg-md-tertiary-container/20 border border-md-tertiary-container/30 text-md-on-tertiary-container'
+              : 'bg-md-error/10 border border-md-error/30 text-md-error'
+          }`}
+        >
+          {message.text}
+        </div>
+      )}
 
-        {loading ? (
-          <div className="flex justify-center py-16">
-            <Loader2 className="animate-spin text-emerald-500" size={26} />
-          </div>
-        ) : (
-          <>
-            {/* ── Nova competência ─────────────────────────────────────── */}
-            <section className="bg-[#141414] border border-[#2a2a2a] rounded-2xl p-5">
-              <h2 className="text-sm font-bold text-white uppercase tracking-wide mb-4">Nova Competência</h2>
-              <div className="grid sm:grid-cols-4 gap-3">
-                <input
-                  value={skillName}
-                  onChange={(e) => setSkillName(e.target.value)}
-                  placeholder="Ex.: Liderança"
-                  className="sm:col-span-2 px-4 py-2.5 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500 text-sm"
-                />
-                <select
-                  value={skillCategory}
-                  onChange={(e) => setSkillCategory(e.target.value)}
-                  className="px-4 py-2.5 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm"
-                >
-                  <option value="leadership">Liderança</option>
-                  <option value="compliance">Compliance</option>
-                  <option value="tech">Tecnologia</option>
-                  <option value="health">Saúde</option>
-                  <option value="retail">Varejo</option>
-                  <option value="industry">Indústria</option>
-                  <option value="general">Geral</option>
-                </select>
-                <select
-                  value={targetLevel}
-                  onChange={(e) => setTargetLevel(Number(e.target.value))}
-                  className="px-4 py-2.5 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm"
-                >
-                  {[3, 4, 5].map((l) => (
-                    <option key={l} value={l}>Nível-alvo {l}</option>
-                  ))}
-                </select>
+      {loading ? (
+        <div className="flex justify-center py-16">
+          <Loader2 className="animate-spin text-md-primary" size={26} />
+        </div>
+      ) : (
+        <>
+          {/* ── Nova competência ─────────────────────────────────────── */}
+          <section className="md-card-outlined md-elevation-1 p-6">
+            <h2 className="text-label-lg font-bold text-md-on-surface uppercase tracking-wider mb-5 flex items-center gap-2">
+              <Plus size={18} className="text-md-primary" /> Nova Competência
+            </h2>
+            <div className="grid sm:grid-cols-4 gap-3 mb-4">
+              <input
+                value={skillName}
+                onChange={(e) => setSkillName(e.target.value)}
+                placeholder="Ex.: Liderança"
+                className="sm:col-span-2 px-4 py-3 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-variant/50 focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
+              />
+              <select
+                value={skillCategory}
+                onChange={(e) => setSkillCategory(e.target.value)}
+                className="px-4 py-3 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
+              >
+                <option value="leadership">Liderança</option>
+                <option value="compliance">Compliance</option>
+                <option value="tech">Tecnologia</option>
+                <option value="health">Saúde</option>
+                <option value="retail">Varejo</option>
+                <option value="industry">Indústria</option>
+                <option value="general">Geral</option>
+              </select>
+              <select
+                value={targetLevel}
+                onChange={(e) => setTargetLevel(Number(e.target.value))}
+                className="px-4 py-3 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
+              >
+                {[3, 4, 5].map((l) => (
+                  <option key={l} value={l}>Nível-alvo {l}</option>
+                ))}
+              </select>
+            </div>
+            <p className="text-body-sm text-md-on-surface-variant/60 mb-4">
+              Os nós da árvore são criados ao vincular cursos existentes — os primeiros nós ficam
+              disponíveis automaticamente; os seguintes exigem ≥ 80% no pré-requisito.
+            </p>
+            <button
+              type="button"
+              onClick={handleCreateSkill}
+              disabled={creating}
+              className="md-btn md-btn-filled flex items-center justify-center gap-2"
+            >
+              {creating ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
+              Criar competência
+            </button>
+          </section>
+
+          {/* ── Trilhas existentes ───────────────────────────────────── */}
+          <section className="md-card-outlined md-elevation-1 p-6">
+            <h2 className="text-label-lg font-bold text-md-on-surface uppercase tracking-wider mb-5 flex items-center gap-2">
+              <BookOpen size={18} className="text-md-primary" /> Trilhas Publicadas
+            </h2>
+            {skills.length === 0 ? (
+              <div className="text-center py-12">
+                <TreePine size={48} className="mx-auto text-md-on-surface-variant/30 mb-4" />
+                <p className="text-body-md text-md-on-surface-variant">Nenhuma competência criada ainda.</p>
               </div>
-              <p className="text-xs text-gray-600 mt-2">
-                Os nós da árvore são criados ao vincular cursos existentes — os primeiros nós ficam
-                disponíveis automaticamente; os seguintes exigem ≥ 80% no pré-requisito.
-              </p>
+            ) : (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {skills.map((s) => (
+                  <div key={s.id} className="bg-md-surface-container-high border border-md-outline rounded-xl p-5 hover:border-md-primary/30 transition-colors">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="font-semibold text-md-on-surface">{s.name}</p>
+                      <span className="text-label-sm font-bold uppercase text-md-tertiary bg-md-tertiary-container/20 border border-md-tertiary-container/30 rounded-full px-2 py-0.5">
+                        {s.category}
+                      </span>
+                    </div>
+                    <p className="text-body-sm text-md-on-surface-variant/60 mb-3">{s.nodes.length} nós · nível-alvo {s.targetLevel}</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {s.nodes.map((n) => (
+                        <span
+                          key={n.id}
+                          title={`${n.title}${n.prerequisiteId ? ' (requer pré-requisito)' : ' (raiz)'}`}
+                          className="text-label-sm font-mono text-md-on-surface-variant/60 bg-md-surface-container border border-md-outline rounded px-2 py-0.5 truncate max-w-[120px]"
+                        >
+                          {n.title.length > 14 ? `${n.title.slice(0, 13)}…` : n.title}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* ── PDI ──────────────────────────────────────────────────── */}
+          <section className="md-card-outlined md-elevation-1 p-6">
+            <h2 className="text-label-lg font-bold text-md-on-surface uppercase tracking-wider mb-5 flex items-center gap-2">
+              <Target size={18} className="text-md-primary" /> Plano de Desenvolvimento Individual
+            </h2>
+            <div className="grid sm:grid-cols-3 gap-3 mb-4">
+              <select
+                value={pdiUserId}
+                onChange={(e) => setPdiUserId(e.target.value)}
+                className="px-4 py-3 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
+              >
+                <option value="">Colaborador…</option>
+                {users.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.name} ({u.email})
+                  </option>
+                ))}
+              </select>
+              <select
+                value={pdiNodeId}
+                onChange={(e) => setPdiNodeId(e.target.value)}
+                className="px-4 py-3 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
+              >
+                <option value="">Nó da árvore…</option>
+                {skills.flatMap((s) =>
+                  s.nodes.map((n) => (
+                    <option key={n.id} value={n.id}>
+                      {s.name} → {n.title}
+                    </option>
+                  )),
+                )}
+              </select>
               <button
                 type="button"
-                onClick={handleCreateSkill}
+                onClick={handleAssignPdi}
                 disabled={creating}
-                className="mt-4 flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors disabled:opacity-50"
+                className="md-btn md-btn-filled flex items-center justify-center gap-2"
               >
-                {creating ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
-                Criar competência
+                {creating ? <Loader2 size={18} className="animate-spin" /> : <Target size={18} />}
+                Vincular ao PDI
               </button>
-            </section>
+            </div>
 
-            {/* ── Trilhas existentes ───────────────────────────────────── */}
-            <section className="bg-[#141414] border border-[#2a2a2a] rounded-2xl p-5">
-              <h2 className="text-sm font-bold text-white uppercase tracking-wide mb-4">Trilhas Publicadas</h2>
-              {skills.length === 0 ? (
-                <p className="text-sm text-gray-600 text-center py-6">Nenhuma competência criada ainda.</p>
-              ) : (
-                <div className="grid sm:grid-cols-2 gap-3">
-                  {skills.map((s) => (
-                    <div key={s.id} className="bg-[#1f1f1f] border border-[#2a2a2a] rounded-xl p-4">
-                      <div className="flex items-center justify-between">
-                        <p className="font-bold text-white">{s.name}</p>
-                        <span className="text-[10px] font-bold uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2 py-0.5">
-                          {s.category}
-                        </span>
+            {pdis.length > 0 && (
+              <div className="mt-5">
+                <p className="text-label-sm text-md-on-surface-variant/60 uppercase tracking-wider font-semibold mb-3">PDIs ativos</p>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {pdis.map((p, i) => (
+                    <div key={`${p.userId}-${p.nodeId}-${i}`} className="flex items-center justify-between bg-md-surface-container border border-md-outline rounded-xl px-4 py-3 text-body-sm">
+                      <div>
+                        <span className="font-semibold text-md-on-surface">{p.userName}</span>
+                        <span className="text-md-on-surface-variant/60 ml-2">→ {p.skillName}: {p.nodeTitle}</span>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">{s.nodes.length} nós · nível-alvo {s.targetLevel}</p>
-                      <div className="mt-2 flex flex-wrap gap-1.5">
-                        {s.nodes.map((n) => (
-                          <span
-                            key={n.id}
-                            title={`${n.title}${n.prerequisiteId ? ' (requer pré-requisito)' : ' (raiz)'}`}
-                            className="text-[10px] font-mono text-gray-400 bg-[#2a2a2a] rounded px-1.5 py-0.5"
-                          >
-                            {n.title.length > 14 ? `${n.title.slice(0, 13)}…` : n.title}
-                          </span>
-                        ))}
-                      </div>
+                        <span className="text-label-sm text-md-on-surface-variant/50">{new Date(p.createdAt).toLocaleDateString('pt-BR')}</span>
                     </div>
                   ))}
                 </div>
-              )}
-            </section>
-
-            {/* ── PDI ──────────────────────────────────────────────────── */}
-            <section className="bg-[#141414] border border-[#2a2a2a] rounded-2xl p-5">
-              <h2 className="text-sm font-bold text-white uppercase tracking-wide mb-4 flex items-center gap-2">
-                <Target size={15} className="text-emerald-400" /> Plano de Desenvolvimento Individual
-              </h2>
-              <div className="grid sm:grid-cols-3 gap-3">
-                <select
-                  value={pdiUserId}
-                  onChange={(e) => setPdiUserId(e.target.value)}
-                  className="px-4 py-2.5 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm"
-                >
-                  <option value="">Colaborador…</option>
-                  {users.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.name} ({u.email})
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={pdiNodeId}
-                  onChange={(e) => setPdiNodeId(e.target.value)}
-                  className="px-4 py-2.5 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm"
-                >
-                  <option value="">Nó da árvore…</option>
-                  {skills.flatMap((s) =>
-                    s.nodes.map((n) => (
-                      <option key={n.id} value={n.id}>
-                        {s.name} → {n.title}
-                      </option>
-                    )),
-                  )}
-                </select>
-                <button
-                  type="button"
-                  onClick={handleAssignPdi}
-                  disabled={creating}
-                  className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors disabled:opacity-50"
-                >
-                  {creating ? <Loader2 size={15} className="animate-spin" /> : <Target size={15} />}
-                  Vincular ao PDI
-                </button>
               </div>
-
-              {pdis.length > 0 && (
-                <div className="mt-4">
-                  <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-2">PDIs ativos</p>
-                  <div className="space-y-2">
-                    {pdis.map((p, i) => (
-                      <div key={`${p.userId}-${p.nodeId}-${i}`} className="flex items-center justify-between bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg px-4 py-2.5 text-sm">
-                        <div>
-                          <span className="text-white font-semibold">{p.userName}</span>
-                          <span className="text-gray-500"> → {p.skillName}: {p.nodeTitle}</span>
-                        </div>
-                        <span className="text-xs text-gray-600">{new Date(p.createdAt).toLocaleDateString('pt-BR')}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </section>
-          </>
-        )}
-      </div>
+            )}
+          </section>
+        </>
+      )}
     </div>
   );
 }
