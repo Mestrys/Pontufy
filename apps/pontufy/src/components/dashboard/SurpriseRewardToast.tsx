@@ -39,12 +39,13 @@ export default function SurpriseRewardToast() {
 
   return (
     <>
-      {/* Botão flutuante para forçar o Autopilot (Apenas no MVP para Review) */}
+      {/* Botão flutuante para forçar o Autopilot (Apenas no MVP para Review) —
+          container tonal MD3 #f7d0a9 com texto escuro (AA 9:1) */}
       <button
         type="button"
         onClick={triggerAutopilot}
         disabled={isLoading}
-        className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-50 bg-brand-slate text-white px-3 sm:px-4 py-2 rounded-full font-medium shadow-lg hover:shadow-xl transition-all flex items-center space-x-2 text-sm"
+        className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-50 bg-md-highlight text-md-on-highlight px-3 sm:px-4 py-2 rounded-full font-medium shadow-lg hover:shadow-xl hover:bg-md-highlight/90 transition-all flex items-center space-x-2 text-sm"
       >
         {isLoading ? (
           <span className="animate-pulse">Analisando Perfil...</span>
@@ -63,33 +64,33 @@ export default function SurpriseRewardToast() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="fixed bottom-32 sm:bottom-20 right-4 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-80 bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100"
+            className="fixed bottom-32 sm:bottom-20 right-4 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-80 bg-md-highlight rounded-2xl shadow-2xl overflow-hidden border border-md-highlight"
           >
-            {/* Header / Brand Gradient Bar */}
-            <div className="h-2 bg-gradient-brand w-full"></div>
+            {/* Header / Brand Gradient Bar (acento primary #5c4152 → container) */}
+            <div className="h-2 bg-gradient-to-r from-md-primary to-md-primary-container w-full"></div>
             
             <div className="p-5">
               <div className="flex justify-between items-start mb-3">
-                <h3 className="font-bold text-brand-slate text-lg">Oferta Relâmpago ⚡</h3>
+                <h3 className="font-bold text-md-on-highlight text-lg">Oferta Relâmpago ⚡</h3>
                 <button
                   type="button"
                   onClick={() => setIsVisible(false)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-md-on-highlight/60 hover:text-md-on-highlight"
                 >
                   ✕
                 </button>
               </div>
 
-              <p className="text-sm text-brand-slate/80 leading-relaxed mb-4">
+              <p className="text-sm text-md-on-highlight/80 leading-relaxed mb-4">
                 "{data.aiMessage}"
               </p>
 
-              <div className="bg-brand-gray rounded-xl p-3 mb-4 flex items-center justify-between">
+              <div className="bg-md-primary/10 border border-md-primary/20 rounded-xl p-3 mb-4 flex items-center justify-between">
                 <div>
-                  <span className="text-xs text-gray-500 block">Desconto IA:</span>
-                  <span className="font-bold text-lg text-brand-slate">{data.discountedPoints} pts</span>
+                  <span className="text-xs text-md-on-highlight/70 block">Desconto IA:</span>
+                  <span className="font-black text-lg text-md-primary">{data.discountedPoints} pts</span>
                 </div>
-                <div className="h-8 w-8 bg-gradient-brand rounded-full flex items-center justify-center text-white font-bold text-xs">
+                <div className="h-8 w-8 bg-md-primary rounded-full flex items-center justify-center text-white font-bold text-xs">
                   -10%
                 </div>
               </div>
@@ -109,7 +110,7 @@ export default function SurpriseRewardToast() {
                   }
                   setIsVisible(false);
                 }}
-                className="w-full bg-brand-slate text-white py-2.5 rounded-lg font-medium hover:bg-black transition-colors"
+                className="w-full bg-md-primary text-md-on-primary py-2.5 rounded-lg font-medium hover:bg-md-primary-container transition-colors"
               >
                 Resgatar Agora
               </button>

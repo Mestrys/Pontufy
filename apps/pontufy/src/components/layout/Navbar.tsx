@@ -1,11 +1,12 @@
 'use client';
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Search, User, Coins, LogOut, Menu, X, LayoutDashboard, ShieldCheck } from 'lucide-react';
+import { Search, User, LogOut, Menu, X, LayoutDashboard, ShieldCheck } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
+import { PointsChip } from '@/components/ui/Chip';
 
 export default function Navbar() {
   const { data: session, status } = useSession();
@@ -86,7 +87,7 @@ export default function Navbar() {
       <nav
         className={`fixed top-0 w-full z-50 px-4 sm:px-8 py-3 transition-all duration-500 ${
           isScrolled || isMobileMenuOpen
-            ? 'bg-[#141414]/96 backdrop-blur-sm shadow-lg shadow-black/50'
+            ? 'bg-md-surface/96 backdrop-blur-sm shadow-lg shadow-black/50'
             : 'bg-gradient-to-b from-black/80 via-black/40 to-transparent'
         }`}
       >
@@ -94,7 +95,7 @@ export default function Navbar() {
           {/* Left: Logo + Desktop links */}
           <div className="flex items-center gap-8">
             <Link href="/dashboard" className="text-xl font-black tracking-tight text-white flex-shrink-0">
-              <span className="text-emerald-400">Pontu</span>fy
+              <span className="text-md-primary-container">Pontu</span>fy
             </Link>
 
             <div className="hidden md:flex items-center gap-0.5">
@@ -104,7 +105,7 @@ export default function Navbar() {
                   href={link.href}
                   className={`px-3 py-1.5 text-sm font-medium transition-colors rounded-full ${
                     isActive(link.href)
-                      ? 'text-white font-bold bg-white/10'
+                      ? 'text-white font-bold bg-md-primary/20'
                       : 'text-gray-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
@@ -115,7 +116,7 @@ export default function Navbar() {
               {role === 'admin_rh' && (
                 <Link
                   href="/admin"
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold text-emerald-400 hover:text-emerald-300 transition-colors ml-1"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold text-md-secondary hover:text-md-secondary/80 transition-colors ml-1"
                 >
                   <LayoutDashboard size={14} />
                   Painel RH
@@ -135,13 +136,9 @@ export default function Navbar() {
 
           {/* Right: Actions */}
           <div className="flex items-center gap-2">
-            {/* Points badge */}
-            <Link
-              href="/wallet"
-              className="flex items-center gap-1.5 bg-emerald-500/15 border border-emerald-500/25 px-3 py-1.5 rounded-full hover:bg-emerald-500/25 transition-colors text-sm"
-            >
-              <Coins size={14} className="text-emerald-400" />
-              <span className="font-bold text-emerald-400">{pointsBalance}</span>
+            {/* Points badge (terciário #a1c0ae — padrão MD3 obrigatório) */}
+            <Link href="/wallet">
+              <PointsChip value={pointsBalance} />
             </Link>
 
             {/* Notification bell */}
@@ -162,7 +159,7 @@ export default function Navbar() {
                       setIsSearchOpen(false);
                     }
                   }}
-                  className="absolute right-8 w-64 px-4 py-1.5 rounded-full text-sm bg-[#1f1f1f] border border-[#3a3a3a] text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500"
+                  className="absolute right-8 w-64 px-4 py-1.5 rounded-full text-sm bg-md-surface-container border border-md-outline-variant text-white placeholder-gray-600 focus:outline-none focus:border-md-primary"
                 />
               )}
               <button
@@ -180,14 +177,14 @@ export default function Navbar() {
                 <button
                   type="button"
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center hover:bg-emerald-500 transition-colors text-white font-black text-sm"
+                  className="w-8 h-8 rounded-full bg-md-primary flex items-center justify-center hover:bg-md-primary-container transition-colors text-white font-black text-sm"
                 >
                   {session?.user?.name?.[0]?.toUpperCase() ?? <User size={16} />}
                 </button>
 
                 {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-[#1f1f1f] rounded-xl shadow-2xl border border-[#2a2a2a] py-1 overflow-hidden">
-                    <div className="px-4 py-3 border-b border-[#2a2a2a]">
+                  <div className="absolute right-0 mt-2 w-56 bg-md-surface-container rounded-xl shadow-2xl border border-md-outline py-1 overflow-hidden">
+                    <div className="px-4 py-3 border-b border-md-outline">
                       <p className="text-sm font-semibold text-white truncate">
                         {session?.user?.name}
                       </p>
@@ -235,7 +232,7 @@ export default function Navbar() {
             className="absolute inset-0 bg-black/60"
             onClick={() => setIsMobileMenuOpen(false)}
           />
-          <div className="absolute top-[57px] left-0 right-0 bg-[#141414] border-b border-[#2a2a2a] shadow-2xl">
+          <div className="absolute top-[57px] left-0 right-0 bg-md-surface border-b border-md-outline shadow-2xl">
             <div className="px-4 pt-3 pb-2">
               <div className="relative">
                 <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
@@ -250,7 +247,7 @@ export default function Navbar() {
                       setIsMobileMenuOpen(false);
                     }
                   }}
-                  className="w-full pl-9 pr-3 py-2 rounded-lg bg-[#1f1f1f] border border-[#2a2a2a] text-white placeholder-gray-600 text-sm focus:outline-none focus:border-emerald-500"
+                  className="w-full pl-9 pr-3 py-2 rounded-lg bg-md-surface-container border border-md-outline text-white placeholder-gray-600 text-sm focus:outline-none focus:border-md-primary"
                 />
               </div>
             </div>
@@ -273,7 +270,7 @@ export default function Navbar() {
               {role === 'admin_rh' && (
                 <Link
                   href="/admin"
-                  className="flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-bold text-emerald-400 mt-1"
+                  className="flex items-center gap-2 px-4 py-3 rounded-lg text-sm font-bold text-md-secondary mt-1"
                 >
                   <LayoutDashboard size={15} />
                   Painel RH
@@ -291,9 +288,9 @@ export default function Navbar() {
             </div>
 
             {status === 'authenticated' && (
-              <div className="border-t border-[#2a2a2a] px-4 py-3">
+              <div className="border-t border-md-outline px-4 py-3">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-9 h-9 rounded-full bg-emerald-600 flex items-center justify-center text-white font-black flex-shrink-0">
+                  <div className="w-9 h-9 rounded-full bg-md-primary flex items-center justify-center text-white font-black flex-shrink-0">
                     {session?.user?.name?.[0]?.toUpperCase() ?? <User size={16} />}
                   </div>
                   <div className="min-w-0">

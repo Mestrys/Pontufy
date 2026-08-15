@@ -28,7 +28,7 @@ export default function VideoPlayer({ lesson, onComplete }: VideoPlayerProps) {
         />
       ) : (
         <div className="flex-1 flex items-center justify-center relative overflow-hidden group">
-          <div className="absolute inset-0 bg-[#0a0a0a] flex items-center justify-center">
+          <div className="absolute inset-0 bg-md-surface-dim flex items-center justify-center">
             <div className="text-center">
               <h3 className="text-white text-2xl font-bold mb-2">{lesson.title}</h3>
               <p className="text-gray-500 text-sm">Área do Player de Vídeo</p>
@@ -39,7 +39,7 @@ export default function VideoPlayer({ lesson, onComplete }: VideoPlayerProps) {
             <div className="text-white text-sm">00:00 / {lesson.duration ?? '--:--'}</div>
             <button
               onClick={onComplete}
-              className="bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-1.5 px-4 rounded text-sm transition-colors"
+              className="bg-md-primary hover:bg-md-primary-container text-white font-bold py-1.5 px-4 rounded text-sm transition-colors"
             >
               Marcar como Concluída
             </button>

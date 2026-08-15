@@ -98,18 +98,18 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
 
   if (isLoading && !localCourse) {
     return (
-      <div className="flex items-center justify-center h-screen bg-[#0a0a0a]">
-        <Loader2 className="animate-spin text-emerald-500" size={36} />
+      <div className="flex items-center justify-center h-screen bg-md-surface-dim">
+        <Loader2 className="animate-spin text-md-primary" size={36} />
       </div>
     );
   }
 
   if (!course) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-[#0a0a0a] gap-4">
+      <div className="flex flex-col items-center justify-center h-screen bg-md-surface-dim gap-4">
         <BookOpen size={48} className="text-gray-700" />
         <p className="text-white text-lg font-bold">Curso não encontrado.</p>
-        <Link href="/dashboard" className="text-emerald-400 font-bold hover:text-emerald-300 transition-colors">
+        <Link href="/dashboard" className="text-md-primary-container font-bold hover:text-md-secondary transition-colors">
           ← Voltar ao Início
         </Link>
       </div>
@@ -140,9 +140,9 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
 
   if (!activeLesson) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-[#0a0a0a] gap-4">
+      <div className="flex flex-col items-center justify-center h-screen bg-md-surface-dim gap-4">
         <p className="text-white text-lg font-bold">Este curso não possui aulas.</p>
-        <Link href="/dashboard" className="text-emerald-400 font-bold hover:text-emerald-300 transition-colors">
+        <Link href="/dashboard" className="text-md-primary-container font-bold hover:text-md-secondary transition-colors">
           ← Voltar ao Início
         </Link>
       </div>
@@ -264,7 +264,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
   };
 
   return (
-    <div className="flex flex-col h-screen bg-[#0a0a0a] overflow-hidden">
+    <div className="flex flex-col h-screen bg-md-surface-dim overflow-hidden">
       <PointsCelebration
         points={celebrationPoints}
         isVisible={showCelebration}
@@ -286,7 +286,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
       />
 
       {/* Top bar (Udemy-style) */}
-      <div className="h-14 flex-shrink-0 bg-[#141414] border-b border-[#2a2a2a] flex items-center px-4 gap-4 z-40">
+      <div className="h-14 flex-shrink-0 bg-md-surface border-b border-md-outline flex items-center px-4 gap-4 z-40">
         <Link
           href="/dashboard"
           className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm font-medium"
@@ -294,7 +294,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
           <ArrowLeft size={18} />
           <span className="hidden sm:inline">Voltar</span>
         </Link>
-        <div className="h-5 w-px bg-[#2a2a2a]" />
+        <div className="h-5 w-px bg-md-outline" />
         <h1 className="text-sm font-bold text-white truncate flex-1">{course.title}</h1>
         <div className="text-xs text-gray-500 hidden sm:block">
           {completedCount}/{lessons.length} aulas
@@ -320,12 +320,12 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
 
           {/* CTA do Quiz / Certificado (rodapé do conteúdo) */}
           {allCompleted && (
-            <div className="flex-shrink-0 px-6 sm:px-10 py-6 border-t border-[#2a2a2a] bg-[#0f0f0f]">
+            <div className="flex-shrink-0 px-6 sm:px-10 py-6 border-t border-md-outline bg-md-surface-dim">
               {!passed ? (
                 <div className="max-w-4xl flex flex-wrap items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-amber-400/10 rounded-full flex items-center justify-center">
-                      <Trophy size={18} className="text-amber-400" />
+                    <div className="w-9 h-9 bg-md-tertiary/10 rounded-full flex items-center justify-center">
+                      <Trophy size={18} className="text-md-tertiary" />
                     </div>
                     <div>
                       <p className="text-sm font-bold text-white">Quiz final disponível!</p>
@@ -334,7 +334,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
                   </div>
                   <button
                     onClick={() => setQuizOpen(true)}
-                    className="px-6 py-3 rounded-lg font-bold text-sm bg-emerald-600 text-white hover:bg-emerald-500 transition-colors"
+                    className="px-6 py-3 rounded-lg font-bold text-sm bg-md-primary text-md-on-primary hover:bg-md-primary-container transition-colors"
                   >
                     Iniciar Quiz Final
                   </button>
@@ -342,8 +342,8 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
               ) : (
                 <div className="max-w-4xl flex flex-wrap items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-emerald-500/10 rounded-full flex items-center justify-center">
-                      <Award size={18} className="text-emerald-400" />
+                    <div className="w-9 h-9 bg-md-tertiary/10 rounded-full flex items-center justify-center">
+                      <Award size={18} className="text-md-tertiary" />
                     </div>
                     <div>
                       <p className="text-sm font-bold text-white">Curso concluído!</p>
@@ -353,7 +353,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
                   <button
                     onClick={handleDownloadCertificate}
                     disabled={isDownloading}
-                    className="flex items-center gap-2 px-6 py-3 rounded-lg font-bold text-sm bg-[#1f1f1f] text-white hover:bg-[#2a2a2a] border border-[#2a2a2a] disabled:opacity-50 transition-colors"
+                    className="flex items-center gap-2 px-6 py-3 rounded-lg font-bold text-sm bg-md-surface-container text-white hover:bg-md-surface-container-high border border-md-outline disabled:opacity-50 transition-colors"
                   >
                     {isDownloading ? (
                       <>
@@ -372,7 +372,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
         </div>
 
         {/* Sidebar (desktop) */}
-        <div className="hidden lg:flex w-[340px] xl:w-[380px] flex-shrink-0 border-l border-[#2a2a2a] flex-col">
+        <div className="hidden lg:flex w-[340px] xl:w-[380px] flex-shrink-0 border-l border-md-outline flex-col">
           <CourseSidebar
             lessons={lessons.map((l) => ({
               id: l.id,
@@ -396,7 +396,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
       </div>
 
       {/* Sidebar (mobile bottom sheet) */}
-      <div className="lg:hidden border-t border-[#2a2a2a] bg-[#141414] max-h-[40vh] overflow-hidden">
+      <div className="lg:hidden border-t border-md-outline bg-md-surface max-h-[40vh] overflow-hidden">
         <CourseSidebar
           lessons={lessons.map((l) => ({
             id: l.id,

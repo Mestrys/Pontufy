@@ -82,12 +82,12 @@ export default function Home() {
   const isLoading = loadingCourses || loadingEnrolled;
 
   return (
-    <main className="min-h-screen pb-20 bg-[#0a0a0a]">
+    <main className="min-h-screen pb-20 bg-md-surface-dim">
       <SurpriseRewardToast />
 
       {isLoading ? (
         <div className="flex items-center justify-center h-[60vh]">
-          <Loader2 className="animate-spin text-emerald-500" size={40} />
+          <Loader2 className="animate-spin text-md-primary" size={40} />
         </div>
       ) : (
         <>

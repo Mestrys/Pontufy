@@ -81,7 +81,7 @@ function MarkdownContent({ content }: { content: string }) {
     if (trimmed.startsWith('## ')) {
       flush();
       elements.push(
-        <h2 key={key++} className="text-xl font-bold text-white mt-8 mb-3 first:mt-0 border-b border-[#2a2a2a] pb-2">
+        <h2 key={key++} className="text-xl font-bold text-white mt-8 mb-3 first:mt-0 border-b border-md-outline pb-2">
           {formatInline(trimmed.slice(3))}
         </h2>,
       );
@@ -134,7 +134,7 @@ export default function LessonContent({
     <div className="flex flex-col flex-1 min-h-0">
       <div className="flex-1 overflow-y-auto">
         {/* Cabeçalho da aula */}
-        <div className="bg-[#141414] border-b border-[#2a2a2a] px-6 sm:px-10 py-6">
+        <div className="bg-md-surface border-b border-md-outline px-6 sm:px-10 py-6">
           <div className="flex items-center gap-2 text-gray-600 text-xs mb-2">
             <BookOpen size={13} />
             <span>Aula {lessonIndex} de {totalLessons}</span>
@@ -156,15 +156,15 @@ export default function LessonContent({
       </div>
 
       {/* Barra de navegação inferior */}
-      <div className="flex-shrink-0 px-6 sm:px-10 py-5 bg-[#141414] border-t border-[#2a2a2a]">
+      <div className="flex-shrink-0 px-6 sm:px-10 py-5 bg-md-surface border-t border-md-outline">
         <div className="flex flex-wrap items-center justify-between gap-3 max-w-4xl">
           <button
             onClick={() => onPrevious?.()}
             disabled={!onPrevious}
             className={`px-4 py-3 rounded-lg font-bold transition-all text-sm flex items-center gap-2 border ${
               onPrevious
-                ? 'border-[#2a2a2a] text-gray-300 hover:border-[#3a3a3a] hover:text-white'
-                : 'border-[#1f1f1f] text-gray-700 cursor-not-allowed'
+                ? 'border-md-outline text-gray-300 hover:border-md-outline-variant hover:text-white'
+                : 'border-md-outline text-gray-700 cursor-not-allowed'
             }`}
           >
             <ArrowLeft size={15} /> Aula Anterior
@@ -175,8 +175,8 @@ export default function LessonContent({
             disabled={completed || isCompleting}
             className={`px-6 py-3 rounded-lg font-bold transition-all text-sm flex items-center gap-2 ${
               completed
-                ? 'bg-[#1f1f1f] text-gray-600 cursor-not-allowed border border-[#2a2a2a]'
-                : 'bg-emerald-600 text-white hover:bg-emerald-500'
+                ? 'bg-md-surface-container text-gray-600 cursor-not-allowed border border-md-outline'
+                : 'bg-md-primary text-md-on-primary hover:bg-md-primary-container'
             }`}
           >
             {completed ? (
@@ -197,8 +197,8 @@ export default function LessonContent({
             disabled={!onNext}
             className={`px-4 py-3 rounded-lg font-bold transition-all text-sm flex items-center gap-2 ${
               onNext
-                ? 'bg-white text-black hover:bg-gray-200'
-                : 'bg-[#1f1f1f] text-gray-700 cursor-not-allowed border border-[#2a2a2a]'
+                ? 'bg-md-secondary text-md-on-secondary hover:bg-md-secondary/90'
+                : 'bg-md-surface-container text-gray-700 cursor-not-allowed border border-md-outline'
             }`}
           >
             Próxima Aula <ArrowRight size={15} />

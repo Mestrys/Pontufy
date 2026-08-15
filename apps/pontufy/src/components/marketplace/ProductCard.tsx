@@ -22,16 +22,16 @@ export default function ProductCard({ product, userPoints, onRedeem }: ProductCa
   const pointsMissing = price - userPoints;
 
   return (
-    <div className="bg-[#141414] border border-[#2a2a2a] rounded-xl overflow-hidden flex flex-col hover:border-[#3a3a3a] transition-all duration-200 group">
+    <div className="bg-md-surface border border-md-outline rounded-xl overflow-hidden flex flex-col hover:border-md-primary/40 transition-all duration-200 group">
       {/* Product Image */}
-      <div className="relative h-44 bg-[#1a1a1a] flex items-center justify-center p-4">
+      <div className="relative h-44 bg-md-surface-dim flex items-center justify-center p-4">
         <img
           src={product.imageUrl}
           alt={product.title}
           className="max-h-full max-w-full object-contain"
           loading="lazy"
         />
-        <div className="absolute top-3 left-3 bg-[#0a0a0a]/80 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+        <div className="absolute top-3 left-3 bg-md-on-surface/80 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] font-bold text-md-surface uppercase tracking-wider">
           {partner}
         </div>
       </div>
@@ -42,7 +42,7 @@ export default function ProductCard({ product, userPoints, onRedeem }: ProductCa
           {product.title}
         </h3>
 
-        <div className="flex items-center gap-1.5 text-amber-400 font-black text-base mb-4">
+        <div className="flex items-center gap-1.5 text-md-tertiary font-black text-base mb-4">
           <Coins size={16} />
           {price.toLocaleString('pt-BR')} pts
         </div>
@@ -50,7 +50,7 @@ export default function ProductCard({ product, userPoints, onRedeem }: ProductCa
         {canRedeem ? (
           <button
             onClick={() => onRedeem(product)}
-            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-full transition-colors flex items-center justify-center gap-2 text-sm"
+            className="w-full bg-md-primary hover:bg-md-primary-container text-md-on-primary font-bold py-2.5 rounded-full transition-colors flex items-center justify-center gap-2 text-sm"
           >
             <CheckCircle2 size={16} /> Resgatar
           </button>
@@ -58,14 +58,14 @@ export default function ProductCard({ product, userPoints, onRedeem }: ProductCa
           <div className="w-full flex flex-col gap-2">
             <button
               disabled
-              className="w-full bg-[#1f1f1f] text-gray-600 font-bold py-2.5 rounded-lg cursor-not-allowed flex items-center justify-center gap-2 text-sm border border-[#2a2a2a]"
+              className="w-full bg-md-surface-container text-gray-600 font-bold py-2.5 rounded-lg cursor-not-allowed flex items-center justify-center gap-2 text-sm border border-md-outline"
             >
               <Lock size={14} /> Resgatar
             </button>
             <div className="flex flex-col gap-1">
-              <div className="w-full h-1 bg-[#2a2a2a] rounded-full overflow-hidden">
+              <div className="w-full h-1 bg-md-outline rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-emerald-700 rounded-full"
+                  className="h-full bg-md-tertiary rounded-full"
                   style={{ width: `${progress}%` }}
                 />
               </div>

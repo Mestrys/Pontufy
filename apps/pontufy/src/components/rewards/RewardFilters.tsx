@@ -37,14 +37,14 @@ export function RewardFilters({
   }, [onSortChange]);
 
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 p-4 bg-[#141414] border border-[#2a2a2a] rounded-xl">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 p-4 bg-md-surface border border-md-outline rounded-xl">
       <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
         <button
           type="button"
           onClick={() => setIsCategoryOpen(!isCategoryOpen)}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
             selectedCategory
-              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+              ? 'bg-md-primary text-md-on-primary border border-md-primary'
               : 'bg-white/5 text-gray-300 border border-white/10 hover:bg-white/10'
           }`}
         >
@@ -54,12 +54,12 @@ export function RewardFilters({
         </button>
 
         {isCategoryOpen && (
-          <div className="absolute z-10 mt-2 bg-[#141414] border border-[#2a2a2a] rounded-lg shadow-xl py-1 min-w-[180px]">
+          <div className="absolute z-10 mt-2 bg-md-surface border border-md-outline rounded-lg shadow-xl py-1 min-w-[180px]">
             <button
               type="button"
               onClick={() => handleCategorySelect(null)}
               className={`w-full px-4 py-2 text-left text-sm transition-colors ${
-                !selectedCategory ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-300 hover:bg-white/5'
+                !selectedCategory ? 'bg-md-primary/15 text-md-primary-container' : 'text-gray-300 hover:bg-white/5'
               }`}
             >
               Todas
@@ -70,7 +70,7 @@ export function RewardFilters({
                 type="button"
                 onClick={() => handleCategorySelect(cat)}
                 className={`w-full px-4 py-2 text-left text-sm transition-colors ${
-                  selectedCategory === cat ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-300 hover:bg-white/5'
+                  selectedCategory === cat ? 'bg-md-primary/15 text-md-primary-container' : 'text-gray-300 hover:bg-white/5'
                 }`}
               >
                 {cat}
@@ -99,7 +99,7 @@ export function RewardFilters({
                 type="button"
                 onClick={() => handleSortSelect(opt.value)}
                 className={`w-full px-4 py-2 text-left text-sm transition-colors ${
-                  sortBy === opt.value ? 'bg-emerald-500/10 text-emerald-400' : 'text-gray-300 hover:bg-white/5'
+                  sortBy === opt.value ? 'bg-md-primary/15 text-md-primary-container' : 'text-gray-300 hover:bg-white/5'
                 }`}
               >
                 {opt.label}

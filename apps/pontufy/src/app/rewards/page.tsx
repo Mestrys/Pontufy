@@ -68,40 +68,40 @@ export default function RewardsPage() {
   }, [mutate]);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] pt-24 pb-12 px-4 sm:px-8">
+    <div className="min-h-screen bg-md-surface-dim pt-24 pb-12 px-4 sm:px-8">
       <div className="max-w-7xl mx-auto space-y-8">
         <header className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-                Clube de <span className="text-emerald-400">Benefícios</span>
+                Clube de <span className="text-md-primary-container">Benefícios</span>
               </h1>
               <p className="mt-2 text-gray-400 text-lg">
                 Troque seus pontos por recompensas exclusivas nos melhores parceiros.
               </p>
             </div>
-            <div className="flex items-center gap-3 bg-[#141414] border border-[#2a2a2a] rounded-xl px-5 py-3">
-              <Gift size={24} className="text-emerald-400" />
+            <div className="flex items-center gap-3 bg-md-surface border border-md-outline rounded-xl px-5 py-3">
+              <Gift size={24} className="text-md-tertiary" />
               <div className="text-right">
                 <p className="text-xs text-gray-500">Seu saldo</p>
-                <p className="text-2xl font-black text-emerald-400">{pointsBalance.toLocaleString('pt-BR')}</p>
+                <p className="text-2xl font-black text-md-tertiary">{pointsBalance.toLocaleString('pt-BR')}</p>
               </div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="bg-[#141414] border border-[#2a2a2a] rounded-xl p-4">
+            <div className="bg-md-surface border border-md-outline rounded-xl p-4">
               <p className="text-xs text-gray-500">Total de recompensas</p>
               <p className="text-2xl font-bold text-white">{totalRewards}</p>
             </div>
-            <div className="bg-[#141414] border border-[#2a2a2a] rounded-xl p-4">
+            <div className="bg-md-surface border border-md-outline rounded-xl p-4">
               <p className="text-xs text-gray-500">Categorias disponíveis</p>
               <p className="text-2xl font-bold text-white">{categories.length}</p>
             </div>
-            <div className="bg-[#141414] border border-emerald-500/20 rounded-xl p-4 relative overflow-hidden">
-              <Sparkles size={24} className="text-emerald-400 absolute top-2 right-2" />
+            <div className="bg-md-surface border border-md-highlight/30 rounded-xl p-4 relative overflow-hidden">
+              <Sparkles size={24} className="text-md-highlight absolute top-2 right-2" />
               <p className="text-xs text-gray-500">Parceiros premium</p>
-              <p className="text-2xl font-bold text-emerald-400">
+              <p className="text-2xl font-bold text-md-highlight">
                 {new Set(allRewards.map((r: Reward) => r.partnerStore)).size}
               </p>
             </div>
@@ -119,8 +119,8 @@ export default function RewardsPage() {
         {isLoading && page === 1 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="bg-[#141414] border border-[#2a2a2a] rounded-2xl overflow-hidden animate-pulse">
-                <div className="aspect-[4/3] bg-[#0a0a0a]" />
+              <div key={i} className="bg-md-surface border border-md-outline rounded-2xl overflow-hidden animate-pulse">
+                <div className="aspect-[4/3] bg-md-surface-dim" />
                 <div className="p-4 space-y-3">
                   <div className="h-4 bg-[#2a2a2a] rounded w-3/4" />
                   <div className="h-4 bg-[#2a2a2a] rounded w-1/2" />
@@ -144,7 +144,7 @@ export default function RewardsPage() {
             {category && (
               <button
                 onClick={() => setCategory(null)}
-                className="mt-4 text-emerald-400 hover:text-emerald-300 font-medium"
+                className="mt-4 text-md-primary-container hover:text-md-secondary font-medium"
               >
                 Limpar filtros
               </button>
@@ -169,7 +169,7 @@ export default function RewardsPage() {
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="px-4 py-2 rounded-lg bg-[#141414] border border-[#2a2a2a] text-gray-400 hover:text-white hover:border-emerald-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 rounded-lg bg-md-surface border border-md-outline text-gray-400 hover:text-white hover:border-md-primary/40 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Anterior
                 </button>
@@ -179,7 +179,7 @@ export default function RewardsPage() {
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className="px-4 py-2 rounded-lg bg-[#141414] border border-[#2a2a2a] text-gray-400 hover:text-white hover:border-emerald-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 rounded-lg bg-md-surface border border-md-outline text-gray-400 hover:text-white hover:border-md-primary/40 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Próxima
                 </button>

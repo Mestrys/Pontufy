@@ -36,8 +36,8 @@ export function RewardCard({
   if (!isActive) return null;
 
   return (
-    <article className="group relative bg-[#141414] border border-[#2a2a2a] rounded-2xl overflow-hidden transition-all duration-300 hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/10">
-      <div className="relative aspect-[4/3] overflow-hidden bg-[#0a0a0a]">
+    <article className="group relative bg-md-surface border border-md-outline rounded-2xl overflow-hidden transition-all duration-300 hover:border-md-primary/40 hover:shadow-lg hover:shadow-md-primary/10">
+      <div className="relative aspect-[4/3] overflow-hidden bg-md-surface-dim">
         {imageUrl ? (
           <Image
             src={imageUrl}
@@ -62,7 +62,7 @@ export function RewardCard({
 
         {category && (
           <div className="absolute bottom-3 left-3">
-            <span className="bg-emerald-500/20 backdrop-blur-sm text-emerald-400 text-xs font-medium px-2 py-1 rounded-full border border-emerald-500/30">
+            <span className="bg-md-tertiary/20 backdrop-blur-sm text-md-tertiary text-xs font-medium px-2 py-1 rounded-full border border-md-tertiary/30">
               {category}
             </span>
           </div>
@@ -70,14 +70,15 @@ export function RewardCard({
       </div>
 
       <div className="p-4 space-y-3">
-        <h3 className="font-semibold text-white text-base line-clamp-2 group-hover:text-emerald-400 transition-colors">
+        <h3 className="font-semibold text-white text-base line-clamp-2 group-hover:text-md-primary-container transition-colors">
           {title}
         </h3>
 
-        <div className="flex items-center justify-between pt-2 border-t border-[#2a2a2a]">
+        <div className="flex items-center justify-between pt-2 border-t border-md-outline">
+          {/* Badge de pontos — SEMPRE terciário (#a1c0ae), padrão MD3 obrigatório */}
           <div className="flex items-center gap-2">
-            <Gift size={16} className="text-emerald-400" />
-            <span className="font-bold text-emerald-400 text-lg">{pricePoints.toLocaleString('pt-BR')}</span>
+            <Gift size={16} className="text-md-tertiary" />
+            <span className="font-bold text-md-tertiary text-lg">{pricePoints.toLocaleString('pt-BR')}</span>
             <span className="text-gray-500 text-sm">pontos</span>
           </div>
 
@@ -86,7 +87,7 @@ export function RewardCard({
             disabled={!canAfford}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
               canAfford
-                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30 hover:border-emerald-500/50 active:scale-[0.98]'
+                ? 'bg-md-primary text-md-on-primary hover:bg-md-primary-container active:scale-[0.98]'
                 : 'bg-white/5 text-gray-500 border border-white/10 cursor-not-allowed'
             }`}
           >
@@ -106,7 +107,7 @@ export function RewardCard({
 
         <div className="flex items-center justify-between text-xs text-gray-500">
           <span>Saldo: <span className="font-medium text-white">{pointsBalance.toLocaleString('pt-BR')}</span> pts</span>
-          <span className={canAfford ? 'text-emerald-400' : 'text-red-400'}>
+          <span className={canAfford ? 'text-md-tertiary' : 'text-md-error'}>
             {canAfford ? `Novo saldo: ${(pointsBalance - pricePoints).toLocaleString('pt-BR')}` : `Faltam ${missingPoints.toLocaleString('pt-BR')}`}
           </span>
         </div>

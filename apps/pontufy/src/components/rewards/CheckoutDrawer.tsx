@@ -102,10 +102,10 @@ export function CheckoutDrawer({ isOpen, onClose, reward }: CheckoutDrawerProps)
           animate={{ x: 0 }}
           exit={{ x: '100%' }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-[#141414] border-l border-[#2a2a2a] shadow-2xl flex flex-col"
+          className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-md-surface border-l border-md-outline shadow-2xl flex flex-col"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="flex items-center justify-between p-4 border-b border-[#2a2a2a]">
+          <div className="flex items-center justify-between p-4 border-b border-md-outline">
             <h2 className="text-lg font-bold text-white">Resgatar Recompensa</h2>
             <button
               onClick={onClose}
@@ -141,16 +141,16 @@ export function CheckoutDrawer({ isOpen, onClose, reward }: CheckoutDrawerProps)
                     </div>
                   </div>
 
-                  <div className="bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl p-4 space-y-3">
+                  <div className="bg-md-surface-dim border border-md-outline rounded-xl p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-gray-400">Seu saldo atual</span>
-                      <span className="font-bold text-emerald-400 text-lg">{pointsBalance.toLocaleString('pt-BR')} pts</span>
+                      <span className="font-bold text-md-tertiary text-lg">{pointsBalance.toLocaleString('pt-BR')} pts</span>
                     </div>
-                    <div className="flex items-center justify-between text-emerald-400">
+                    <div className="flex items-center justify-between text-md-tertiary">
                       <span className="text-gray-400">Custo do resgate</span>
                       <span className="font-bold text-lg">{reward.pricePoints.toLocaleString('pt-BR')} pts</span>
                     </div>
-                    <div className="h-px bg-[#2a2a2a]" />
+                    <div className="h-px bg-md-outline" />
                     <div className="flex items-center justify-between text-white">
                       <span>Saldo projetado</span>
                       <span className="font-bold text-lg">{canAfford ? newBalance.toLocaleString('pt-BR') : '—'}</span>
@@ -172,7 +172,7 @@ export function CheckoutDrawer({ isOpen, onClose, reward }: CheckoutDrawerProps)
                     disabled={!canAfford}
                     className={`w-full py-3 rounded-xl font-semibold text-sm transition-all ${
                       canAfford
-                        ? 'bg-emerald-500 text-white hover:bg-emerald-400 active:scale-[0.98]'
+                        ? 'bg-md-primary text-md-on-primary hover:bg-md-primary-container active:scale-[0.98]'
                         : 'bg-white/5 text-gray-500 cursor-not-allowed'
                     }`}
                   >
@@ -193,7 +193,7 @@ export function CheckoutDrawer({ isOpen, onClose, reward }: CheckoutDrawerProps)
                   exit={{ opacity: 0, y: -20 }}
                   className="flex flex-col items-center justify-center py-12 space-y-4"
                 >
-                  <Loader2 size={48} className="text-emerald-400 animate-spin" />
+                  <Loader2 size={48} className="text-md-primary animate-spin" />
                   <h3 className="text-lg font-semibold text-white">Processando resgate...</h3>
                   <p className="text-gray-400 text-center px-4">
                     Debitando pontos e gerando seu link de acesso. Isso pode levar alguns segundos.
@@ -213,19 +213,19 @@ export function CheckoutDrawer({ isOpen, onClose, reward }: CheckoutDrawerProps)
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: 'spring', damping: 12, stiffness: 150 }}
-                    className="w-20 h-20 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center"
+                    className="w-20 h-20 rounded-full bg-md-tertiary/20 border border-md-tertiary/30 flex items-center justify-center"
                   >
-                    <CheckCircle size={36} className="text-emerald-400" />
+                    <CheckCircle size={36} className="text-md-tertiary" />
                   </motion.div>
                   <div className="space-y-1">
                     <h3 className="text-xl font-bold text-white">Resgate Concluído!</h3>
                     <p className="text-gray-400">{reward.pricePoints.toLocaleString('pt-BR')} pontos debitados com sucesso.</p>
                   </div>
 
-                  <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 w-full space-y-3">
+                  <div className="bg-md-tertiary/10 border border-md-tertiary/20 rounded-xl p-4 w-full space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-gray-400">Novo saldo</span>
-                      <span className="font-bold text-emerald-400 text-lg">{newBalance.toLocaleString('pt-BR')} pts</span>
+                      <span className="font-bold text-md-tertiary text-lg">{newBalance.toLocaleString('pt-BR')} pts</span>
                     </div>
                     <p className="text-sm text-gray-500">Seu voucher está pronto para uso no {partnerDisplay}.</p>
                   </div>

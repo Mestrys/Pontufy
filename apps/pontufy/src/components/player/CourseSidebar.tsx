@@ -46,9 +46,9 @@ export default function CourseSidebar({
   const firstIncompleteIndex = lessons.findIndex((l) => !l.completed);
 
   return (
-    <div className="w-full h-full bg-[#141414] flex flex-col overflow-hidden">
+    <div className="w-full h-full bg-md-surface flex flex-col overflow-hidden">
       {/* Header com colapso */}
-      <div className="p-4 border-b border-[#2a2a2a] flex-shrink-0">
+      <div className="p-4 border-b border-md-outline flex-shrink-0">
         <button
           onClick={() => setCollapsed((c) => !c)}
           className="w-full flex items-center justify-between"
@@ -62,11 +62,11 @@ export default function CourseSidebar({
         </button>
         <div className="flex items-center justify-between text-xs text-gray-500 mb-2 mt-3">
           <span>{completedCount}/{lessons.length} aulas</span>
-          <span className="text-emerald-400 font-bold">{progress}%</span>
+          <span className="text-md-tertiary font-bold">{progress}%</span>
         </div>
-        <div className="h-1 bg-[#2a2a2a] rounded-full overflow-hidden">
+        <div className="h-1 bg-md-outline rounded-full overflow-hidden">
           <div
-            className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+            className="h-full bg-md-tertiary rounded-full transition-all duration-500"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -85,19 +85,19 @@ export default function CourseSidebar({
                   key={lesson.id}
                   onClick={() => !locked && onLessonClick(lesson)}
                   disabled={locked}
-                  className={`w-full text-left p-4 flex gap-3 transition-colors border-b border-[#1f1f1f] ${
+                  className={`w-full text-left p-4 flex gap-3 transition-colors border-b border-md-outline ${
                     isActive
-                      ? 'bg-emerald-500/10 border-l-2 border-l-emerald-500'
-                      : 'hover:bg-[#1f1f1f] border-l-2 border-l-transparent'
+                      ? 'bg-md-primary/15 border-l-2 border-l-md-primary'
+                      : 'hover:bg-md-surface-container border-l-2 border-l-transparent'
                   } ${locked ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   <div className="mt-0.5 flex-shrink-0">
                     {lesson.completed ? (
-                      <CheckCircle2 size={17} className="text-emerald-500" />
+                      <CheckCircle2 size={17} className="text-md-tertiary" />
                     ) : locked ? (
                       <Lock size={17} className="text-gray-600" />
                     ) : isActive ? (
-                      <PlayCircle size={17} className="text-emerald-400" />
+                      <PlayCircle size={17} className="text-md-secondary" />
                     ) : (
                       <Circle size={17} className="text-gray-600" />
                     )}
@@ -112,7 +112,7 @@ export default function CourseSidebar({
                       {lesson.title}
                     </p>
                     {!lesson.completed && !locked && (
-                      <div className="flex items-center gap-1 mt-1 text-[10px] text-amber-400 font-bold">
+                      <div className="flex items-center gap-1 mt-1 text-[10px] text-md-tertiary font-bold">
                         <Coins size={10} /> +{lesson.points} pts
                       </div>
                     )}
@@ -123,16 +123,16 @@ export default function CourseSidebar({
           </div>
 
           {/* Trigger do Quiz Final */}
-          <div className="p-4 border-t border-[#2a2a2a] flex-shrink-0">
+          <div className="p-4 border-t border-md-outline flex-shrink-0">
             <button
               onClick={onOpenQuiz}
               disabled={!allCompleted}
               className={`w-full px-4 py-3 rounded-lg font-bold transition-all text-sm flex items-center justify-center gap-2 ${
                 quizPassed
-                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/40'
+                  ? 'bg-md-tertiary/10 text-md-tertiary border border-md-tertiary/40'
                   : allCompleted
-                    ? 'bg-emerald-600 text-white hover:bg-emerald-500'
-                    : 'bg-[#1f1f1f] text-gray-600 cursor-not-allowed border border-[#2a2a2a]'
+                    ? 'bg-md-primary text-md-on-primary hover:bg-md-primary-container'
+                    : 'bg-md-surface-container text-gray-600 cursor-not-allowed border border-md-outline'
               }`}
             >
               {quizPassed ? (

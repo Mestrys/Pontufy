@@ -7,8 +7,8 @@
  *   next/font em layout.tsx → --font-roboto), com fallback preparado para
  *   quando "Google Sans Flex"/"Google Sans" estiverem disponíveis.
  * - Shape scale M3: xs 4dp · sm 8dp · md/lg 12dp · xl 16dp · 2xl/3xl 28dp · full (pill)
- * - Elevação M3: níveis 1–5 mapeados nos tokens shadow-* do Tailwind
- * - Cores: paleta existente inalterada (bg #0a0a0a, surface #141414, accent emerald)
+ * - Elevação M3: níveis 0–5 (0dp = shadow-none) mapeados nos tokens shadow-* do Tailwind
+ * - Cores: paleta MD3 (tokens md-*) + dark surfaces; white-label via --brand-*
  */
 
 @theme {
@@ -18,6 +18,31 @@
      DynamicThemeProvider (nunca aceitar input do tenant sem sanitização). */
   --brand-primary: #10b981;
   --brand-accent: #8b5cf6;
+
+  /* ── MD3 palette Pontufy (tokens semânticos) ────────────────────────────────
+     Primary #5c4152 · Primary Container/Hover #b4585d · Secondary #d97f76
+     Tertiary (gamificação/pontos) #a1c0ae · Highlight/Autopilot #f7d0a9
+     on-* garantem contraste WCAG AA (texto em superfícies tonais). */
+  --color-md-primary: #5c4152;
+  --color-md-on-primary: #ffffff;
+  --color-md-primary-container: #b4585d;
+  --color-md-on-primary-container: #ffffff;
+  --color-md-secondary: #d97f76;
+  --color-md-on-secondary: #241011;
+  --color-md-tertiary: #a1c0ae;
+  --color-md-on-tertiary: #0d1f16;
+  --color-md-highlight: #f7d0a9;
+  --color-md-on-highlight: #3a2410;
+  --color-md-surface: #141414;
+  --color-md-surface-dim: #0a0a0a;
+  --color-md-surface-container: #1f1f1f;
+  --color-md-surface-container-high: #2a2a2a;
+  --color-md-surface-variant: #2a2a2a;
+  --color-md-on-surface: #e5e5e5;
+  --color-md-on-surface-variant: #a3a3a3;
+  --color-md-outline: #2a2a2a;
+  --color-md-outline-variant: #3a3a3a;
+  --color-md-error: #f87171;
 
   --color-brand-bg: #0a0a0a;
   --color-brand-surface: #141414;
@@ -42,8 +67,8 @@
   --radius-3xl: 1.75rem;
   --radius-4xl: 2rem;
 
-  /* M3 elevation levels 1–5 (umbra + penumbra) */
-  --shadow-2xs: 0 1px 2px 0 rgb(0 0 0 / 0.30);
+  /* M3 elevation levels 0–5 (umbra + penumbra); 0dp = `shadow-none` (MD3) */
+  --shadow-2xs: none;
   --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.30), 0 1px 3px 1px rgb(0 0 0 / 0.15);
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.30), 0 1px 3px 1px rgb(0 0 0 / 0.15);
   --shadow: 0 1px 2px 0 rgb(0 0 0 / 0.30), 0 1px 3px 1px rgb(0 0 0 / 0.15);
@@ -104,11 +129,11 @@
   .md-btn:active::after { opacity: 0.12; }
   .md-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  .md-btn-filled { background-color: #059669; color: #fff; }
-  .md-btn-filled:hover { box-shadow: var(--shadow-sm); }
-  .md-btn-tonal { background-color: rgb(16 185 129 / 0.15); color: #34d399; }
-  .md-btn-outlined { border: 1px solid #2a2a2a; color: #34d399; background: transparent; }
-  .md-btn-text { color: #34d399; background: transparent; padding-inline: 0.75rem; }
+  .md-btn-filled { background-color: #5c4152; color: #fff; }
+  .md-btn-filled:hover { background-color: #b4585d; box-shadow: var(--shadow-sm); }
+  .md-btn-tonal { background-color: rgb(217 127 118 / 0.15); color: #d97f76; }
+  .md-btn-outlined { border: 1px solid #2a2a2a; color: #b4585d; background: transparent; }
+  .md-btn-text { color: #b4585d; background: transparent; padding-inline: 0.75rem; }
 
   /* Cards M3 sobre a paleta atual */
   .md-card-elevated {
@@ -147,6 +172,16 @@
 
   .bg-gradient-pontufy {
     background: linear-gradient(135deg, var(--brand-primary, #10b981) 0%, #059669 100%);
+  }
+  /* Gradiente de marca (white-label). Antes referenciado por
+     SurpriseRewardToast e marketplace/CheckoutDrawer sem definição — agora
+     resolvido; falha silenciosa eliminada. */
+  .bg-gradient-brand {
+    background: linear-gradient(
+      135deg,
+      var(--brand-primary, #10b981) 0%,
+      var(--brand-accent, #8b5cf6) 100%
+    );
   }
   .text-gradient-pontufy {
     background-image: linear-gradient(135deg, var(--brand-primary, #10b981) 0%, var(--brand-accent, #8b5cf6) 100%);

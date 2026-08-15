@@ -26,11 +26,11 @@ export default function CourseRow({ title, courses }: { title: string; courses: 
                   <Play size={18} fill="black" strokeWidth={0} className="ml-0.5" />
                 </div>
               </div>
-              {/* Progress bar */}
+              {/* Progress bar (terciária — gamificação) */}
               {course.progress !== undefined && course.progress > 0 && (
                 <div className="absolute bottom-0 left-0 w-full h-[3px] bg-gray-700">
                   <div
-                    className="h-full bg-emerald-500"
+                    className="h-full bg-md-tertiary"
                     style={{ width: `${course.progress}%` }}
                   />
                 </div>
@@ -41,7 +41,7 @@ export default function CourseRow({ title, courses }: { title: string; courses: 
               <h3 className="text-xs sm:text-sm font-semibold text-gray-300 line-clamp-1 group-hover:text-white transition-colors">
                 {course.title}
               </h3>
-              <div className="flex items-center gap-1 mt-0.5 text-[11px] text-amber-400 font-bold">
+              <div className="flex items-center gap-1 mt-0.5 text-[11px] text-md-tertiary font-bold">
                 <Coins size={10} /> +{course.pointsReward} pts
               </div>
             </div>

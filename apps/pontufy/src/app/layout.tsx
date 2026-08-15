@@ -7,6 +7,13 @@ import OfflineBanner from "@/components/pwa/OfflineBanner";
 import DynamicThemeProvider from "@/components/theme/DynamicThemeProvider";
 import "./globals.css";
 
+// Tipografia Pontufy (MD3): Google Sans Flex é a família corporativa, mas NÃO
+// está publicada no Google Fonts nem licenciada para redistribuição local — o
+// carregamento seguro via `next/font/google` é impossível. Estratégia: Roboto
+// (webfont real, --font-roboto) entra no stack `--font-sans` do globals.css:
+//   "Google Sans Flex", "Google Sans", var(--font-roboto), "Roboto", sans-serif
+// Navegadores com Google Sans instalada localmente a usam; os demais caem em
+// Roboto com métricas visuais equivalentes (mesmo DNA tipográfico).
 const roboto = Roboto({
   variable: "--font-roboto",
   weight: ["300", "400", "500", "600", "700"],
@@ -46,7 +53,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${roboto.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${roboto.variable} ${geistMono.variable} font-sans h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-brand-gray">
         <AuthProvider>
