@@ -51,33 +51,56 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: 'Senha', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+        try {
+          if (!credentials?.email || !credentials?.password) return null;
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
-        });
+          const email = String(credentials.email).trim().toLowerCase();
 
-        if (!user || !user.passwordHash) return null;
+          let user = await prisma.user.findUnique({
+            where: { email },
+          });
 
-        const isValid = await verifyPassword(
-          credentials.password as string,
-          user.passwordHash,
-        );
+          // Fallback case-insensitive: PostgreSQL `=` é case-sensitive e dados
+          // legados podem conter emails com maiúsculas.
+          if (!user) {
+            user = await prisma.user.findFirst({
+              where: { email: { equals: email, mode: 'insensitive' } },
+            });
+          }
 
-        if (!isValid) return null;
+          if (!user || !user.passwordHash) {
+            console.warn(`[auth] Login recusado: usuário não encontrado (${email}).`);
+            return null;
+          }
 
-        // Super admins must originate from the @pontufy.com domain.
-        if (user.role === 'super_admin' && !user.email.endsWith('@pontufy.com')) {
+          const isValid = await verifyPassword(
+            credentials.password as string,
+            user.passwordHash,
+          );
+
+          if (!isValid) {
+            console.warn(`[auth] Login recusado: senha inválida (${email}).`);
+            return null;
+          }
+
+          // Super admins must originate from the @pontufy.com domain.
+          if (user.role === 'super_admin' && !user.email.endsWith('@pontufy.com')) {
+            console.warn(`[auth] Login recusado: super_admin fora do domínio @pontufy.com (${email}).`);
+            return null;
+          }
+
+          console.log(`[auth] Login OK: ${email} (${user.role}).`);
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            tenantId: user.tenantId,
+            role: user.role,
+          };
+        } catch (err) {
+          console.error('[auth] authorize error:', err);
           return null;
         }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          tenantId: user.tenantId,
-          role: user.role,
-        };
       },
     }),
   ],
