@@ -9,12 +9,17 @@ export async function GET() {
 
     const user = await db.user.findUnique({
       where: { id: userId },
-      select: { pointsBalance: true, name: true, role: true },
+      select: { pointsBalance: true, name: true, role: true, department: true },
+    });
+
+    const tenant = await db.tenant.findUnique({
+      where: { id: tenantId },
+      select: { name: true },
     });
 
     if (!user) return NextResponse.json({ error: 'Usuário não encontrado.' }, { status: 404 });
 
-    return NextResponse.json(user);
+    return NextResponse.json({ ...user, tenantName: tenant?.name });
   } catch {
     return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 });
   }

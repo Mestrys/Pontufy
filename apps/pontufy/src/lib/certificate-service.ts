@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { getTenantDb } from '@/backend/db';
-import { generateCertificatePdf } from './certificate-generator';
+import { generateCertificatePdf, computeCertificateSignature } from './certificate-generator';
+import { resolveBaseUrl } from '@/lib/email';
 
 // Serviço compartilhado de emissão de certificados (usado por
 // POST /api/certificates e POST /api/certificates/generate).
@@ -60,7 +61,7 @@ export async function issueCertificate(
     }
   }
 
-  const user = await db.user.findFirst({ where: { id: userId }, select: { name: true } });
+  const user = await db.user.findFirst({ where: { id: userId }, select: { name: true, email: true } });
   const tenant = await db.tenant.findFirst({ where: { id: tenantId }, select: { name: true } });
   if (!user || !tenant) {
     throw new CertificateError('Dados do usuário não encontrados.', 404);
@@ -80,28 +81,91 @@ export async function issueCertificate(
   // Hash estável entre reemissões: reutiliza o existente quando o certificado já existe.
   const existing = await db.issuedCertificate.findFirst({
     where: { userId, courseId },
-    select: { verificationHash: true },
+    select: { verificationHash: true, signature: true },
   });
   const verificationHash = existing?.verificationHash ?? randomUUID();
 
-  const certificate = await db.issuedCertificate.upsert({
-    where: { userId_courseId: { userId, courseId } },
-    update: { courseName: course.title, issuedAt: new Date(), verificationHash },
-    create: { userId, tenantId, courseId, courseName: course.title, verificationHash },
-  });
-
-  const buffer = generateCertificatePdf({
+  // Prepara dados para assinatura
+  const certData = {
     employeeName: user.name,
     courseName: course.title,
     tenantName: tenant.name,
     completionDate,
     workloadHours,
     lessonCount: lessonIds.length,
-    verificationHash: certificate.verificationHash ?? verificationHash,
+    verificationHash,
+  };
+  const signature = computeCertificateSignature(certData);
+
+  const certificate = await db.issuedCertificate.upsert({
+    where: { userId_courseId: { userId, courseId } },
+    update: { courseName: course.title, issuedAt: new Date(), verificationHash, signature },
+    create: { userId, tenantId, courseId, courseName: course.title, verificationHash, signature },
   });
+
+  const buffer = generateCertificatePdf({
+    ...certData,
+    signature,
+  });
+
+  // Envia email com certificado anexado (fire-and-forget)
+  const baseUrl = resolveBaseUrl();
+  const verifyUrl = `${baseUrl}/verify/${certificate.id}`;
+  sendCertificateEmail(user.name, tenant.name, course.title, completionDate, verifyUrl, buffer, user.email).catch(() => {});
 
   return {
     buffer,
     filename: `certificado-${course.title.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}.pdf`,
   };
+}
+
+async function sendCertificateEmail(
+  employeeName: string,
+  tenantName: string,
+  courseName: string,
+  completionDate: string,
+  verifyUrl: string,
+  pdfBuffer: Buffer<ArrayBuffer>,
+  toEmail: string,
+): Promise<void> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.log(`[DEV] Certificate email to ${toEmail}: ${courseName}`);
+    return;
+  }
+
+  const base64Pdf = Buffer.from(pdfBuffer).toString('base64');
+
+  await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: process.env.EMAIL_FROM || 'Pontufy <noreply@pontufy.com>',
+      to: toEmail,
+      subject: `🏆 Seu certificado: ${courseName}`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+          <h2 style="color: #10b981;">Pontufy</h2>
+          <p>Parabéns, <strong>${employeeName}</strong>!</p>
+          <p>Você concluiu o curso <strong>${courseName}</strong> na <strong>${tenantName}</strong>.</p>
+          <p>Data de conclusão: ${completionDate}</p>
+          <p>Seu certificado em PDF está anexado a este email.</p>
+          <p>Você também pode verificar a autenticidade online:</p>
+          <a href="${verifyUrl}" style="display: inline-block; padding: 12px 24px; background: #10b981; color: white; text-decoration: none; border-radius: 8px; font-weight: bold;">
+            Verificar certificado
+          </a>
+          <p style="color: #666; font-size: 12px; margin-top: 24px;">Equipe Pontufy</p>
+        </div>
+      `,
+      attachments: [
+        {
+          filename: `certificado-${courseName.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase()}.pdf`,
+          content: base64Pdf,
+        },
+      ],
+    }),
+  });
 }
