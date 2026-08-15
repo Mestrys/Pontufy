@@ -9,9 +9,14 @@ export const dynamic = 'force-dynamic'; // Prevent static caching for cron endpo
  */
 export async function GET(request: Request) {
   try {
-    // 1. Authenticate Cron Request (ensure it's from Vercel or an internal trigger)
+    // Validação: aceita Bearer token OU header x-vercel-cron do Vercel Cron
     const authHeader = request.headers.get('authorization');
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    const vercelCronHeader = request.headers.get('x-vercel-cron');
+    const isVercelCron = vercelCronHeader === '1';
+    const cronSecret = process.env.CRON_SECRET;
+    const isAuthorized = isVercelCron || (cronSecret && authHeader === `Bearer ${cronSecret}`);
+
+    if (!isAuthorized) {
       return new NextResponse('Unauthorized', { status: 401 });
     }
 

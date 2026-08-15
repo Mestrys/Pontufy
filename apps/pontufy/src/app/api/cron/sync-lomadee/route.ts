@@ -32,9 +32,13 @@ async function handleSync(request: Request): Promise<NextResponse> {
   const startedAt = Date.now();
 
   try {
-    // Validação de autorização
+    // Validação de autorização: aceita Bearer token OU header x-vercel-cron do Vercel Cron
     const authHeader = request.headers.get('authorization');
-    if (!CRON_SECRET || authHeader !== `Bearer ${CRON_SECRET}`) {
+    const vercelCronHeader = request.headers.get('x-vercel-cron');
+    const isVercelCron = vercelCronHeader === '1';
+    const isAuthorized = isVercelCron || (CRON_SECRET && authHeader === `Bearer ${CRON_SECRET}`);
+
+    if (!isAuthorized) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 

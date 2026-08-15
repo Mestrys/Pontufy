@@ -4,10 +4,14 @@ import { prisma } from '@/backend/db';
 const EXPIRY_MONTHS = 12;
 
 export async function GET(request: NextRequest) {
+  // Validação: aceita Bearer token OU header x-vercel-cron do Vercel Cron
   const authHeader = request.headers.get('authorization');
+  const vercelCronHeader = request.headers.get('x-vercel-cron');
+  const isVercelCron = vercelCronHeader === '1';
   const cronSecret = process.env.CRON_SECRET;
+  const isAuthorized = isVercelCron || (cronSecret && authHeader === `Bearer ${cronSecret}`);
 
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (!isAuthorized) {
     return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 });
   }
 
