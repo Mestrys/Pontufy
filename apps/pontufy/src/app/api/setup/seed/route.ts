@@ -33,12 +33,29 @@ export async function POST(request: Request) {
       },
     });
 
+    // Tenant de plataforma (obrigatório: User.tenantId é NOT NULL e o
+    // super_admin precisa estar fora do domínio do tenant, ver auth.ts).
+    const platformTenant = await prisma.tenant.upsert({
+      where: { id: 'tenant-pontufy-platform' },
+      update: {},
+      create: {
+        id: 'tenant-pontufy-platform',
+        name: 'Pontufy',
+        slug: 'pontufy-platform',
+        sector: 'tech',
+        contractStatus: 'active',
+        plan: 'enterprise',
+        aiCredits: 0,
+      },
+    });
+
+    // Mesmas contas do prisma/seed.ts (auto-seed do deploy) — nunca divida os
+    // dois seeds, ou o desbloqueio manual cria contas diferentes das testadas.
     const users = [
-      { id: 'user-admin-001', email: 'admin@empresaalpha.com', name: 'Maria Silva (RH)', role: 'admin_rh', points: 500 },
-      { id: 'user-admin-002', email: 'admin@alpha.com', name: 'Admin Alpha', role: 'admin_rh', points: 0 },
-      { id: 'user-emp-002', email: 'joao@empresaalpha.com', name: 'João Souza', role: 'employee', points: 1250 },
-      { id: 'user-emp-003', email: 'user@alpha.com', name: 'Employee Alpha', role: 'employee', points: 200 },
-      { id: 'user-guest-001', email: 'guest@alpha.com', name: 'Guest Alpha', role: 'guest', points: 0 },
+      { id: 'user-admin-001', email: 'admin@empresaalpha.com', name: 'Maria Silva (RH)', role: 'admin_rh', points: 0, tenantId: tenant.id },
+      { id: 'user-emp-002', email: 'joao@empresaalpha.com', name: 'João Souza', role: 'employee', points: 450, tenantId: tenant.id },
+      { id: 'user-guest-001', email: 'guest@empresaalpha.com', name: 'Convidado Alpha', role: 'guest', points: 0, tenantId: tenant.id },
+      { id: 'user-superadmin-001', email: 'superadmin@pontufy.com', name: 'Super Admin Pontufy', role: 'super_admin', points: 0, tenantId: platformTenant.id },
     ];
 
     const seededUsers: string[] = [];
@@ -49,7 +66,7 @@ export async function POST(request: Request) {
         update: { passwordHash: hash },
         create: {
           id: u.id,
-          tenantId: tenant.id,
+          tenantId: u.tenantId,
           name: u.name,
           email: u.email,
           role: u.role,
