@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server';
-import { randomBytes, scrypt } from 'crypto';
-import { promisify } from 'util';
+import { randomBytes } from 'crypto';
 import { prisma } from '@/backend/db';
+import { hashPassword } from '@/lib/crypto';
 import { sendPasswordResetEmail } from '@/lib/email';
 
-const scryptAsync = promisify(scrypt);
 const TOKEN_EXPIRY_HOURS = 1;
 
 export async function POST(request: Request) {
@@ -58,9 +57,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Token expirado ou inválido.' }, { status: 400 });
     }
 
-    const salt = randomBytes(16).toString('hex');
-    const buf = (await scryptAsync(newPassword, salt, 64)) as Buffer;
-    const passwordHash = `${salt}:${buf.toString('hex')}`;
+    const passwordHash = hashPassword(newPassword);
 
     await prisma.$transaction([
       prisma.user.update({ where: { id: reset.userId }, data: { passwordHash } }),

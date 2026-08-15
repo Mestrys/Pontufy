@@ -1,19 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type Stripe from 'stripe';
-import { randomBytes, scrypt } from 'crypto';
-import { promisify } from 'util';
+import { randomBytes } from 'crypto';
 import { prisma } from '@/backend/db';
+import { hashPassword } from '@/lib/crypto';
 import { logAudit } from '@/lib/audit';
 import { sendWelcomeEmail, sendPasswordResetEmail } from '@/lib/email';
 import { getStripe } from '@/lib/stripe';
-
-const scryptAsync = promisify(scrypt);
-
-async function hashPassword(password: string): Promise<string> {
-  const salt = randomBytes(16).toString('hex');
-  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${salt}:${buf.toString('hex')}`;
-}
 
 const DEFAULT_CREDITS: Record<string, number> = {
   starter: 50,
@@ -140,7 +132,7 @@ export async function POST(request: NextRequest) {
           });
         }
 
-        const unusablePassword = await hashPassword(randomBytes(32).toString('hex'));
+        const unusablePassword = hashPassword(randomBytes(32).toString('hex'));
         const aiCredits = DEFAULT_CREDITS[plan] || DEFAULT_CREDITS.starter;
         const setupToken = randomBytes(32).toString('hex');
         const setupExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);

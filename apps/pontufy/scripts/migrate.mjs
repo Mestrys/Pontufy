@@ -65,29 +65,13 @@ try {
 
 // Bootstrap idempotente: o pipeline de deploy NÃO roda o seed — se o banco está
 // vazio (sem usuários), nenhum login é possível ("Email ou senha incorretos").
-// Executa o seed de homologação APENAS quando a tabela de users está vazia;
-// nunca sobrescreve senhas de usuários existentes.
-function seedIfEmpty() {
-  try {
-    const count = execSync(
-      `node -e "const{PrismaClient}=require('@prisma/client');const p=new PrismaClient();p.user.count().then(c=>{console.log(c);return p.$disconnect()}).catch(e=>{console.error(e);process.exit(1)})"`,
-      { env, stdio: ['ignore', 'pipe', 'ignore'] },
-    )
-      .toString()
-      .trim();
-
-    if (Number(count) > 0) {
-      console.log(`🟢 ${count} usuário(s) existente(s) — seed ignorado (dados preservados).`);
-      return;
-    }
-
-    console.log('🟡 Nenhum usuário encontrado — executando seed de homologação...');
-    execSync('npx tsx prisma/seed.ts', { stdio: 'inherit', env });
-    console.log('🟢 Seed concluído — usuários de teste disponíveis (senha 123456).');
-  } catch (err) {
-    // Intentionally non-fatal: never block the deploy on a seed problem.
-    console.warn(`🟠 Auto-seed falhou (deploy continua): ${err?.message ?? err}`);
-  }
+// scripts/check-and-seed.ts roda SEMPRE (idempotente): valida conectividade,
+// faz upsert do tenant + utilizadores de teste (scrypt canónico, senha 123456)
+// e verifica cada hash com PASSED/FAILED. Nunca bloqueia o deploy em caso de
+// falha — apenas alerta, para que o `next build` prossiga.
+try {
+  execSync('npx tsx scripts/check-and-seed.ts', { stdio: 'inherit', env });
+} catch (err) {
+  // Intentionally non-fatal: never block the deploy on a seed problem.
+  console.warn(`🟠 Auto-seed falhou (deploy continua): ${err?.message ?? err}`);
 }
-
-seedIfEmpty();

@@ -1,28 +1,21 @@
 import { PrismaClient } from '@prisma/client';
-import { scrypt, randomBytes } from 'crypto';
-import { promisify } from 'util';
+import { hashPassword } from '../src/lib/crypto';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Seed idempotente de homologação — Pontufy
 // ───────────────────────────────────────────────────────────────────────────
 // - 100% idempotente: upserts por chaves únicas (email, slug, ids fixos).
 // - Senhas no padrão Pontufy: scrypt(salt, 64 bytes) → "salt:hash" (hex 64),
-//   exatamente o formato verificado em src/auth.ts (verifyPassword).
+//   geradas pelo módulo canónico src/lib/crypto.ts (o mesmo usado por
+//   src/auth.ts / verifyPassword em produção).
 // - Zero Trust: todo usuário criado tem tenantId explícito; o único usuário
 //   fora do domínio do tenant é o super_admin (@pontufy.com), alocado no
 //   tenant de plataforma "Pontufy" (User.tenantId é NOT NULL no schema).
 // ═══════════════════════════════════════════════════════════════════════════
 
 const prisma = new PrismaClient();
-const scryptAsync = promisify(scrypt);
 
 const DEFAULT_PASSWORD = '123456';
-
-async function hashPassword(password: string): Promise<string> {
-  const salt = randomBytes(16).toString('hex');
-  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${salt}:${buf.toString('hex')}`;
-}
 
 // ── Tenant de plataforma (super_admin) ────────────────────────────────────────
 const PLATFORM_TENANT = {
@@ -85,7 +78,7 @@ async function main() {
   console.log(`Tenant: ${platform.name} (${platform.slug}) — domínio super_admin`);
 
   // 2. Utilizadores de teste (upsert por email; senha padrão 123456)
-  const passwordHash = await hashPassword(DEFAULT_PASSWORD);
+  const passwordHash = hashPassword(DEFAULT_PASSWORD);
   const users = [
     {
       id: 'user-admin-001',

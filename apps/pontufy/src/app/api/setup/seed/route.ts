@@ -1,15 +1,6 @@
 import { NextResponse } from 'next/server';
-import { scrypt, randomBytes } from 'crypto';
-import { promisify } from 'util';
 import { prisma } from '@/backend/db';
-
-const scryptAsync = promisify(scrypt);
-
-async function hashPassword(password: string): Promise<string> {
-  const salt = randomBytes(16).toString('hex');
-  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${salt}:${buf.toString('hex')}`;
-}
+import { hashPassword } from '@/lib/crypto';
 
 export async function POST(request: Request) {
   const authHeader = request.headers.get('x-setup-secret');
@@ -60,7 +51,7 @@ export async function POST(request: Request) {
 
     const seededUsers: string[] = [];
     for (const u of users) {
-      const hash = await hashPassword('123456');
+      const hash = hashPassword('123456');
       await prisma.user.upsert({
         where: { email: u.email },
         update: { passwordHash: hash },

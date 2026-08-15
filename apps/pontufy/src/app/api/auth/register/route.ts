@@ -1,16 +1,7 @@
 import { NextResponse } from 'next/server';
-import { randomBytes, scrypt } from 'crypto';
-import { promisify } from 'util';
 import { prisma } from '@/backend/db';
+import { hashPassword } from '@/lib/crypto';
 import { sendWelcomeEmail } from '@/lib/email';
-
-const scryptAsync = promisify(scrypt);
-
-async function hashPassword(password: string): Promise<string> {
-  const salt = randomBytes(16).toString('hex');
-  const derived = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${salt}:${derived.toString('hex')}`;
-}
 
 export async function POST(request: Request) {
   try {
@@ -60,7 +51,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const passwordHash = await hashPassword(password);
+    const passwordHash = hashPassword(password);
 
     // Criação do utilizador + aceitação do convite: transação atómica.
     await prisma.$transaction([

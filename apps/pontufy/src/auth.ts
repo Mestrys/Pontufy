@@ -1,8 +1,8 @@
-import crypto from 'crypto';
 import NextAuth, { type DefaultSession } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from '@/backend/db';
 import { authConfig } from '@/auth.config';
+import { verifyPassword } from '@/lib/crypto';
 
 declare module 'next-auth' {
   interface Session {
@@ -19,27 +19,10 @@ declare module 'next-auth' {
   }
 }
 
-// Pontufy scrypt specification: `salt:hash` (hex), 16-byte salt, 64-byte key.
-// Matches prisma/seed.ts, register, forgot-password and every other hashing path.
-export async function hashPassword(password: string): Promise<string> {
-  const salt = crypto.randomBytes(16).toString('hex');
-  const hash = crypto.scryptSync(password, salt, 64).toString('hex');
-  return `${salt}:${hash}`;
-}
-
-export async function verifyPassword(password: string, storedHash: string): Promise<boolean> {
-  try {
-    if (!storedHash || !storedHash.includes(':')) return false;
-    const [salt, key] = storedHash.split(':');
-    if (!salt || !key) return false;
-    const keyBuffer = Buffer.from(key, 'hex');
-    const derivedKey = crypto.scryptSync(password, salt, 64);
-    return crypto.timingSafeEqual(keyBuffer, derivedKey);
-  } catch (err) {
-    console.error('[Crypto Error]:', err);
-    return false;
-  }
-}
+// ═══════════════════════════════════════════════════════════════════════════
+// auth.ts — configuração Node.js Runtime (único lugar autorizado a importar
+// Prisma e crypto). auth.config.ts permanece Edge-safe (proxy/middleware).
+// ═══════════════════════════════════════════════════════════════════════════
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -73,7 +56,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             return null;
           }
 
-          const isValid = await verifyPassword(
+          const isValid = verifyPassword(
             credentials.password as string,
             user.passwordHash,
           );

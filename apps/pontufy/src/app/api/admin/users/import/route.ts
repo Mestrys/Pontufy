@@ -1,17 +1,9 @@
 import { NextResponse } from 'next/server';
-import { randomBytes, scrypt } from 'crypto';
-import { promisify } from 'util';
+import { randomBytes } from 'crypto';
 import { getSessionContext } from '@/backend/session';
 import { getTenantDb, prisma } from '@/backend/db';
+import { hashPassword } from '@/lib/crypto';
 import { logAudit, extractRequestMeta } from '@/lib/audit';
-
-const scryptAsync = promisify(scrypt);
-
-async function hashPassword(password: string): Promise<string> {
-  const salt = randomBytes(16).toString('hex');
-  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${salt}:${buf.toString('hex')}`;
-}
 
 function parseCSV(text: string): { name: string; email: string }[] {
   const lines = text.split(/\r?\n/).filter((l) => l.trim());
@@ -85,7 +77,7 @@ export async function POST(request: Request) {
         // Each user gets a UNIQUE, unguessable, unusable password hash. They set
         // a real password via the "forgot password" flow (emailed reset link),
         // so no shared/plaintext credential is ever issued or exposed.
-        const passwordHash = await hashPassword(randomBytes(32).toString('hex'));
+        const passwordHash = hashPassword(randomBytes(32).toString('hex'));
         // tenantId comes from the authenticated session (never the file/body);
         // the Zero Trust interceptor re-forces it at runtime regardless.
         await db.user.create({
