@@ -14,26 +14,13 @@ import { getTenantDb } from '@/backend/db';
 import { rateLimitCheck } from '@/lib/redis';
 
 // ─── Content types ────────────────────────────────────────────────────────────
+// Defined in src/lib/course-types.ts (no 'use server') so client components
+// can import them without triggering Next.js 'use server' module restrictions.
 
-export const CONTENT_TYPES = [
-  'text',
-  'video',
-  'podcast',
-  'slides',
-  'quiz_interativo',
-  'escrita_expressa',
-] as const;
-
-export type ContentType = (typeof CONTENT_TYPES)[number];
-
-export const CONTENT_TYPE_LABELS: Record<ContentType, string> = {
-  text: 'Texto / Artigo',
-  video: 'Roteiro de Vídeo',
-  podcast: 'Roteiro de Podcast',
-  slides: 'Apresentação de Slides',
-  quiz_interativo: 'Quiz Interativo',
-  escrita_expressa: 'Escrita Expressa',
-};
+export type { ContentType } from '@/lib/course-types';
+export { CONTENT_TYPES, CONTENT_TYPE_LABELS } from '@/lib/course-types';
+import type { ContentType } from '@/lib/course-types';
+import { CONTENT_TYPES, CONTENT_TYPE_LABELS } from '@/lib/course-types';
 
 // ─── Base lesson schema (common to all types) ─────────────────────────────────
 

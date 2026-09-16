@@ -6,8 +6,10 @@ import {
   Upload, X, FileText, AlertTriangle, Zap,
   Video, Mic, LayoutTemplate, HelpCircle, PenLine, BookOpen,
 } from 'lucide-react';
-import { generateTrainingCourse, checkAIProviders, CONTENT_TYPE_LABELS } from '@/actions/course-generator';
-import type { GenerateTrainingResult, ContentType } from '@/actions/course-generator';
+import { generateTrainingCourse, checkAIProviders } from '@/actions/course-generator';
+import type { GenerateTrainingResult } from '@/actions/course-generator';
+import { CONTENT_TYPE_LABELS } from '@/lib/course-types';
+import type { ContentType } from '@/lib/course-types';
 import { saveCourse } from '@/lib/local-courses';
 import { mutate } from 'swr';
 
