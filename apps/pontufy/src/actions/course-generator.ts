@@ -455,7 +455,7 @@ const inputSchema = z.object({
     .min(10, 'Descreva o objetivo do treinamento (mínimo de 10 caracteres).')
     .max(2000),
   sector: z.string().max(60).optional(),
-  contentType: z.enum(CONTENT_TYPES).optional().default('text'),
+  contentType: z.enum(CONTENT_TYPES).optional(),
   referenceContent: z.string().max(60000).optional(),
 });
 
