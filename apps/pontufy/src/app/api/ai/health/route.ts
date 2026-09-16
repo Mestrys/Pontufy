@@ -9,7 +9,7 @@ async function pingGemini(): Promise<{ ok: boolean; latencyMs: number; error?: s
   try {
     const ai = getGeminiClient();
     const res = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.5-flash-lite',
       contents: PING_PROMPT,
     });
     const text = res.text?.trim();

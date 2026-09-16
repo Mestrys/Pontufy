@@ -1,9 +1,13 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Sparkles, CheckCircle, ChevronRight, ArrowLeft, AlertCircle, Upload, X, FileText, AlertTriangle, Zap } from 'lucide-react';
-import { generateTrainingCourse, checkAIProviders } from '@/actions/course-generator';
-import type { GenerateTrainingResult } from '@/actions/course-generator';
+import {
+  Sparkles, CheckCircle, ChevronRight, ArrowLeft, AlertCircle,
+  Upload, X, FileText, AlertTriangle, Zap,
+  Video, Mic, LayoutTemplate, HelpCircle, PenLine, BookOpen,
+} from 'lucide-react';
+import { generateTrainingCourse, checkAIProviders, CONTENT_TYPE_LABELS } from '@/actions/course-generator';
+import type { GenerateTrainingResult, ContentType } from '@/actions/course-generator';
 import { saveCourse } from '@/lib/local-courses';
 import { mutate } from 'swr';
 
@@ -23,12 +27,50 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
 }
 
+const CONTENT_TYPE_CONFIG: Record<ContentType, {
+  icon: React.ReactNode;
+  description: string;
+  badge: string;
+}> = {
+  text: {
+    icon: <BookOpen size={20} />,
+    description: 'Artigos educacionais ricos em Markdown',
+    badge: 'Mais popular',
+  },
+  video: {
+    icon: <Video size={20} />,
+    description: 'Roteiros completos prontos para gravação',
+    badge: 'Engajamento alto',
+  },
+  podcast: {
+    icon: <Mic size={20} />,
+    description: 'Episódios com diálogos e dicas de produção',
+    badge: 'Fácil de consumir',
+  },
+  slides: {
+    icon: <LayoutTemplate size={20} />,
+    description: 'Estrutura de slides com notas do apresentador',
+    badge: 'Presencial / EAD',
+  },
+  quiz_interativo: {
+    icon: <HelpCircle size={20} />,
+    description: 'Questões situacionais com explicações detalhadas',
+    badge: 'Avaliação',
+  },
+  escrita_expressa: {
+    icon: <PenLine size={20} />,
+    description: 'Desafios de escrita com rubrica de avaliação',
+    badge: 'Habilidades soft',
+  },
+};
+
 export default function AIWizard() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState(1);
   const [prompt, setPrompt] = useState('');
   const [sector, setSector] = useState('tech');
+  const [contentType, setContentType] = useState<ContentType>('text');
   const [error, setError] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [dragOver, setDragOver] = useState(false);
@@ -52,19 +94,25 @@ export default function AIWizard() {
     health: 'Saúde e Bem-Estar',
     retail: 'Varejo e Vendas',
     industry: 'Indústria e Manufatura',
+    finance: 'Financeiro e Contabilidade',
+    education: 'Educação e Treinamento',
+    logistics: 'Logística e Supply Chain',
+    hr: 'Recursos Humanos',
+    legal: 'Jurídico e Compliance',
+    other: 'Outro',
   };
 
   const checklistItems = files.length > 0
     ? [
         'Processando materiais de referência...',
         'Enviando prompt para a IA...',
-        'Estruturando módulos de ensino...',
+        `Estruturando ${CONTENT_TYPE_LABELS[contentType].toLowerCase()}...`,
         'Calibrando distribuição de recompensas (pts)...',
         'Finalizando formatação...',
       ]
     : [
         'Enviando prompt para a IA...',
-        'Estruturando módulos de ensino...',
+        `Estruturando ${CONTENT_TYPE_LABELS[contentType].toLowerCase()}...`,
         'Calibrando distribuição de recompensas (pts)...',
         'Finalizando formatação...',
       ];
@@ -133,6 +181,7 @@ export default function AIWizard() {
       const res = await generateTrainingCourse({
         prompt,
         sector: sectorLabels[sector] ?? sector,
+        contentType,
         referenceContent: referenceContent || undefined,
       });
 
@@ -198,12 +247,12 @@ export default function AIWizard() {
             <div className="flex items-start gap-3 text-amber-800">
               <AlertTriangle size={20} className="flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-bold">Motor de IA nao configurado</p>
+                <p className="text-sm font-bold">Motor de IA não configurado</p>
                 <p className="text-sm mt-1">
-                  Nenhuma chave de API de IA esta configurada. Os cursos serao gerados com um <strong>template basico</strong>.
+                  Nenhuma chave de API de IA está configurada. Os cursos serão gerados com um <strong>template básico</strong>.
                 </p>
                 <p className="text-sm mt-2 font-medium">
-                  Para geracao inteligente, configure no Vercel (Settings → Environment Variables):
+                  Para geração inteligente, configure no Vercel (Settings → Environment Variables):
                 </p>
                 <ul className="text-sm mt-1 space-y-1 ml-4 list-disc">
                   <li><code className="bg-amber-100 px-1 rounded text-xs">GEMINI_API_KEY</code> — Gratuito em aistudio.google.com</li>
@@ -211,11 +260,11 @@ export default function AIWizard() {
                   <li><code className="bg-amber-100 px-1 rounded text-xs">ANTHROPIC_API_KEY</code> — console.anthropic.com</li>
                 </ul>
                 <p className="text-xs mt-3 text-amber-600 font-medium">
-                  Importante: Configure a variavel para TODOS os ambientes (Production, Preview e Development) no Vercel.
+                  Importante: Configure a variável para TODOS os ambientes (Production, Preview e Development) no Vercel.
                 </p>
                 {providerStatus.diagnostics && (
                   <details className="mt-2">
-                    <summary className="cursor-pointer text-xs font-medium text-amber-700">Diagnostico do servidor</summary>
+                    <summary className="cursor-pointer text-xs font-medium text-amber-700">Diagnóstico do servidor</summary>
                     <ul className="mt-1 space-y-0.5 text-xs text-amber-600">
                       {Object.entries(providerStatus.diagnostics).map(([k, v]) => (
                         <li key={k}><strong>{k}:</strong> {v}</li>
@@ -245,37 +294,90 @@ export default function AIWizard() {
         )}
 
         <div className="space-y-6">
+          {/* Tipo de Conteúdo */}
+          <div>
+            <label className="block text-sm font-bold text-brand-slate mb-3">
+              Formato do Conteúdo
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {(Object.entries(CONTENT_TYPE_CONFIG) as [ContentType, typeof CONTENT_TYPE_CONFIG[ContentType]][]).map(([type, cfg]) => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => setContentType(type)}
+                  className={`relative flex flex-col items-start gap-1.5 p-3 rounded-lg border-2 text-left transition-all ${
+                    contentType === type
+                      ? 'border-emerald-400 bg-emerald-50'
+                      : 'border-gray-200 hover:border-emerald-200 hover:bg-gray-50'
+                  }`}
+                >
+                  {contentType === type && (
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500" />
+                  )}
+                  <span className={contentType === type ? 'text-emerald-600' : 'text-gray-400'}>
+                    {cfg.icon}
+                  </span>
+                  <span className={`text-xs font-bold leading-tight ${contentType === type ? 'text-emerald-800' : 'text-brand-slate'}`}>
+                    {CONTENT_TYPE_LABELS[type]}
+                  </span>
+                  <span className="text-xs text-gray-400 leading-tight">{cfg.description}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Setor */}
           <div>
             <label className="block text-sm font-bold text-brand-slate mb-2">
-              Setor/Vertical de Atua&ccedil;&atilde;o
+              Setor/Vertical de Atuação
             </label>
             <select
               value={sector}
               onChange={(e) => setSector(e.target.value)}
               className="w-full bg-gray-50 border border-gray-200 text-brand-slate rounded-lg p-3 outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all"
             >
-              <option value="tech">Tecnologia e Inova&ccedil;&atilde;o</option>
-              <option value="health">Sa&uacute;de e Bem-Estar</option>
+              <option value="tech">Tecnologia e Inovação</option>
+              <option value="health">Saúde e Bem-Estar</option>
               <option value="retail">Varejo e Vendas</option>
-              <option value="industry">Ind&uacute;stria e Manufatura</option>
+              <option value="industry">Indústria e Manufatura</option>
+              <option value="finance">Financeiro e Contabilidade</option>
+              <option value="education">Educação e Treinamento</option>
+              <option value="logistics">Logística e Supply Chain</option>
+              <option value="hr">Recursos Humanos</option>
+              <option value="legal">Jurídico e Compliance</option>
+              <option value="other">Outro</option>
             </select>
           </div>
 
+          {/* Prompt */}
           <div>
             <label className="block text-sm font-bold text-brand-slate mb-2">
-              O que voc&ecirc; deseja ensinar?
+              O que você deseja ensinar?
             </label>
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               className="w-full h-32 bg-gray-50 border border-gray-200 text-brand-slate rounded-lg p-3 outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-all resize-none"
-              placeholder="Ex: Crie um treinamento de LGPD focado na equipe de atendimento ao cliente, com foco prático em proteção de dados e cenários de call center..."
+              placeholder={
+                contentType === 'video'
+                  ? 'Ex: Roteiro de vídeo sobre boas práticas de atendimento ao cliente para equipes de varejo...'
+                  : contentType === 'podcast'
+                  ? 'Ex: Episódio de podcast sobre liderança situacional para gestores de equipes remotas...'
+                  : contentType === 'slides'
+                  ? 'Ex: Apresentação sobre gestão de conflitos para coordenadores de RH...'
+                  : contentType === 'quiz_interativo'
+                  ? 'Ex: Quiz sobre segurança da informação e LGPD para equipe de TI...'
+                  : contentType === 'escrita_expressa'
+                  ? 'Ex: Exercícios de escrita para relatórios gerenciais destinados a analistas sênior...'
+                  : 'Ex: Crie um treinamento de LGPD focado na equipe de atendimento, com foco prático em proteção de dados...'
+              }
             />
           </div>
 
+          {/* Material de Referência */}
           <div>
             <label className="block text-sm font-bold text-brand-slate mb-2">
-              Material de Refer&ecirc;ncia <span className="text-brand-text font-normal">(opcional)</span>
+              Material de Referência <span className="text-brand-text font-normal">(opcional)</span>
             </label>
             <div
               onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
@@ -305,7 +407,7 @@ export default function AIWizard() {
                 Arraste arquivos aqui ou <span className="text-emerald-600 font-semibold">clique para selecionar</span>
               </p>
               <p className="text-xs text-gray-400 mt-1">
-                PDF, Word, TXT, PowerPoint, Excel, MD, MP4, MP3 — at&eacute; {MAX_FILES} arquivos, 10MB cada
+                PDF, Word, TXT, PowerPoint, Excel, MD, MP4, MP3 — até {MAX_FILES} arquivos, 10MB cada
               </p>
             </div>
 
@@ -329,11 +431,17 @@ export default function AIWizard() {
             )}
           </div>
 
+          {/* Footer */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-4 border-t border-gray-100">
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-brand-text">Custo da opera&ccedil;&atilde;o:</span>
+            <div className="flex items-center gap-3 text-sm flex-wrap">
+              <span className="text-brand-text">Custo da operação:</span>
               <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">
-                1 Cr&eacute;dito de IA
+                1 Crédito de IA
+              </span>
+              <span className="text-gray-300">·</span>
+              <span className="text-brand-text">Formato:</span>
+              <span className="font-bold text-brand-slate">
+                {CONTENT_TYPE_LABELS[contentType]}
               </span>
             </div>
 
@@ -359,8 +467,9 @@ export default function AIWizard() {
         <div className="w-16 h-16 bg-gradient-pontufy rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-100 animate-pulse">
           <Sparkles className="text-emerald-900" size={32} />
         </div>
-        <h2 className="text-2xl font-black text-brand-slate mb-2">A IA est&aacute; trabalhando...</h2>
-        <p className="text-brand-text mb-10">Isso pode levar at&eacute; 30 segundos.</p>
+        <h2 className="text-2xl font-black text-brand-slate mb-2">A IA está trabalhando...</h2>
+        <p className="text-brand-text mb-2">Gerando: <strong>{CONTENT_TYPE_LABELS[contentType]}</strong></p>
+        <p className="text-brand-text mb-10">Isso pode levar até 30 segundos.</p>
 
         <div className="w-full max-w-xl mx-auto h-2 bg-gray-100 rounded-full overflow-hidden mb-8">
           <div
@@ -401,6 +510,7 @@ export default function AIWizard() {
   if (step === 3 && result) {
     const lessons = result.course.lessons;
     const isTemplate = result.provider.startsWith('local:');
+    const typeLabel = CONTENT_TYPE_LABELS[result.course.contentType ?? 'text'];
 
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 animate-[fadeIn_0.3s_ease-out]">
@@ -430,9 +540,9 @@ export default function AIWizard() {
           <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3 text-amber-800">
             <AlertTriangle size={18} className="flex-shrink-0 mt-0.5" />
             <div className="text-sm">
-              <p className="font-bold">Conteudo gerado por template</p>
+              <p className="font-bold">Conteúdo gerado por template</p>
               <p className="mt-1">
-                Este curso foi criado com um modelo basico porque nenhuma IA esta configurada ou todos os provedores falharam.
+                Este curso foi criado com um modelo básico porque nenhuma IA está configurada ou todos os provedores falharam.
                 Para cursos personalizados e inteligentes, configure uma <code className="bg-amber-100 px-1 rounded text-xs">GEMINI_API_KEY</code> no Vercel.
               </p>
               {result.aiErrors && result.aiErrors.length > 0 && (
@@ -449,7 +559,10 @@ export default function AIWizard() {
 
         <div className="flex flex-wrap items-center gap-3 mb-6 text-sm">
           <span className="bg-emerald-50 text-emerald-700 font-bold px-3 py-1 rounded-full">
-            {result.lessonsCount} aulas
+            {result.lessonsCount} módulos
+          </span>
+          <span className="bg-blue-50 text-blue-700 font-medium px-3 py-1 rounded-full">
+            {typeLabel}
           </span>
           <span className={`font-medium px-3 py-1 rounded-full ${
             isTemplate ? 'bg-amber-50 text-amber-700' : 'bg-emerald-50 text-emerald-700'
@@ -457,7 +570,7 @@ export default function AIWizard() {
             {isTemplate ? 'Template local' : `IA: ${result.provider}`}
           </span>
           <span className="bg-gray-100 text-brand-text font-medium px-3 py-1 rounded-full">
-            Cr&eacute;ditos restantes: {result.creditsRemaining}
+            Créditos restantes: {result.creditsRemaining}
           </span>
           {!result.persisted && (
             <span className="bg-amber-50 text-amber-700 font-medium px-3 py-1 rounded-full">
@@ -484,9 +597,7 @@ export default function AIWizard() {
 
         <div className="flex justify-end">
           <button
-            onClick={() => {
-              window.location.href = '/admin';
-            }}
+            onClick={() => { window.location.href = '/admin'; }}
             className="flex items-center gap-2 bg-gradient-pontufy text-emerald-900 font-bold px-8 py-3 rounded-full shadow-sm hover:shadow-md hover:scale-[1.02] transition-all"
           >
             Voltar ao Painel
