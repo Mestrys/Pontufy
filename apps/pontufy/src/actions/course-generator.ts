@@ -13,12 +13,6 @@ import { auth } from '@/auth';
 import { getTenantDb } from '@/backend/db';
 import { rateLimitCheck } from '@/lib/redis';
 
-// ─── Content types ────────────────────────────────────────────────────────────
-// Defined in src/lib/course-types.ts (no 'use server') so client components
-// can import them without triggering Next.js 'use server' module restrictions.
-
-export type { ContentType } from '@/lib/course-types';
-export { CONTENT_TYPES, CONTENT_TYPE_LABELS } from '@/lib/course-types';
 import type { ContentType } from '@/lib/course-types';
 import { CONTENT_TYPES, CONTENT_TYPE_LABELS } from '@/lib/course-types';
 
