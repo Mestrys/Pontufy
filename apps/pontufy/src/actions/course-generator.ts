@@ -122,6 +122,9 @@ const quizQuestionSchema = z.object({
     .int()
     .min(0)
     .describe('Índice (0-based) da opção correta.'),
+}).refine((q) => q.correctIndex < q.options.length, {
+  message: 'correctIndex deve ser menor que o número de opções.',
+  path: ['correctIndex'],
 });
 
 // ─── Course schema factory ────────────────────────────────────────────────────
@@ -235,7 +238,7 @@ const SYSTEM_PROMPTS: Record<ContentType, string> = {
 function toDbLessonType(contentType: ContentType): string {
   const map: Record<ContentType, string> = {
     text: 'text',
-    video: 'video',
+    video: 'text',   // roteiro em texto; o player trata 'video' como URL de mídia
     podcast: 'text', // stored as text (script), rendered as audio player when URL present
     slides: 'text',  // stored as text (structure)
     quiz_interativo: 'text',
@@ -254,7 +257,6 @@ function generateLocalFallback(
 ): GeneratedCourse {
   const sectorName = sector || 'geral';
   const topic = prompt.slice(0, 80);
-  const typeLabel = CONTENT_TYPE_LABELS[contentType];
 
   if (referenceContent && referenceContent.length > 50) {
     const paragraphs = referenceContent
@@ -291,7 +293,7 @@ function generateLocalFallback(
     });
 
     return {
-      courseTitle: `${typeLabel}: ${prompt.slice(0, 60)}`,
+      courseTitle: prompt.slice(0, 60),
       courseDescription: `Curso baseado no material de referência fornecido sobre "${prompt.slice(0, 100)}" para o setor de ${sectorName}.`,
       lessons,
       quiz: [
@@ -303,8 +305,8 @@ function generateLocalFallback(
   }
 
   return {
-    courseTitle: `${typeLabel}: ${prompt.slice(0, 60)}`,
-    courseDescription: `Curso sobre "${prompt.slice(0, 100)}" (formato: ${typeLabel}) para o setor de ${sectorName}. Configure uma chave de IA (GEMINI_API_KEY) no Vercel para gerar conteúdo personalizado.`,
+    courseTitle: prompt.slice(0, 60),
+    courseDescription: `Curso sobre "${prompt.slice(0, 100)}" para o setor de ${sectorName}. Configure uma chave de IA (GEMINI_API_KEY) no Vercel para gerar conteúdo personalizado.`,
     lessons: [
       {
         title: 'Introdução e Contexto',
@@ -539,6 +541,12 @@ export async function generateTrainingCourse(
   }
 
   const dbLessonType = toDbLessonType(contentType);
+  // Sem coluna própria para o formato: registra-o na descrição (omitido no fallback local, que gera texto genérico).
+  const isLocal = generated.provider.startsWith('local:');
+  const courseDescription =
+    contentType !== 'text' && !isLocal
+      ? `${generated.data.courseDescription} (Formato: ${CONTENT_TYPE_LABELS[contentType]})`
+      : generated.data.courseDescription;
   const now = new Date();
   const lessonsToCreate = generated.data.lessons.map((lesson) => ({
     title: lesson.title,
@@ -577,7 +585,7 @@ export async function generateTrainingCourse(
         data: {
           tenantId,
           title: generated.data.courseTitle,
-          description: generated.data.courseDescription,
+          description: courseDescription,
           status: 'published',
           aiCreditsSpent: 1,
           quizJson,
@@ -632,7 +640,7 @@ export async function generateTrainingCourse(
     course: {
       id: courseId,
       title: generated.data.courseTitle,
-      description: generated.data.courseDescription,
+      description: courseDescription,
       status: 'published',
       createdAt: now.toISOString(),
       quizJson,
