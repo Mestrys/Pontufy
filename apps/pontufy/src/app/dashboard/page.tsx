@@ -1,7 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useStore } from '@/store/useStore';
-import HeroCourse from '@/components/dashboard/HeroCourse';
+import HeroCourse, { type HeroCourseData } from '@/components/dashboard/HeroCourse';
+import ContinueCard, { type ContinueCourse } from '@/components/dashboard/ContinueCard';
 import CourseRow from '@/components/dashboard/CourseRow';
 import SurpriseRewardToast from '@/components/dashboard/SurpriseRewardToast';
 import StreakCard from '@/components/dashboard/StreakCard';
@@ -40,38 +41,58 @@ export default function Home() {
     );
   };
 
-  const heroCourse = allCourses[0]
+  const lessonPoints = (c: any) =>
+    c.lessons?.reduce((sum: number, l: any) => sum + (l.pointsAssigned || 0), 0) || 0;
+
+  // "Continuar": o curso em andamento com atividade mais recente.
+  const inProgressEnrolled = enrolled
+    .filter((c: any) => c.status === 'in_progress')
+    .sort((a: any, b: any) => (b.lastActivityAt ?? '').localeCompare(a.lastActivityAt ?? ''));
+  const continueCourse: ContinueCourse | null = inProgressEnrolled[0]
     ? {
-        id: allCourses[0].id,
-        title: allCourses[0].title,
-        description: allCourses[0].description || '',
-        duration: `${allCourses[0].lessons?.length || 0} aulas`,
-        pointsReward:
-          allCourses[0].lessons?.reduce((s: number, l: any) => s + (l.pointsAssigned || 0), 0) || 0,
-        thumbnail:
-          allCourses[0].imageUrl ||
-          'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=1400',
-        modules: allCourses[0].lessons?.length || 0,
+        id: inProgressEnrolled[0].id,
+        title: inProgressEnrolled[0].title,
+        nextLessonTitle: inProgressEnrolled[0].nextLessonTitle ?? null,
+        completedLessons: inProgressEnrolled[0].completedLessons,
+        totalLessons: inProgressEnrolled[0].totalLessons,
+        progress: inProgressEnrolled[0].progress,
       }
     : null;
 
-  const inProgress = enrolled
-    .filter((c: any) => c.status === 'in_progress')
-    .map((c: any) => ({
-      id: c.id,
-      title: c.title,
-      progress: c.progress,
-      pointsReward: c.totalLessons * 50,
-      thumbnail:
-        c.imageUrl ||
-        'https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&q=80&w=600',
-    }));
+  // Destaque: o curso mais novo que a pessoa ainda não começou.
+  const startedIds = new Set(
+    enrolled.filter((c: any) => c.status !== 'available').map((c: any) => c.id),
+  );
+  const notStarted = allCourses.filter((c: any) => !startedIds.has(c.id));
+  const heroSource = notStarted[0];
+  const heroCourse: HeroCourseData | null = heroSource
+    ? {
+        id: heroSource.id,
+        title: heroSource.title,
+        description: heroSource.description || '',
+        lessonsCount: heroSource.lessons?.length || 0,
+        pointsReward: lessonPoints(heroSource),
+        thumbnail:
+          heroSource.imageUrl ||
+          'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=1400',
+      }
+    : null;
 
-  const available = allCourses.slice(1).map((c: any) => ({
+  // Os outros cursos em andamento (o primeiro já está no cartão "Continuar").
+  const inProgress = inProgressEnrolled.slice(1).map((c: any) => ({
     id: c.id,
     title: c.title,
-    pointsReward:
-      c.lessons?.reduce((s: number, l: any) => s + (l.pointsAssigned || 0), 0) || 0,
+    progress: c.progress,
+    subtitle: `${c.completedLessons} de ${c.totalLessons} aulas`,
+    thumbnail:
+      c.imageUrl ||
+      'https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&q=80&w=600',
+  }));
+
+  const available = notStarted.slice(1).map((c: any) => ({
+    id: c.id,
+    title: c.title,
+    pointsReward: lessonPoints(c),
     thumbnail:
       c.imageUrl ||
       'https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&q=80&w=600',
@@ -91,32 +112,31 @@ export default function Home() {
           <DashboardSkeleton />
         </LoadingRegion>
       ) : (
-        <>
-          {heroCourse && <HeroCourse course={heroCourse} />}
+        <div className="pt-24 px-4 sm:px-8 md:px-16 space-y-8">
+          <h1 className="sr-only">Início</h1>
+          {continueCourse && !searchQuery && <ContinueCard course={continueCourse} />}
+          {heroCourse && !searchQuery && <HeroCourse course={heroCourse} />}
 
-          <div className="relative z-20 -mt-8 space-y-2 pt-4">
-            <div className="px-8 md:px-16 pb-2">
-              <StreakCard />
-            </div>
+          <StreakCard />
+
+          <div className="-mx-4 sm:-mx-8 md:-mx-16">
             {filteredInProgress.length > 0 && (
-              <CourseRow title="Continue de onde parou" courses={filteredInProgress} />
+              <CourseRow title="Também em andamento" courses={filteredInProgress} />
             )}
 
             {filteredAvailable.length > 0 && (
-              <CourseRow title="Trilhas Recomendadas" courses={filteredAvailable} />
-            )}
-
-            {filteredInProgress.length === 0 && filteredAvailable.length === 0 && !heroCourse && (
-              <div className="px-8 md:px-16 py-20 text-center">
-                <p className="text-md-on-surface-muted text-base">
-                  {searchQuery
-                    ? `Nenhum curso encontrado para "${searchQuery}".`
-                    : 'Nenhum curso disponível ainda. Peça ao seu gestor para criar treinamentos.'}
-                </p>
-              </div>
+              <CourseRow title="Mais cursos para você" courses={filteredAvailable} />
             )}
           </div>
-        </>
+
+          {filteredInProgress.length === 0 && filteredAvailable.length === 0 && (searchQuery || !heroCourse) && !continueCourse && (
+            <p className="py-20 text-center text-base text-md-on-surface-muted">
+              {searchQuery
+                ? `Nenhum curso encontrado para "${searchQuery}".`
+                : 'Nenhum curso disponível ainda. Peça ao seu gestor para criar treinamentos.'}
+            </p>
+          )}
+        </div>
       )}
     </main>
   );

@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Flame, Trophy, AlertTriangle, Loader2 } from 'lucide-react';
+import { Flame, Trophy, AlertTriangle } from 'lucide-react';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 // TAREFA 11 — Widget de streak do usuário (dados de /api/gamification).
 
@@ -32,9 +33,7 @@ export default function StreakCard() {
 
   if (!streak) {
     return (
-      <div className="flex items-center justify-center py-8 bg-md-surface border border-md-outline rounded-xl">
-        <Loader2 className="animate-spin text-md-primary-text" size={20} />
-      </div>
+      <Skeleton className="h-24 w-full rounded-xl" />
     );
   }
 

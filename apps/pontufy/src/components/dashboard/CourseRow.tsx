@@ -16,7 +16,7 @@ export default function CourseRow({ title, courses }: { title: string; courses: 
             <div className="relative aspect-video rounded-sm overflow-hidden transition-all duration-300 ease-out group-hover:scale-110 group-hover:z-10 group-hover:shadow-2xl group-hover:shadow-black/80">
               <img
                 src={course.thumbnail}
-                alt={course.title}
+                alt=""
                 className="w-full h-full object-cover"
                 loading="lazy"
               />
@@ -41,9 +41,13 @@ export default function CourseRow({ title, courses }: { title: string; courses: 
               <h3 className="text-xs sm:text-sm font-semibold text-gray-300 line-clamp-1 group-hover:text-white transition-colors">
                 {course.title}
               </h3>
-              <div className="flex items-center gap-1 mt-0.5 text-xs text-md-tertiary font-bold">
-                <Coins size={10} /> +{course.pointsReward} pts
-              </div>
+              {course.subtitle ? (
+                <p className="mt-0.5 text-xs text-md-on-surface-muted">{course.subtitle}</p>
+              ) : (
+                <div className="flex items-center gap-1 mt-0.5 text-xs text-md-tertiary font-bold">
+                  <Coins size={12} aria-hidden="true" /> +{course.pointsReward} pts
+                </div>
+              )}
             </div>
           </Link>
         ))}
