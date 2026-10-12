@@ -1,0 +1,23 @@
+name: Theme check
+
+on:
+  pull_request:
+    paths:
+      - 'apps/pontufy/src/**'
+      - 'apps/pontufy/scripts/check-theme.mjs'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/pontufy/src/**'
+      - 'apps/pontufy/scripts/check-theme.mjs'
+
+jobs:
+  check-theme:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      # Sem dependências: o script só lê arquivos de src/.
+      - run: node apps/pontufy/scripts/check-theme.mjs

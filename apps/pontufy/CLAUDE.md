@@ -17,7 +17,7 @@ Pontufy é uma plataforma B2B SaaS de gamificação corporativa. Empresas (tenan
 | ORM | Prisma + PostgreSQL | Supabase em produção; SQLite **apenas** local |
 | AI | Vercel AI SDK | **v6** — `maxOutputTokens` (não `maxTokens`), `toTextStreamResponse` (não `toDataStreamResponse`) |
 | Estado | Zustand | `src/store/useStore.ts` para pontos/busca, `useUserStore.ts` para sessão |
-| Estilo | Tailwind CSS | Tema dark: `bg-[#0a0a0a]`, `bg-[#141414]`, `border-[#2a2a2a]`, `text-gray-400` |
+| Estilo | Tailwind CSS v4 | Tokens MD3 `md-*` em `src/app/globals.css` (`@theme`); ver "Tema Visual" |
 | Email | Resend | Via `src/lib/email.ts`; sem `RESEND_API_KEY` imprime no console (dev) |
 | Cache/Queue | Upstash Redis + QStash | Inicialização lazy obrigatória (Vercel Edge não suporta top-level await) |
 | Pagamentos | Stripe | `src/app/api/integrations/` |
@@ -211,19 +211,54 @@ export async function GET() {
 
 ### Tema Visual (Dark)
 
-Toda UI deve seguir o tema escuro estabelecido:
+Use sempre os tokens `md-*` de `src/app/globals.css`. Os contrastes abaixo foram medidos sobre `md-surface` (#141414). `npm run check:theme` roda no build e reprova as classes proibidas.
+
+**Superfícies**
 
 ```
-Fundo principal:     bg-[#0a0a0a]
-Fundo de card:       bg-[#141414]
-Fundo de input:      bg-[#1f1f1f]
-Bordas:              border-[#2a2a2a]
-Texto primário:      text-white
-Texto secundário:    text-gray-400 / text-gray-500
-Accent (brand):      text-emerald-400 / bg-emerald-600 / hover:bg-emerald-500
-Accent admin:        text-emerald-400
-Accent superadmin:   text-violet-400
-Erro:                text-red-400 / bg-red-500/10 / border-red-500/20
+Fundo da página:     bg-md-surface-dim (#0a0a0a)
+Card / painel:       bg-md-surface (#141414)
+Campo / elevado:     bg-md-surface-container (#1f1f1f)
+Divisor de card:     border-md-outline (#2a2a2a)
+Borda de campo:      automática em input/select/textarea (#636363, 3,07:1)
+```
+
+**Texto**
+
+```
+Principal:           text-md-on-surface / text-white
+Secundário:          text-md-on-surface-variant (#a3a3a3, 7,30:1)
+Metadados/legenda:   text-md-on-surface-muted (#949494, 6,07:1)
+Link / destaque:     text-md-primary-text (#d99bb8, 8,19:1)
+Sobre preenchimento: text-md-on-primary, text-md-on-tertiary, text-md-on-highlight...
+```
+
+**Mapa semântico de cor** (uma cor, um significado)
+
+```
+Ação primária:       bg-md-primary text-md-on-primary hover:bg-md-primary-container
+Pontos / sucesso:    text-md-tertiary · bg-md-tertiary/10 · border-md-tertiary/20
+Alerta / aviso:      text-md-highlight · bg-md-highlight/10
+Erro:                text-md-error · bg-md-error/10 · border-md-error/30
+Chip tonal:          bg-md-tertiary-container text-md-on-tertiary-container
+```
+
+**Regras**
+
+- `md-primary` (#5c4152) e `md-primary-container` (#b4585d) são **só preenchimento**: como texto ficam entre 2:1 e 3,9:1. Para texto e ícone na cor da marca, use `text-md-primary-text`.
+- Em fundo translúcido (`bg-md-X/10`), o texto é `text-md-X`, nunca `text-md-on-X`. `on-X` só funciona sobre o preenchimento sólido; sobre o tinte chega a 1,02:1.
+- Não use opacidade em texto (`text-.../60`, `opacity-50` em bloco de texto). Escolha o papel de texto mais fraco que ainda passa: `md-on-surface-muted`.
+- Piso tipográfico de **12px** (`text-xs`, `text-label-sm`). Nada de `text-[9px]`, `text-[10px]` ou `text-[11px]`.
+- Foco: o `:focus-visible` global desenha `outline` de 2px em `md-focus` (#f7d0a9). Não use `focus:outline-none`, exceto em campo com `focus:border-md-focus`.
+
+**Proibido** (reprovado pelo `check:theme`)
+
+```
+text-gray-500/600/700, placeholder-gray-*   → text-md-on-surface-muted
+emerald-*                                    → mapa semântico acima
+text-md-primary, text-md-primary-container   → text-md-primary-text
+text-md-on-surface-variant/NN                → text-md-on-surface-muted
+text-[<12px]                                 → text-xs
 ```
 
 ### Senha e Segurança

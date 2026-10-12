@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && node scripts/migrate.mjs && next build",
+    "build": "node scripts/check-theme.mjs && prisma generate && node scripts/migrate.mjs && next build",
+    "check:theme": "node scripts/check-theme.mjs",
     "start": "next start",
     "lint": "eslint",
     "db:migrate": "node scripts/migrate.mjs",
