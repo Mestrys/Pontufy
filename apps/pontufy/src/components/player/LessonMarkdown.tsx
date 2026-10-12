@@ -17,7 +17,7 @@ function safeHref(raw: string): string | null {
   }
 }
 
-const INLINE_RE = /(`[^`]+`|\*\*[^*]+\*\*|__[^_]+__|\[[^\]]+\]\([^)\s]+\)|\*[^*\s][^*]*\*|_[^_\s][^_]*_)/g;
+const INLINE_RE = /(`[^`]+`|\*\*[^*]+\*\*|(?<!\w)__[^_]+__(?!\w)|\[[^\]]+\]\([^)\s]+\)|\*[^*\s][^*]*\*|(?<!\w)_[^_\s][^_]*_(?!\w))/g;
 
 function formatInline(text: string): ReactNode[] {
   return text.split(INLINE_RE).map((part, i) => {

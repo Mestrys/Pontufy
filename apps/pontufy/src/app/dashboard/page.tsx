@@ -79,7 +79,9 @@ export default function Home() {
     : null;
 
   // Os outros cursos em andamento (o primeiro já está no cartão "Continuar").
-  const inProgress = inProgressEnrolled.slice(1).map((c: any) => ({
+  // Com busca ativa, as linhas trazem todos os cursos (cartão e destaque somem).
+  const skip = searchQuery ? 0 : 1;
+  const inProgress = inProgressEnrolled.slice(skip).map((c: any) => ({
     id: c.id,
     title: c.title,
     progress: c.progress,
@@ -89,7 +91,7 @@ export default function Home() {
       'https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&q=80&w=600',
   }));
 
-  const available = notStarted.slice(1).map((c: any) => ({
+  const available = notStarted.slice(skip).map((c: any) => ({
     id: c.id,
     title: c.title,
     pointsReward: lessonPoints(c),
@@ -121,15 +123,15 @@ export default function Home() {
 
           <div className="-mx-4 sm:-mx-8 md:-mx-16">
             {filteredInProgress.length > 0 && (
-              <CourseRow title="Também em andamento" courses={filteredInProgress} />
+              <CourseRow title={searchQuery ? 'Em andamento' : 'Também em andamento'} courses={filteredInProgress} />
             )}
 
             {filteredAvailable.length > 0 && (
-              <CourseRow title="Mais cursos para você" courses={filteredAvailable} />
+              <CourseRow title={searchQuery ? 'Cursos' : 'Mais cursos para você'} courses={filteredAvailable} />
             )}
           </div>
 
-          {filteredInProgress.length === 0 && filteredAvailable.length === 0 && (searchQuery || !heroCourse) && !continueCourse && (
+          {filteredInProgress.length === 0 && filteredAvailable.length === 0 && (searchQuery || (!heroCourse && !continueCourse)) && (
             <p className="py-20 text-center text-base text-md-on-surface-muted">
               {searchQuery
                 ? `Nenhum curso encontrado para "${searchQuery}".`
