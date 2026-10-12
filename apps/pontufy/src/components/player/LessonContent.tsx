@@ -189,6 +189,7 @@ export default function LessonContent({
             onNext ? (
               <button
                 type="button"
+                data-lesson-primary
                 onClick={() => onNext()}
                 className="flex-1 h-11 px-4 rounded-lg font-bold transition-colors text-sm flex items-center justify-center gap-2 bg-md-primary text-md-on-primary hover:bg-md-primary-container"
               >
@@ -202,6 +203,7 @@ export default function LessonContent({
           ) : !completed ? (
             <button
               type="button"
+              data-lesson-primary
               onClick={onComplete}
               disabled={isCompleting}
               className="flex-1 h-11 px-4 rounded-lg font-bold transition-colors text-sm flex items-center justify-center gap-2 bg-md-primary text-md-on-primary hover:bg-md-primary-container disabled:opacity-70 disabled:cursor-wait"
@@ -221,6 +223,7 @@ export default function LessonContent({
           ) : onNext ? (
             <button
               type="button"
+              data-lesson-primary
               onClick={() => onNext()}
               className="flex-1 h-11 px-4 rounded-lg font-bold transition-colors text-sm flex items-center justify-center gap-2 bg-md-primary text-md-on-primary hover:bg-md-primary-container"
             >

@@ -19,6 +19,8 @@ interface CelebrationModalProps {
     maxPoints?: number;
   };
   previousTier?: string;
+  /** Destino do foco ao fechar se o botão que disparou a celebração sumiu. */
+  returnFocus?: () => HTMLElement | null | undefined;
 }
 
 const TIER_ICONS: Record<string, typeof Trophy | typeof Crown | typeof Medal> = {
@@ -54,6 +56,7 @@ export default function CelebrationModal({
   points,
   newTier,
   previousTier,
+  returnFocus,
 }: CelebrationModalProps) {
   const reduced = useReducedMotion();
   const titleId = useId();
@@ -77,6 +80,7 @@ export default function CelebrationModal({
       labelledBy={titleId}
       describedBy={subtitleId}
       initialFocus={continueRef}
+      returnFocus={returnFocus}
       backdropClassName="bg-black/60"
       className="bg-[#141414] px-10 py-8 rounded-2xl shadow-2xl border border-[#2a2a2a] flex flex-col items-center gap-4 max-w-md w-full"
     >

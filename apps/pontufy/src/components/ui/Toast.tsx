@@ -48,8 +48,11 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       const priority = t.priority ?? (t.tone === 'error' ? 'high' : 'normal');
       const entry: Toast = { ...t, id, priority };
       setToasts((prev) => {
-        const hasHigher = prev.some((p) => p.priority === 'high');
-        return hasHigher && entry.priority !== 'high' ? prev : [...prev, entry];
+        // Um erro na tela segura só avisos de baixa prioridade; confirmações
+        // normais continuam aparecendo. No máximo 3 avisos ao mesmo tempo.
+        const hasHigh = prev.some((p) => p.priority === 'high');
+        if (hasHigh && entry.priority === 'low') return prev;
+        return [...prev, entry].slice(-3);
       });
       if (entry.tone !== 'error') {
         timers.current.set(

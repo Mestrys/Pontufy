@@ -44,6 +44,8 @@ interface QuizModalProps {
   onClose: () => void;
   onQuizPassed?: (result: QuizResult) => void;
   onEmitCertificate?: () => void;
+  emittingCertificate?: boolean;
+  certificateError?: string;
 }
 
 interface FlatQuestion extends QuizQuestion {
@@ -58,6 +60,8 @@ export default function QuizModal({
   onClose,
   onQuizPassed,
   onEmitCertificate,
+  emittingCertificate = false,
+  certificateError = '',
 }: QuizModalProps) {
   const setPointsBalance = useStore((s) => s.setPointsBalance);
 
@@ -214,10 +218,16 @@ export default function QuizModal({
               <div className="flex flex-wrap items-center justify-center gap-3">
                 {onEmitCertificate && (
                   <button
+                    type="button"
                     onClick={onEmitCertificate}
-                    className="flex items-center gap-2 px-6 py-3 rounded-lg font-bold text-sm bg-md-primary text-md-on-primary hover:bg-md-primary-container transition-colors"
+                    disabled={emittingCertificate}
+                    className="flex items-center gap-2 px-6 py-3 rounded-lg font-bold text-sm bg-md-primary text-md-on-primary hover:bg-md-primary-container transition-colors disabled:opacity-60"
                   >
-                    <Award size={16} /> Emitir Certificado
+                    {emittingCertificate ? (
+                      <><Loader2 size={16} className="animate-spin" aria-hidden="true" /> Gerando…</>
+                    ) : (
+                      <><Award size={16} aria-hidden="true" /> Emitir Certificado</>
+                    )}
                   </button>
                 )}
                 <button
@@ -227,6 +237,11 @@ export default function QuizModal({
                   Fechar
                 </button>
               </div>
+              {certificateError && (
+                <p role="alert" className="mt-5 text-sm text-md-error bg-md-error/10 border border-md-error/30 rounded-xl px-4 py-3">
+                  {certificateError}
+                </p>
+              )}
             </div>
           ) : (
             /* ── Tela de reprovação ──────────────────────────── */

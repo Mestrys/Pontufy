@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { triggerRewardRedemption } from "@/hooks/useApi";
+import { useToast } from '@/components/ui/Toast';
+import { friendlyApiError } from '@/lib/api-errors';
 
 // Botão de teste do Autopilot: ferramenta de review do MVP, nunca visível
 // para colaboradores. Só aparece com NEXT_PUBLIC_AUTOPILOT_DEBUG=1.
@@ -15,6 +17,7 @@ type AutopilotResponse = {
 };
 
 export default function SurpriseRewardToast() {
+  const { toast } = useToast();
   const [data, setData] = useState<AutopilotResponse | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -109,14 +112,15 @@ export default function SurpriseRewardToast() {
                     if (result.success && result.affiliateUrl) {
                       window.open(result.affiliateUrl, '_blank');
                     } else if (!result.success) {
-                      console.error('Autopilot redeem failed:', result.error);
+                      toast({ tone: 'error', title: 'Resgate não concluído', description: friendlyApiError(result, 'redeem') });
                     }
                   } catch (err) {
                     console.error('Autopilot redeem failed:', err);
+                    toast({ tone: 'error', title: 'Resgate não concluído', description: friendlyApiError({}, 'redeem') });
                   }
                   setIsVisible(false);
                 }}
-                className="w-full bg-md-primary text-md-on-primary py-2.5 rounded-lg font-medium hover:bg-md-primary-container transition-colors"
+                className="w-full h-11 bg-md-primary text-md-on-primary rounded-lg font-medium hover:bg-md-primary-container transition-colors"
               >
                 Resgatar Agora
               </button>

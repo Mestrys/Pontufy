@@ -29,6 +29,8 @@ interface DialogProps {
   /** false: Escape e clique no fundo não fazem nada (ex.: envio em andamento). */
   dismissible?: boolean;
   initialFocus?: RefObject<HTMLElement | null>;
+  /** Para onde levar o foco ao fechar se quem abriu já saiu da tela. */
+  returnFocus?: () => HTMLElement | null | undefined;
   className?: string;
   backdropClassName?: string;
   zIndexClassName?: string;
@@ -62,18 +64,22 @@ export function useModalBehavior({
   onClose,
   dismissible = true,
   initialFocus,
+  returnFocus,
 }: {
   open: boolean;
   panelRef: RefObject<HTMLElement | null>;
   onClose: () => void;
   dismissible?: boolean;
   initialFocus?: RefObject<HTMLElement | null>;
+  returnFocus?: () => HTMLElement | null | undefined;
 }) {
   const onCloseRef = useRef(onClose);
   const dismissibleRef = useRef(dismissible);
+  const returnFocusRef = useRef(returnFocus);
   useEffect(() => {
     onCloseRef.current = onClose;
     dismissibleRef.current = dismissible;
+    returnFocusRef.current = returnFocus;
   });
 
   useEffect(() => {
@@ -144,8 +150,9 @@ export function useModalBehavior({
       const idx = stack.indexOf(id);
       if (idx >= 0) stack.splice(idx, 1);
       if (--scrollLocks === 0) document.body.style.overflow = previousOverflow;
-      // Devolve o foco a quem abriu; se ele saiu da tela, ao conteúdo principal.
-      const fallback = document.querySelector<HTMLElement>('main') ?? document.body;
+      // Devolve o foco a quem abriu; se ele saiu da tela, ao destino indicado
+      // ou ao conteúdo principal.
+      const fallback = returnFocusRef.current?.() ?? document.querySelector<HTMLElement>('main') ?? document.body;
       const back = opener && opener.isConnected && opener !== document.body ? opener : fallback;
       if (back === fallback && !fallback.hasAttribute('tabindex')) fallback.setAttribute('tabindex', '-1');
       back.focus({ preventScroll: true });
@@ -164,6 +171,7 @@ export function Dialog({
   variant = 'center',
   dismissible = true,
   initialFocus,
+  returnFocus,
   className = '',
   backdropClassName = 'bg-black/60 backdrop-blur-sm',
   zIndexClassName = 'z-[100]',
@@ -178,7 +186,7 @@ export function Dialog({
     dismissibleRef.current = dismissible;
   });
 
-  useModalBehavior({ open, panelRef, onClose, dismissible, initialFocus });
+  useModalBehavior({ open, panelRef, onClose, dismissible, initialFocus, returnFocus });
 
   if (!mounted) return null;
 

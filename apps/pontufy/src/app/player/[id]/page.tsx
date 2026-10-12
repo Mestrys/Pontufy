@@ -89,6 +89,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
   const [completionError, setCompletionError] = useState<{ lessonId: string; message: string } | null>(null);
   const { toast } = useToast();
   const [quizOpen, setQuizOpen] = useState(false);
+  const [certificateError, setCertificateError] = useState('');
   const [quizPassed, setQuizPassed] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -257,10 +258,17 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
 
   const handleDownloadCertificate = async () => {
     setIsDownloading(true);
+    setCertificateError('');
     try {
       await downloadCertificate(course.id, course.title);
     } catch (err) {
       console.error(err);
+      // Dentro do quiz (modal) o aviso vai junto do botão: um toast fora do
+      // diálogo não é anunciado nem alcançável pelo teclado.
+      if (quizOpen) {
+        setCertificateError('Não foi possível baixar o certificado. Tente de novo em instantes.');
+        return;
+      }
       toast({
         tone: 'error',
         title: 'Não foi possível baixar o certificado.',
@@ -314,8 +322,15 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
           name: levelUpData.newTier.name,
           color: levelUpData.newTier.color,
           icon: levelUpData.newTier.icon,
+          maxPoints: levelUpData.newTier.maxPoints,
         } : undefined}
         previousTier={levelUpData?.previousTier}
+        // Depois do "Concluir e avançar" a aula trocou: o foco volta para a
+        // ação principal da aula nova (ou para o texto dela).
+        returnFocus={() =>
+          document.querySelector<HTMLElement>('[data-lesson-primary]:not([disabled])') ??
+          document.querySelector<HTMLElement>('[aria-label="Conteúdo da aula"]')
+        }
       />
 
       {/* Top bar (Udemy-style) */}
@@ -474,9 +489,14 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
             courseTitle={course.title}
             modules={modules}
             alreadyPassed={passed}
-            onClose={() => setQuizOpen(false)}
+            onClose={() => {
+              setQuizOpen(false);
+              setCertificateError('');
+            }}
             onQuizPassed={handleQuizPassed}
             onEmitCertificate={handleDownloadCertificate}
+            emittingCertificate={isDownloading}
+            certificateError={certificateError}
           />
         )}
       </AnimatePresence>

@@ -254,12 +254,26 @@ Chip tonal:          bg-md-tertiary-container text-md-on-tertiary-container
 **Proibido** (reprovado pelo `check:theme`)
 
 ```
+alert() / confirm() / prompt()               → inline, useToast ou AlertDialog
 text-gray-500/600/700, placeholder-gray-*   → text-md-on-surface-muted
 emerald-*                                    → mapa semântico acima
 text-md-primary, text-md-primary-container   → text-md-primary-text
 text-md-on-surface-variant/NN                → text-md-on-surface-muted
 text-[<12px]                                 → text-xs
 ```
+
+### Diálogos, avisos e carregamento
+
+- **Todo overlay modal usa `components/ui/Dialog`** (`variant` `center`, `right` ou `left`). Ele já entrega `role="dialog"`, `aria-modal`, foco inicial, foco preso, Escape, pilha de diálogos, trava de rolagem e foco devolvido a quem abriu. Não monte `fixed inset-0` próprio.
+- Para fechar com condição (envio em andamento, respostas não salvas), use `dismissible={false}` ou trate o pedido em `onClose` e abra um `AlertDialog` de confirmação.
+- Painel que só é modal em parte do tempo (gaveta do RH no celular) usa o hook `useModalBehavior`. Menu suspenso não é modal: use `useDismissableMenu`, que fecha com Escape, clique ou foco fora.
+- **Nada de `alert()`, `confirm()` ou `prompt()`** (o `check:theme` reprova). Use:
+  - erro de uma ação → texto inline perto do controle, com `role="alert"` (dentro de um diálogo, sempre inline: um toast fica fora do `aria-modal`);
+  - confirmação de algo que aconteceu ou erro sem lugar fixo → `useToast()` (`tone: 'error'` para erro);
+  - confirmação antes de uma ação destrutiva → `AlertDialog` com `destructive`.
+- Mensagem de erro de API passa por `friendlyApiError()` (`src/lib/api-errors.ts`): nunca mostre o texto cru da rota ("lessonId inválido.").
+- Carregamento de tela usa `Skeleton` dentro de `LoadingRegion` (anuncia "Carregando…"); spinner só dentro de botão. Tela vazia usa `EmptyState` com o próximo passo quando existir.
+- Alvo de toque mínimo de **44px** (`h-11`/`size-11`; `Button` e `.md-btn` já têm). Para ícones pequenos, mantenha o desenho e aumente só a área clicável.
 
 ### Senha e Segurança
 

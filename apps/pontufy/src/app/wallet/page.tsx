@@ -4,7 +4,6 @@ import { useStore } from '@/store/useStore';
 import { usePointsHistory } from '@/hooks/useApi';
 import BalanceCard from '@/components/wallet/BalanceCard';
 import PointsHistory from '@/components/wallet/PointsHistory';
-import { Loader2 } from 'lucide-react';
 import { ListSkeleton, LoadingRegion } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { History } from 'lucide-react';
