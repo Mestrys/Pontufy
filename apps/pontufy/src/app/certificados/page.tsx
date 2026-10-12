@@ -62,7 +62,7 @@ export default function CertificatesPage() {
         <header className="mb-8 flex items-center gap-3">
           <Award size={28} className="text-md-primary-text" />
           <div>
-            <h1 className="text-3xl font-black text-white tracking-tight">Meus Certificados</h1>
+            <h1 className="text-3xl font-black text-white tracking-tight">Meus certificados</h1>
             <p className="text-md-on-surface-muted mt-0.5 text-sm">Certificados emitidos pelos cursos que você concluiu — cada um com raridade única e verificação criptográfica.</p>
           </div>
         </header>

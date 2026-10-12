@@ -42,8 +42,8 @@ export default function TopCoursesTable({ courses }: TopCoursesTableProps) {
             <th className="pb-3 pr-4 font-semibold">Estado</th>
             <th className="pb-3 pr-4 font-semibold text-right">Conclusões</th>
             <th className="pb-3 pr-4 font-semibold text-right">Colaboradores</th>
-            <th className="pb-3 pr-4 font-semibold text-right">Pontos Gerados</th>
-            <th className="pb-3 font-semibold text-right">Taxa Média</th>
+            <th className="pb-3 pr-4 font-semibold text-right">Pontos gerados</th>
+            <th className="pb-3 font-semibold text-right">Taxa média</th>
           </tr>
         </thead>
         <tbody>

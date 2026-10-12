@@ -115,7 +115,7 @@ export default function BattlesPage() {
         <header className="mb-8">
           <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
             <Swords className="text-md-primary-text" size={28} />
-            Batalhas de Conhecimento
+            Batalhas de conhecimento
           </h1>
           <p className="text-md-on-surface-muted mt-1.5 text-sm">
             Desafie um colega para um duelo de 5 questões com 15 segundos cada — seus acertos

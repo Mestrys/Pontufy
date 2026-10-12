@@ -4,7 +4,7 @@ import { getTenantDb } from '@/backend/db';
 import { buildProviderChain } from '@/lib/ai-providers';
 
 // ═══════════════════════════════════════════════════════════════════════════
-// TAREFA 13 — Batalhas de Conhecimento
+// TAREFA 13 — Batalhas de conhecimento
 //  • 13.1: 5 perguntas geradas por IA sobre a trilha da empresa (fallback
 //    determinístico local se nenhum provedor estiver configurado).
 //  • 13.4: cronômetro estrito de 15s POR QUESTÃO — o servidor re-scora as

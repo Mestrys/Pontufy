@@ -98,7 +98,7 @@ export function MD3NavigationDrawer({ open, onClose, links, activeHref }: MD3Nav
                   className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-md-secondary mt-1 transition-colors"
                 >
                   <LayoutDashboard size={16} />
-                  Painel RH
+                  Painel de RH
                 </Link>
               )}
               {role === 'super_admin' && (
@@ -139,7 +139,7 @@ export function MD3NavigationDrawer({ open, onClose, links, activeHref }: MD3Nav
                   className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
                 >
                   <User size={15} />
-                  Meu Perfil
+                  Meu perfil
                 </Link>
                 <button
                   type="button"

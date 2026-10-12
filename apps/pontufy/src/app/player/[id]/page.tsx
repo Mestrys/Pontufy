@@ -395,7 +395,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
                       <Trophy size={18} className="text-md-tertiary" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-white">Quiz final disponível!</p>
+                      <p className="text-sm font-bold text-white">Avaliação final disponível</p>
                       <p className="text-xs text-md-on-surface-muted">Nota mínima: 70% · Bônus de +50 pts</p>
                     </div>
                   </div>
@@ -403,7 +403,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
                     onClick={() => setQuizOpen(true)}
                     className="px-6 py-3 rounded-lg font-bold text-sm bg-md-primary text-md-on-primary hover:bg-md-primary-container transition-colors"
                   >
-                    Iniciar Quiz Final
+                    Fazer a avaliação final
                   </button>
                 </div>
               ) : (
@@ -428,7 +428,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
                       </>
                     ) : (
                       <>
-                        <Award size={16} /> Emitir Certificado
+                        <Award size={16} /> Emitir certificado
                       </>
                     )}
                   </button>

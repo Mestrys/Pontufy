@@ -48,17 +48,17 @@ interface NavItem {
 
 const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
   {
-    label: 'Visão Geral',
+    label: 'Visão geral',
     items: [
       { href: '/admin', icon: <LayoutDashboard size={20} />, label: 'Painel' },
       { href: '/admin/analytics', icon: <BarChart3 size={20} />, label: 'Indicadores' },
     ],
   },
   {
-    label: 'Cursos & Treinamentos',
+    label: 'Cursos',
     items: [
-      { href: '/admin/wizard', icon: <Sparkles size={20} />, label: 'IA Cursos' },
-      { href: '/admin/skills', icon: <FileText size={20} />, label: 'Trilhas de Habilidade' },
+      { href: '/admin/wizard', icon: <Sparkles size={20} />, label: 'Criar curso com IA' },
+      { href: '/admin/skills', icon: <FileText size={20} />, label: 'Trilhas' },
     ],
   },
   {
@@ -71,13 +71,13 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
     label: 'Catálogo',
     items: [
       // O catálogo é gerido no painel (seção #recompensas); não há rota própria.
-      { href: '/admin#recompensas', icon: <Gift size={20} />, label: 'Recompensas' },
+      { href: '/admin#recompensas', icon: <Gift size={20} />, label: 'Benefícios' },
     ],
   },
   {
     label: 'Configurações',
     items: [
-      { href: '/admin/settings/branding', icon: <Settings size={20} />, label: 'Marca & Identidade' },
+      { href: '/admin/settings/branding', icon: <Settings size={20} />, label: 'Marca' },
       { href: '/admin/audit-logs', icon: <ShieldCheck size={20} />, label: 'Auditoria' },
     ],
   },
@@ -280,7 +280,7 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
                   onClick={() => setNavOpen(false)}
                 >
                   <span className="flex-shrink-0"><LayoutDashboard size={20} /></span>
-                  <span>Visão do Colaborador</span>
+                  <span>Ver como colaborador</span>
                 </Link>
                 <button
                   type="button"
@@ -297,8 +297,8 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
                   type="button"
                   onClick={() => { window.location.href = '/dashboard'; }}
                   className="p-2.5 rounded-xl text-md-on-surface-variant hover:bg-md-surface-container-high hover:text-md-on-surface transition-colors"
-                  title="Visão do Colaborador"
-                  aria-label="Visão do Colaborador"
+                  title="Ver como colaborador"
+                  aria-label="Ver como colaborador"
                 >
                   <LayoutDashboard size={22} />
                 </button>

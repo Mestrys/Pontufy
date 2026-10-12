@@ -62,7 +62,7 @@ export default function MarketplacePage() {
           <div>
             <div className="flex items-center gap-3 mb-2">
               <Gift size={24} className="text-md-secondary" aria-hidden="true" />
-              <h1 className="text-3xl font-black text-white tracking-tight">Clube de Benefícios</h1>
+              <h1 className="text-3xl font-black text-white tracking-tight">Benefícios</h1>
             </div>
             <p className="text-md-on-surface-muted text-sm">Troque seus pontos por benefícios reais.</p>
           </div>

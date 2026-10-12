@@ -129,12 +129,12 @@ export interface Achievement {
 }
 
 export const ACHIEVEMENTS: Achievement[] = [
-  { id: 'first_steps', title: 'Primeiros Passos', description: 'Concluiu sua primeira aula.', emoji: '🌱', test: (s) => s.completions >= 1 },
-  { id: 'streak_3', title: 'Ritmo Constante', description: '3 dias seguidos de aprendizado.', emoji: '🔥', test: (s) => s.streak >= 3 },
-  { id: 'streak_7', title: 'Semana Perfeita', description: '7 dias seguidos de aprendizado.', emoji: '⚡', test: (s) => s.streak >= 7 },
-  { id: 'streak_30', title: 'Mês Consistente', description: '30 dias seguidos de aprendizado.', emoji: '🏆', test: (s) => s.streak >= 30 },
+  { id: 'first_steps', title: 'Primeiros passos', description: 'Concluiu sua primeira aula.', emoji: '🌱', test: (s) => s.completions >= 1 },
+  { id: 'streak_3', title: 'Ritmo constante', description: '3 dias seguidos de aprendizado.', emoji: '🔥', test: (s) => s.streak >= 3 },
+  { id: 'streak_7', title: 'Semana perfeita', description: '7 dias seguidos de aprendizado.', emoji: '⚡', test: (s) => s.streak >= 7 },
+  { id: 'streak_30', title: 'Mês consistente', description: '30 dias seguidos de aprendizado.', emoji: '🏆', test: (s) => s.streak >= 30 },
   { id: 'ten_lessons', title: 'Dedicação', description: '10 aulas concluídas.', emoji: '📚', test: (s) => s.completions >= 10 },
-  { id: 'fifty_lessons', title: 'Máquina de Aprendizado', description: '50 aulas concluídas.', emoji: '🚀', test: (s) => s.completions >= 50 },
+  { id: 'fifty_lessons', title: 'Máquina de aprendizado', description: '50 aulas concluídas.', emoji: '🚀', test: (s) => s.completions >= 50 },
   { id: 'hundred_points', title: 'Colecionador', description: 'Acumulou 100 pontos ganhos.', emoji: '💎', test: (s) => s.pointsGained >= 100 },
   { id: 'thousand_points', title: 'Lenda Pontufy', description: 'Acumulou 1.000 pontos ganhos.', emoji: '👑', test: (s) => s.pointsGained >= 1000 },
 ];

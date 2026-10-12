@@ -39,28 +39,28 @@ export default function MetricsCards({ summary }: MetricsCardsProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
       <KpiCard
-        label="Colaboradores Ativos"
+        label="Colaboradores ativos"
         value={formatNumber(summary.activeUsers)}
         hint={`de ${formatNumber(summary.totalUsers)} no total`}
         icon={<Users size={17} />}
         accent="#10B981"
       />
       <KpiCard
-        label="Aulas Concluídas"
+        label="Aulas concluídas"
         value={formatNumber(summary.totalCompletions)}
         hint={`em ${formatNumber(summary.totalCourses)} cursos`}
         icon={<BookOpenCheck size={17} />}
         accent="#8B5CF6"
       />
       <KpiCard
-        label="Pontos Distribuídos"
+        label="Pontos distribuídos"
         value={formatNumber(summary.totalPointsAwarded)}
         hint="últimos 30 dias"
         icon={<Coins size={17} />}
         accent="#3B82F6"
       />
       <KpiCard
-        label="Pontos Resgatados"
+        label="Pontos resgatados"
         value={formatNumber(summary.totalPointsRedeemed)}
         hint="benefícios consumidos"
         icon={<Gift size={17} />}

@@ -43,7 +43,7 @@ export default function LeaderboardCard() {
       <header className="flex items-center gap-2 mb-4">
         <Trophy className="text-md-primary-text" size={20} />
         <h2 className="text-lg font-black text-white tracking-tight">
-          Ranking Interdepartamental
+          Ranking entre departamentos
         </h2>
         <span className="ml-auto text-xs uppercase tracking-wider text-md-on-surface-muted bg-white/5 border border-white/10 rounded-full px-2.5 py-1">
           Semana atual

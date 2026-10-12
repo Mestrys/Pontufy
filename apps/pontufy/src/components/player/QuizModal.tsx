@@ -189,7 +189,7 @@ export default function QuizModal({
                 <Trophy size={32} className="text-md-tertiary" />
               </div>
               <h2 id={titleId} className="text-2xl font-black text-white mb-1">
-                {openedAlreadyPassed ? 'Quiz Já Aprovado' : 'Quiz Aprovado!'}
+                {openedAlreadyPassed ? 'Avaliação já aprovada' : 'Avaliação aprovada!'}
               </h2>
               <p className="text-gray-400 text-sm mb-2">{courseTitle}</p>
 
@@ -226,7 +226,7 @@ export default function QuizModal({
                     {emittingCertificate ? (
                       <><Loader2 size={16} className="animate-spin" aria-hidden="true" /> Gerando…</>
                     ) : (
-                      <><Award size={16} aria-hidden="true" /> Emitir Certificado</>
+                      <><Award size={16} aria-hidden="true" /> Emitir certificado</>
                     )}
                   </button>
                 )}
@@ -266,13 +266,13 @@ export default function QuizModal({
                   onClick={reset}
                   className="flex items-center gap-2 px-6 py-3 rounded-lg font-bold text-sm bg-md-primary text-md-on-primary hover:bg-md-primary-container transition-colors"
                 >
-                  <RotateCcw size={16} /> Tentar Novamente
+                  <RotateCcw size={16} /> Tentar de novo
                 </button>
                 <button
                   onClick={onClose}
                   className="px-6 py-3 rounded-lg font-bold text-sm bg-[#1f1f1f] text-white hover:bg-[#2a2a2a] border border-[#2a2a2a] transition-colors"
                 >
-                  Voltar ao Curso
+                  Voltar ao curso
                 </button>
               </div>
             </div>
@@ -284,7 +284,7 @@ export default function QuizModal({
             <div className="flex items-center justify-between mb-1 pr-10">
               <div className="flex items-center gap-2">
                 <ClipboardCheck size={18} className="text-md-tertiary" />
-                <h2 id={titleId} className="text-base font-bold text-white">Quiz de Avaliação</h2>
+                <h2 id={titleId} className="text-base font-bold text-white">Avaliação final</h2>
                 <span className="text-xs font-bold text-amber-400 bg-amber-400/10 border border-amber-400/30 rounded-full px-2 py-0.5">
                   +50 pts
                 </span>
@@ -364,7 +364,7 @@ export default function QuizModal({
                       <Loader2 size={15} className="animate-spin" /> Enviando...
                     </>
                   ) : (
-                    'Enviar Quiz'
+                    'Enviar respostas'
                   )}
                 </button>
               ) : (

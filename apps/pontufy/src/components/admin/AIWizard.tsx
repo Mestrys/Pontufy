@@ -329,7 +329,7 @@ export default function AIWizard() {
         <div className="space-y-6">
           <div>
             <p id="wizard-format-label" className="text-label-lg text-md-on-surface-variant mb-3 block">
-              Formato do Conteúdo
+              Formato do conteúdo
             </p>
             <div role="group" aria-labelledby="wizard-format-label" className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {(Object.keys(CONTENT_TYPE_CONFIG) as ContentType[]).map((type) => {

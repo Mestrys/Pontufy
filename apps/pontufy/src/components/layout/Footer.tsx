@@ -17,7 +17,7 @@ export default function Footer() {
           </span>
         </div>
         <div className="flex flex-col sm:flex-row items-center sm:gap-4 text-xs">
-          <Link href="/termos" className="inline-flex items-center min-h-11 px-2 hover:text-gray-300 transition-colors">Termos de Serviço</Link>
+          <Link href="/termos" className="inline-flex items-center min-h-11 px-2 hover:text-gray-300 transition-colors">Termos de uso</Link>
           <Link href="/privacidade" className="inline-flex items-center min-h-11 px-2 hover:text-gray-300 transition-colors">Política de Privacidade</Link>
           <Link href="mailto:ajuda@pontufy.com" className="inline-flex items-center min-h-11 px-2 hover:text-gray-300 transition-colors">ajuda@pontufy.com</Link>
         </div>

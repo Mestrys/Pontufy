@@ -65,21 +65,21 @@ export default function AdminDashboardClient() {
   const metrics = [
     {
       id: 'm1',
-      title: 'Colaboradores Ativos',
+      title: 'Colaboradores ativos',
       value: String(summary.totalUsers ?? 0),
       trend: `${summary.totalCompletions ?? 0} conclusões`,
       trendType: 'positive' as const,
     },
     {
       id: 'm2',
-      title: 'Pontos Distribuídos',
+      title: 'Pontos distribuídos',
       value: (summary.totalPointsAwarded ?? 0).toLocaleString('pt-BR'),
       trend: 'Total acumulado',
       trendType: 'neutral' as const,
     },
     {
       id: 'm3',
-      title: 'Pontos Resgatados',
+      title: 'Pontos resgatados',
       value: (summary.totalPointsRedeemed ?? 0).toLocaleString('pt-BR'),
       trend: `${rewards.filter((r) => r.active).length} recompensas ativas`,
       trendType: 'neutral' as const,
@@ -99,7 +99,7 @@ export default function AdminDashboardClient() {
       {/* Page Header */}
       <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <h1 className="text-headline-md font-extrabold text-md-on-surface">Painel do Gestor de RH</h1>
+          <h1 className="text-headline-md font-extrabold text-md-on-surface">Painel de RH</h1>
           <p className="text-body-md text-md-on-surface-variant mt-1">
             Bem-vindo ao centro de comando da {tenant?.name || 'empresa'}.
           </p>
@@ -134,7 +134,7 @@ export default function AdminDashboardClient() {
             <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-md-outline flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-md-surface-container-high/50">
               <div className="flex items-center gap-2">
                 <span className="text-md-primary-text" style={{fontSize: '20px'}}>✨</span>
-                <h2 className="text-title-lg font-bold text-md-on-surface">Cursos Gerados pela IA</h2>
+                <h2 className="text-title-lg font-bold text-md-on-surface">Cursos</h2>
               </div>
               <a
                 href="/admin/wizard"
@@ -150,7 +150,7 @@ export default function AdminDashboardClient() {
             <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-md-outline flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-md-surface-container-high/50">
               <div className="flex items-center gap-2">
                 <span style={{fontSize: '20px'}} aria-hidden="true">🎁</span>
-                <h2 className="text-title-lg font-bold text-md-on-surface">Catálogo de Recompensas</h2>
+                <h2 className="text-title-lg font-bold text-md-on-surface">Catálogo de benefícios</h2>
               </div>
             </div>
             <RewardToggleRow catalog={rewards} />

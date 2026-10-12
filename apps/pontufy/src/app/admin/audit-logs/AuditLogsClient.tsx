@@ -105,7 +105,7 @@ export default function AuditLogsClient() {
             >
               <ArrowLeft size={15} /> Voltar ao painel
             </Link>
-            <h1 className="text-2xl font-bold text-white">Trilha de Auditoria</h1>
+            <h1 className="text-2xl font-bold text-white">Auditoria</h1>
             <p className="text-sm text-md-on-surface-muted mt-1">
               Registro imutável (append-only) das ações administrativas · {total} eventos
             </p>

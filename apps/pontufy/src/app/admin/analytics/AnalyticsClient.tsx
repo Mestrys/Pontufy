@@ -113,7 +113,7 @@ export default function AnalyticsClient() {
 
         <section className="bg-[#141414] border border-[#2a2a2a] rounded-2xl p-6">
           <h2 className="text-sm font-bold text-white uppercase tracking-wide mb-4">
-            Cursos Mais Concluídos
+            Cursos mais concluídos
           </h2>
           <TopCoursesTable courses={data.topCourses} />
         </section>

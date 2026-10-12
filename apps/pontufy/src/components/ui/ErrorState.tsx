@@ -20,7 +20,7 @@ export function ErrorState({ title, description, reset }: ErrorStateProps) {
         {description ?? 'Ocorreu um erro ao carregar esta seção. Você pode tentar novamente.'}
       </p>
       <Button variant="tonal" onClick={reset} className="mt-2">
-        Tentar Novamente
+        Tentar de novo
       </Button>
     </div>
   );

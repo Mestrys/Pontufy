@@ -10,7 +10,7 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { certificateId } = await params;
   return {
-    title: `Verificar Certificado | Pontufy`,
+    title: `Verificar certificado | Pontufy`,
     description: `Verifique a autenticidade do certificado ${certificateId} na plataforma Pontufy.`,
     openGraph: {
       title: `Verificar Certificado ${certificateId}`,
@@ -80,12 +80,12 @@ export default async function VerifyCertificatePage({ params }: Props) {
             {isValid ? (
               <>
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                <span className="font-bold text-lg">Certificado Válido</span>
+                <span className="font-bold text-lg">Certificado válido</span>
               </>
             ) : (
               <>
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                <span className="font-bold text-lg">Certificado Inválido</span>
+                <span className="font-bold text-lg">Certificado inválido</span>
               </>
             )}
           </div>
@@ -108,18 +108,18 @@ export default async function VerifyCertificatePage({ params }: Props) {
           </div>
 
           <div className="border-t border-white/10 pt-4">
-            <p className="text-xs text-md-on-surface-muted uppercase tracking-wider">Data de Emissão</p>
+            <p className="text-xs text-md-on-surface-muted uppercase tracking-wider">Data de emissão</p>
             <p className="text-lg text-gray-300 mt-1">{issuedDate}</p>
           </div>
 
           <div className="border-t border-white/10 pt-4">
-            <p className="text-xs text-md-on-surface-muted uppercase tracking-wider">Código de Verificação</p>
+            <p className="text-xs text-md-on-surface-muted uppercase tracking-wider">Código de verificação</p>
             <p className="font-mono text-sm text-gray-400 mt-1 break-all">{certificate.verificationHash || 'Não disponível'}</p>
           </div>
 
           {certificate.signature && (
             <div className="border-t border-white/10 pt-4">
-              <p className="text-xs text-md-on-surface-muted uppercase tracking-wider">Assinatura Criptográfica</p>
+              <p className="text-xs text-md-on-surface-muted uppercase tracking-wider">Assinatura criptográfica</p>
               <p className="font-mono text-xs text-md-on-surface-muted mt-1 break-all">{certificate.signature.slice(0, 32)}…</p>
             </div>
           )}

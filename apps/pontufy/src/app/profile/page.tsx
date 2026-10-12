@@ -159,7 +159,7 @@ export default function ProfilePage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="bg-md-surface-container border border-md-outline rounded-lg p-4">
                 <div className="flex items-center gap-2 text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">
-                  <Coins size={13} className="text-md-tertiary" /> Saldo de Pontos
+                  <Coins size={13} className="text-md-tertiary" /> Saldo de pontos
                 </div>
                 <div className="text-2xl font-black text-md-tertiary">{currentPoints}</div>
               </div>

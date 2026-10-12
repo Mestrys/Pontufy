@@ -36,7 +36,7 @@ export default function WalletPage() {
     <div className="min-h-screen pb-20 pt-8 bg-md-surface-dim">
       <div className="max-w-[1000px] mx-auto px-6 md:px-8">
         <header className="mb-8">
-          <h1 className="text-3xl font-black text-white tracking-tight">Central de Conquistas</h1>
+          <h1 className="text-3xl font-black text-white tracking-tight">Carteira</h1>
           <p className="text-md-on-surface-muted mt-1.5 text-sm">
             {currentUser?.name ? `Olá, ${currentUser.name}! ` : ''}Acompanhe seu esforço e recompensas.
           </p>
@@ -55,7 +55,7 @@ export default function WalletPage() {
             icon={History}
             title="Nenhuma movimentação ainda"
             description="Cada aula concluída soma pontos aqui. Comece por um dos seus cursos."
-            actionLabel="Ir para Meus Cursos"
+            actionLabel="Ir para os cursos"
             actionHref="/cursos"
           />
         )}

@@ -56,7 +56,7 @@ export default function SurpriseRewardToast() {
         className="fixed bottom-24 md:bottom-6 right-4 sm:right-6 z-50 bg-md-highlight text-md-on-highlight px-3 sm:px-4 py-2 rounded-full font-medium shadow-lg hover:shadow-xl hover:bg-md-highlight/90 transition-all flex items-center space-x-2 text-sm"
       >
         {isLoading ? (
-          <span className="animate-pulse">Analisando Perfil...</span>
+          <span className="animate-pulse">Analisando seu perfil…</span>
         ) : (
           <>
             <span>✨</span>
@@ -80,7 +80,7 @@ export default function SurpriseRewardToast() {
             
             <div className="p-5">
               <div className="flex justify-between items-start mb-3">
-                <h3 className="font-bold text-md-on-highlight text-lg">Oferta Relâmpago ⚡</h3>
+                <h3 className="font-bold text-md-on-highlight text-lg">Oferta relâmpago</h3>
                 <button
                   type="button"
                   onClick={() => setIsVisible(false)}
@@ -122,7 +122,7 @@ export default function SurpriseRewardToast() {
                 }}
                 className="w-full h-11 bg-md-primary text-md-on-primary rounded-lg font-medium hover:bg-md-primary-container transition-colors"
               >
-                Resgatar Agora
+                Resgatar agora
               </button>
             </div>
           </motion.div>

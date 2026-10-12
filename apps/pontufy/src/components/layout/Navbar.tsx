@@ -46,7 +46,7 @@ export default function Navbar() {
 
   const navLinks = [
     { href: '/dashboard', label: 'Início' },
-    { href: '/cursos', label: 'Meus Cursos' },
+    { href: '/cursos', label: 'Cursos' },
     { href: '/skills', label: 'Trilhas' },
     { href: '/battles', label: 'Batalhas' },
     { href: '/loja', label: 'Benefícios' },
@@ -94,7 +94,7 @@ export default function Navbar() {
                   className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold text-md-secondary hover:text-md-secondary/80 transition-colors ml-1"
                 >
                   <LayoutDashboard size={14} />
-                  Painel RH
+                  Painel de RH
                 </Link>
               )}
               {role === 'super_admin' && (
@@ -168,7 +168,7 @@ export default function Navbar() {
                       className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:bg-white/5 transition-colors font-medium"
                     >
                       <User size={15} />
-                      Meu Perfil
+                      Meu perfil
                     </Link>
                     {role === 'super_admin' && (
                       <Link

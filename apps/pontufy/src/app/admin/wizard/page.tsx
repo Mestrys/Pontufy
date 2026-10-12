@@ -18,7 +18,7 @@ export default function WizardPage() {
       <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3 sm:gap-4">
           <div>
-            <h1 className="text-headline-md font-extrabold text-md-on-surface">Gerador de Treinamentos</h1>
+            <h1 className="text-headline-md font-extrabold text-md-on-surface">Criar curso com IA</h1>
             <p className="text-body-md text-md-on-surface-variant">Automatize a criação de conteúdo corporativo com IA.</p>
           </div>
         </div>

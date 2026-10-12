@@ -60,7 +60,7 @@ export default function CoursesPage() {
 
   const filters: { key: FilterStatus; label: string }[] = [
     { key: 'all', label: 'Todos' },
-    { key: 'in_progress', label: 'Em Andamento' },
+    { key: 'in_progress', label: 'Em andamento' },
     { key: 'completed', label: 'Concluídos' },
     { key: 'available', label: 'Disponíveis' },
   ];
@@ -97,7 +97,7 @@ export default function CoursesPage() {
     <div className="min-h-screen pb-20 pt-8 bg-md-surface-dim">
       <div className="max-w-[1200px] mx-auto px-6 md:px-16">
         <header className="mb-8">
-          <h1 className="text-3xl font-black text-white tracking-tight">Meus Cursos & Trilhas</h1>
+          <h1 className="text-3xl font-black text-white tracking-tight">Cursos</h1>
           <p className="text-md-on-surface-muted mt-1.5 text-sm">Acompanhe seu progresso em todas as trilhas de aprendizagem.</p>
         </header>
 

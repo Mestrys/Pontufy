@@ -14,7 +14,7 @@ export default function PointsHistory({ history }: PointsHistoryProps) {
   return (
     <div className="bg-[#141414] rounded-2xl border border-[#2a2a2a] overflow-hidden mb-12">
       <div className="px-6 py-4 border-b border-[#2a2a2a]">
-        <h2 className="text-base font-bold text-white">Extrato Digital</h2>
+        <h2 className="text-base font-bold text-white">Extrato</h2>
         <p className="text-xs text-md-on-surface-muted mt-0.5">Histórico cronológico de movimentações.</p>
       </div>
 

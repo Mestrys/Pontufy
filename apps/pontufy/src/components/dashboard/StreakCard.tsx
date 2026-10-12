@@ -64,7 +64,7 @@ export default function StreakCard() {
           </p>
           {rank && (
             <p className="text-xs text-md-on-surface-muted mt-1">
-              #{rank.position} no ranking · {rank.xp} XP
+              #{rank.position} no ranking · {rank.xp.toLocaleString('pt-BR')} pts
             </p>
           )}
         </div>

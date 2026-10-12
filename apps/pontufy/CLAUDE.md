@@ -276,6 +276,25 @@ text-[<12px]                                 → text-xs
 - Carregamento de tela usa `Skeleton` dentro de `LoadingRegion` (anuncia "Carregando…"); spinner só dentro de botão. Tela vazia usa `EmptyState` com o próximo passo quando existir.
 - Alvo de toque mínimo de **44px** (`h-11`/`size-11`; `Button` e `.md-btn` já têm). Para ícones pequenos, mantenha o desenho e aumente só a área clicável.
 
+### Texto da interface
+
+- **Sentence case** em títulos, botões, abas e rótulos: “Concluir aula”, “Meus certificados”, “Fazer a avaliação final”. Maiúscula só na primeira palavra e em nomes próprios e siglas (Pontufy, LGPD, IA, RH).
+- **Um nome para cada coisa** (glossário). Use estes, não os sinônimos:
+
+| Use | Não use |
+|---|---|
+| Início | Dashboard, Home |
+| Cursos | Meus Cursos, Treinamentos (na navegação) |
+| Trilhas | Trilhas de Competência, Trilhas de Habilidade |
+| Benefícios | Clube de Benefícios, Recompensas, Loja |
+| Carteira | Central de Conquistas |
+| pontos / pts | XP, moedas |
+| Avaliação final | Quiz Final, Quiz de Avaliação |
+| Painel de RH | Painel do Gestor, Dashboard Admin |
+| Marca | Identidade Visual, Marca & Identidade |
+
+- Mensagem de erro diz o que aconteceu e o que fazer, sem termo técnico (ver `friendlyApiError`). Nada de nome de variável de ambiente, provedor de IA ou rota na tela.
+
 ### Senha e Segurança
 
 - Mínimo 8 caracteres (validado client-side **e** server-side)

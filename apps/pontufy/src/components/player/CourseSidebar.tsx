@@ -151,7 +151,7 @@ export default function CourseSidebar({
               ) : (
                 <>
                   <Trophy size={16} />
-                  {allCompleted ? 'Fazer Quiz Final' : 'Quiz Final (+50 pts)'}
+                  {allCompleted ? 'Fazer a avaliação final' : 'Avaliação final (+50 pts)'}
                 </>
               )}
             </button>

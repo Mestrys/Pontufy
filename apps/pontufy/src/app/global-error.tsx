@@ -26,7 +26,7 @@ export default function GlobalError({
               />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold mb-3">Falha Crítica no Sistema</h2>
+          <h2 className="text-2xl font-bold mb-3">Algo deu errado</h2>
           <p className="text-gray-300 mb-8 text-sm">
             Ocorreu um erro inesperado na renderização do aplicativo. A equipe
             técnica foi notificada.
@@ -35,7 +35,7 @@ export default function GlobalError({
             onClick={() => reset()}
             className="w-full bg-md-primary hover:bg-md-primary-container text-md-on-primary font-bold py-3 px-6 rounded-full transition-all shadow-md hover:shadow-lg"
           >
-            Tentar Recarregar
+            Recarregar
           </button>
           {error.digest && (
             <p className="mt-6 text-xs text-md-on-surface-muted font-mono">

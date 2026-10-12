@@ -132,7 +132,7 @@ export default function BrandingClient() {
       <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div className="flex items-center gap-3 sm:gap-4">
           <div>
-            <h1 className="text-headline-md font-extrabold text-md-on-surface">Identidade Visual</h1>
+            <h1 className="text-headline-md font-extrabold text-md-on-surface">Marca</h1>
             <p className="text-body-md text-md-on-surface-variant mt-1">
               Personalize a marca exibida para {branding?.name ?? 'sua empresa'}
             </p>

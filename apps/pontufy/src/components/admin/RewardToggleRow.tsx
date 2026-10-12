@@ -50,10 +50,10 @@ export default function RewardToggleRow({ catalog }: { catalog: RewardItem[] }) 
       <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-md-outline bg-md-surface-container-high/50">
         <div className="flex items-center gap-2 mb-1">
           <Gift className="text-md-primary-text flex-shrink-0" size={20} />
-          <h2 className="text-title-lg font-bold text-md-on-surface">Controle do Catálogo de Recompensas</h2>
+          <h2 className="text-title-lg font-bold text-md-on-surface">Catálogo de benefícios</h2>
         </div>
         <p className="text-body-sm text-md-on-surface-variant">
-          Gerencie quais prêmios estarão visíveis no Clube de Benefícios da sua empresa.
+          Gerencie quais prêmios estarão visíveis no Benefícios da sua empresa.
         </p>
       </div>
 
@@ -99,7 +99,7 @@ export default function RewardToggleRow({ catalog }: { catalog: RewardItem[] }) 
                     aria-checked={item.active}
                     onClick={() => handleToggle(item.id)}
                     className="h-11 w-14 inline-flex items-center justify-center rounded-full"
-                    aria-label={`Disponível no Clube de Benefícios: ${item.title}`}
+                    aria-label={`Disponível no Benefícios: ${item.title}`}
                   >
                     <span
                       aria-hidden="true"

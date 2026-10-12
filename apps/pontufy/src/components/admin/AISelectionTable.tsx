@@ -69,7 +69,7 @@ export default function AISelectionTable({
         <table className="w-full text-left border-collapse min-w-[600px]">
           <thead>
             <tr className="bg-md-surface-container-high/50 text-md-on-surface-variant text-label-sm uppercase tracking-wider border-b border-md-outline">
-              <th className="px-4 sm:px-6 py-3 font-semibold">Título do Curso</th>
+              <th className="px-4 sm:px-6 py-3 font-semibold">Curso</th>
               <th className="px-3 sm:px-6 py-3 font-semibold text-center">Status</th>
               <th className="px-3 sm:px-6 py-3 font-semibold text-center">Engajamento</th>
               <th className="px-3 sm:px-6 py-3 font-semibold text-right whitespace-nowrap">Data</th>

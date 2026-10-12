@@ -84,7 +84,7 @@ export default function CertificateBadgeMural({ certificates }: { certificates: 
         <div>
           <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
             <Award className="text-md-primary-text" size={24} />
-            Meus Certificados
+            Meus certificados
           </h2>
           <p className="text-md-on-surface-muted text-sm mt-0.5">
             {certificates.length} certificado{certificates.length !== 1 ? 's' : ''} — cada um com raridade única baseada no hash criptográfico
