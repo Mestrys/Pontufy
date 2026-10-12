@@ -117,7 +117,7 @@ export default function CourseSidebar({
                         isActive ? 'text-white font-bold' : lesson.completed ? 'text-md-on-surface-muted font-medium' : 'text-gray-400 font-medium'
                       }`}
                     >
-                      <span className="text-md-on-surface-muted mr-1">{index + 1}.</span>
+                      <span className={`mr-1 ${isActive ? 'text-md-on-surface' : 'text-md-on-surface-muted'}`}>{index + 1}.</span>
                       {lesson.title}
                     </p>
                     {!lesson.completed && !locked && (

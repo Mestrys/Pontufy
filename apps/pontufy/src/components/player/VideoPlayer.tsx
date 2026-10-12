@@ -39,7 +39,7 @@ export default function VideoPlayer({ lesson, onComplete }: VideoPlayerProps) {
             <div className="text-white text-sm">00:00 / {lesson.duration ?? '--:--'}</div>
             <button
               onClick={onComplete}
-              className="bg-md-primary hover:bg-md-primary-container text-white font-bold py-1.5 px-4 rounded text-sm transition-colors"
+              className="bg-md-primary hover:bg-md-primary-container text-md-on-primary font-bold py-1.5 px-4 rounded text-sm transition-colors"
             >
               Marcar como Concluída
             </button>

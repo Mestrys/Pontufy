@@ -2,7 +2,16 @@
 
 import { useEffect, useState } from 'react';
 import { Loader2, Save, Palette, Image as ImageIcon, ArrowLeft, Check } from 'lucide-react';
-import { sanitizeHexColor, DEFAULT_PRIMARY_COLOR, DEFAULT_ACCENT_COLOR } from '@/lib/branding';
+import {
+  sanitizeHexColor,
+  sanitizeBrandingUrl,
+  customBrandColor,
+  deriveBrandTheme,
+  brandThemeCssVars,
+  DEFAULT_PRIMARY_COLOR,
+  DEFAULT_ACCENT_COLOR,
+} from '@/lib/branding';
+import { useBrand } from '@/components/theme/DynamicThemeProvider';
 
 interface Branding {
   name: string;
@@ -12,9 +21,10 @@ interface Branding {
   accentColor: string;
 }
 
-const PRESETS = ['#10B981', '#8B5CF6', '#3B82F6', '#F59E0B', '#EF4444', '#EC4899', '#14B8A6', '#F97316'];
+const PRESETS = [DEFAULT_PRIMARY_COLOR, '#1E3A8A', '#3B82F6', '#14B8A6', '#F59E0B', '#F97316', '#EF4444', '#EC4899'];
 
 export default function BrandingClient() {
+  const { refresh } = useBrand();
   const [branding, setBranding] = useState<Branding | null>(null);
   const [logoUrl, setLogoUrl] = useState('');
   const [faviconUrl, setFaviconUrl] = useState('');
@@ -36,8 +46,9 @@ export default function BrandingClient() {
           setBranding(data);
           setLogoUrl(data.logoUrl ?? '');
           setFaviconUrl(data.faviconUrl ?? '');
-          setPrimaryColor(data.primaryColor ?? DEFAULT_PRIMARY_COLOR);
-          setAccentColor(data.accentColor ?? DEFAULT_ACCENT_COLOR);
+          // Padrões antigos (esmeralda/lavanda) contam como "sem personalização".
+          setPrimaryColor(customBrandColor(data.primaryColor) ?? DEFAULT_PRIMARY_COLOR);
+          setAccentColor(customBrandColor(data.accentColor) ?? DEFAULT_ACCENT_COLOR);
         } else {
           setError(data.error || 'Erro ao carregar a marca.');
         }
@@ -89,6 +100,7 @@ export default function BrandingClient() {
       if (res.ok && data.success) {
         setBranding(data.branding);
         setSaved(true);
+        refresh();
         setTimeout(() => setSaved(false), 3000);
       } else {
         setError(data.error || 'Erro ao salvar a marca.');
@@ -110,6 +122,10 @@ export default function BrandingClient() {
 
   const primaryHex = sanitizeHexColor(primaryColor) ?? DEFAULT_PRIMARY_COLOR;
   const accentHex = sanitizeHexColor(accentColor) ?? DEFAULT_ACCENT_COLOR;
+  const isCustom = customBrandColor(primaryHex) !== null;
+  const theme = deriveBrandTheme(primaryHex, customBrandColor(accentHex));
+  // A prévia usa os mesmos tokens que o app vai usar; sem cor própria, a paleta Pontufy.
+  const previewVars = (isCustom ? brandThemeCssVars(theme) : {}) as React.CSSProperties;
 
   return (
     <div className="space-y-8">
@@ -247,32 +263,55 @@ export default function BrandingClient() {
               <button
                 key={preset}
                 type="button"
-                onClick={() => setPrimaryColor(preset)}
+                onClick={() => {
+                  setPrimaryColor(preset);
+                  if (preset === DEFAULT_PRIMARY_COLOR) setAccentColor(DEFAULT_ACCENT_COLOR);
+                }}
                 className="size-11 rounded-full border border-md-outline transition-transform motion-safe:hover:scale-110"
                 style={{ backgroundColor: preset }}
-                aria-label={`Usar cor ${preset}`}
+                aria-label={preset === DEFAULT_PRIMARY_COLOR ? 'Usar as cores Pontufy' : `Usar cor ${preset}`}
+                aria-pressed={primaryHex === preset}
               />
             ))}
           </div>
 
-          <div className="p-5 bg-md-surface-container-high border border-md-outline rounded-xl">
-            <p className="text-body-sm text-md-on-surface-muted mb-4">Prévia do gradiente da marca:</p>
-            <div className="flex items-center gap-4 flex-wrap">
-              <button
-                type="button"
-                className="md-btn md-btn-filled text-body-md"
-                style={{ background: `linear-gradient(135deg, ${primaryHex} 0%, #059669 100%)` }}
-              >
-                CTA principal
-              </button>
-              <span
-                className="text-headline-sm font-black"
-                style={{ backgroundImage: `linear-gradient(135deg, ${primaryHex} 0%, ${accentHex} 100%)`, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}
-              >
-                Pontufy
-              </span>
+          {isCustom && theme.adjusted && (
+            <p role="status" className="mb-4 rounded-xl border border-md-highlight/30 bg-md-highlight/10 p-3 text-body-sm text-md-highlight">
+              Ajustamos o preenchimento para {theme.primary} para manter o texto dos botões legível (contraste mínimo de 4,5:1).
+            </p>
+          )}
+
+          <div style={previewVars} className="rounded-xl border border-md-outline bg-md-surface-dim overflow-hidden" aria-label="Prévia da marca" role="group">
+            <div className="flex items-center justify-between gap-3 border-b border-md-outline bg-md-surface px-4 py-3">
+              {sanitizeBrandingUrl(logoUrl) ? (
+                // eslint-disable-next-line @next/next/no-img-element -- prévia de URL externa digitada pelo RH
+                <img src={sanitizeBrandingUrl(logoUrl)!} alt={branding?.name ?? 'Logo'} className="h-8 max-w-[140px] w-auto object-contain" />
+              ) : (
+                <span className="text-xl font-black tracking-tight text-white">
+                  <span className="text-md-primary-text">Pontu</span>fy
+                </span>
+              )}
+              <span className="rounded-full bg-md-primary/20 px-3 py-1.5 text-sm font-bold text-white">Início</span>
+            </div>
+            <div className="space-y-4 p-5">
+              <p className="text-body-md text-md-on-surface">
+                Texto da aula com um <span className="text-md-primary-text underline underline-offset-2">link</span> e um{' '}
+                <span className="font-bold text-md-secondary">destaque</span>.
+              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="inline-flex h-11 items-center rounded-full bg-md-primary px-6 text-sm font-bold text-md-on-primary">
+                  Concluir e avançar
+                </span>
+                <span className="inline-flex h-11 items-center rounded-full bg-md-primary-container px-6 text-sm font-bold text-md-on-primary-container">
+                  Ao passar o mouse
+                </span>
+                <span className="md-btn md-btn-outlined">Secundário</span>
+              </div>
             </div>
           </div>
+          <p className="mt-3 text-body-sm text-md-on-surface-muted">
+            A cor de destaque aparece em rótulos e em botões tonais. Para voltar às cores Pontufy, escolha a primeira cor da lista.
+          </p>
         </section>
 
         <button

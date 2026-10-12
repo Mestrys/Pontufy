@@ -14,10 +14,10 @@
 @theme {
   --font-sans: "Google Sans Flex", "Google Sans", var(--font-roboto), "Roboto", sans-serif;
 
-  /* White-Label dinâmico: valores padrão injetados em runtime pelo
-     DynamicThemeProvider (nunca aceitar input do tenant sem sanitização). */
-  --brand-primary: #10b981;
-  --brand-accent: #8b5cf6;
+  /* White-label: o DynamicThemeProvider sobrescreve no <html> os tokens
+     md-primary, md-primary-container, on-primary(-container), md-primary-text
+     e md-secondary com valores derivados da cor do cliente e já ajustados
+     para contraste (lib/branding.ts → deriveBrandTheme). */
 
   /* ── MD3 palette Pontufy (tokens semânticos) ────────────────────────────────
      Primary #5c4152 · Primary Container/Hover #b4585d · Secondary #d97f76
@@ -115,8 +115,8 @@
     @apply font-sans antialiased;
   }
   ::selection {
-    background: #b4585d;
-    color: #fff;
+    background: var(--color-md-primary-container);
+    color: var(--color-md-on-primary-container);
   }
   /* Foco de teclado único e visível em toda a aplicação. Não remova com
      focus:outline-none; campos podem trocar por focus:border-md-focus. */
@@ -173,11 +173,12 @@
   .md-btn:active::after { opacity: 0.12; }
   .md-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  .md-btn-filled { background-color: #5c4152; color: #fff; }
-  .md-btn-filled:hover { background-color: #b4585d; box-shadow: var(--shadow-sm); }
-  .md-btn-tonal { background-color: rgb(217 127 118 / 0.15); color: #d97f76; }
-  .md-btn-outlined { border: 1px solid #636363; color: #d99bb8; background: transparent; }
-  .md-btn-text { color: #d99bb8; background: transparent; padding-inline: 0.75rem; }
+  /* Leem os tokens para acompanhar a marca do cliente (white-label). */
+  .md-btn-filled { background-color: var(--color-md-primary); color: var(--color-md-on-primary); }
+  .md-btn-filled:hover { background-color: var(--color-md-primary-container); color: var(--color-md-on-primary-container); box-shadow: var(--shadow-sm); }
+  .md-btn-tonal { background-color: color-mix(in srgb, var(--color-md-secondary) 15%, transparent); color: var(--color-md-secondary); }
+  .md-btn-outlined { border: 1px solid var(--color-md-field-border); color: var(--color-md-primary-text); background: transparent; }
+  .md-btn-text { color: var(--color-md-primary-text); background: transparent; padding-inline: 0.75rem; }
 
   /* Cards M3 sobre a paleta atual */
   .md-card-elevated {

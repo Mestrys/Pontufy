@@ -39,7 +39,7 @@ export default function MobileTabBar() {
               >
                 <span
                   className={`flex h-8 w-14 items-center justify-center rounded-full transition-colors ${
-                    active ? 'bg-md-primary' : ''
+                    active ? 'bg-md-primary text-md-on-primary' : ''
                   }`}
                 >
                   <Icon size={20} aria-hidden="true" />

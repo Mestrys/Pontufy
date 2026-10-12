@@ -7,6 +7,7 @@ import { signOut, useSession } from 'next-auth/react';
 import { MD3SearchBar } from '@/components/ui/MD3SearchBar';
 import { Dialog } from '@/components/ui/Dialog';
 import { isRouteActive } from './shell-routes';
+import BrandMark from '@/components/theme/BrandMark';
 
 export interface MD3DrawerLink {
   href: string;
@@ -54,8 +55,8 @@ export function MD3NavigationDrawer({ open, onClose, links, activeHref }: MD3Nav
     >
             {/* Header do drawer */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-md-outline flex-shrink-0">
-              <Link href="/dashboard" onClick={onClose} className="text-lg font-black tracking-tight text-white">
-                <span className="text-md-primary-text">Pontu</span>fy
+              <Link href="/dashboard" onClick={onClose} aria-label="Início" className="min-h-11 inline-flex items-center">
+                <BrandMark />
               </Link>
               <button
                 type="button"
@@ -117,7 +118,7 @@ export function MD3NavigationDrawer({ open, onClose, links, activeHref }: MD3Nav
               <div className="border-t border-md-outline px-4 py-4 flex-shrink-0">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="relative">
-                    <div className="w-10 h-10 rounded-full bg-md-primary flex items-center justify-center text-white font-black">
+                    <div className="w-10 h-10 rounded-full bg-md-primary flex items-center justify-center text-md-on-primary font-black">
                       {session?.user?.name?.[0]?.toUpperCase() ?? <User size={18} />}
                     </div>
                     <span

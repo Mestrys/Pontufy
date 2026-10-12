@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import { useModalBehavior } from '@/components/ui/Dialog';
 import { useDismissableMenu } from '@/hooks/useDismissableMenu';
+import BrandMark from '@/components/theme/BrandMark';
 import {
   LayoutDashboard,
   BarChart3,
@@ -191,9 +192,9 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
           {/* Drawer Header */}
           <div className={`flex items-center justify-between p-4 border-b border-md-outline ${navCollapsed ? 'justify-center' : ''}`}>
             {!navCollapsed && (
-              <Link href="/admin" className="min-h-11 flex items-center gap-2 text-xl font-black tracking-tighter text-md-on-surface">
-                <span className="text-md-primary-text">Pontu</span>fy
-                <span className="text-md-primary-text">Admin</span>
+              <Link href="/admin" aria-label="Painel de RH" className="min-h-11 flex items-center gap-2 text-xl font-black tracking-tighter text-md-on-surface">
+                <BrandMark />
+                <span className="text-sm font-bold tracking-normal text-md-on-surface-muted">RH</span>
               </Link>
             )}
             <button

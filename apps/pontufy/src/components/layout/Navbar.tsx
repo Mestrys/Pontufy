@@ -12,6 +12,7 @@ import { MD3NavigationDrawer } from '@/components/layout/MD3NavigationDrawer';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { useDismissableMenu } from '@/hooks/useDismissableMenu';
 import { isRouteActive } from '@/components/layout/shell-routes';
+import BrandMark from '@/components/theme/BrandMark';
 
 export default function Navbar() {
   const { data: session, status } = useSession();
@@ -67,8 +68,8 @@ export default function Navbar() {
         <div className="flex items-center justify-between">
           {/* Left: Logo + Desktop links */}
           <div className="flex items-center gap-8">
-            <Link href="/dashboard" className="min-h-11 inline-flex items-center text-xl font-black tracking-tight text-white flex-shrink-0">
-              <span className="text-md-primary-text">Pontu</span>fy
+            <Link href="/dashboard" aria-label="Início" className="min-h-11 inline-flex items-center flex-shrink-0">
+              <BrandMark />
             </Link>
 
             <div className="hidden md:flex items-center gap-0.5">
@@ -139,7 +140,7 @@ export default function Navbar() {
                   aria-expanded={isDropdownOpen}
                   className="group size-11 -m-1.5 flex items-center justify-center rounded-full"
                 >
-                  <span className="relative w-8 h-8 rounded-full bg-md-primary flex items-center justify-center group-hover:bg-md-primary-container transition-colors text-white font-black text-sm">
+                  <span className="relative w-8 h-8 rounded-full bg-md-primary flex items-center justify-center group-hover:bg-md-primary-container transition-colors text-md-on-primary font-black text-sm">
                     {session?.user?.name?.[0]?.toUpperCase() ?? <User size={16} aria-hidden="true" />}
                     {/* Badge de status de conexão (3.4) */}
                     <span

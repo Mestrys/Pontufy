@@ -99,7 +99,7 @@ export default function SurpriseRewardToast() {
                   <span className="text-xs text-md-on-highlight/70 block">Desconto IA:</span>
                   <span className="font-black text-lg text-md-primary-text">{data.discountedPoints} pts</span>
                 </div>
-                <div className="h-8 w-8 bg-md-primary rounded-full flex items-center justify-center text-white font-bold text-xs">
+                <div className="h-8 w-8 bg-md-primary rounded-full flex items-center justify-center text-md-on-primary font-bold text-xs">
                   -10%
                 </div>
               </div>

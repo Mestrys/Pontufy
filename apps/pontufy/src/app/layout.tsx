@@ -53,6 +53,11 @@ export const metadata: Metadata = {
   },
 };
 
+// Aplica a marca do tenant guardada na última visita antes da primeira pintura,
+// sem esperar o fetch do DynamicThemeProvider (evita o "flash" da cor Pontufy).
+// Só aceita nomes de token conhecidos e valores #RRGGBB.
+const BRAND_BOOTSTRAP = `try{var v=JSON.parse(localStorage.getItem('pontufy-brand-vars')||'null');if(v){for(var k in v){if(/^--color-md-[a-z-]+$/.test(k)&&/^#[0-9A-F]{6}$/i.test(v[k]))document.documentElement.style.setProperty(k,v[k]);}}}catch(e){}`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -62,7 +67,12 @@ export default function RootLayout({
     <html
       lang="pt-BR"
       className={`${roboto.variable} ${geistMono.variable} font-sans h-full antialiased`}
+      // O script de marca muda o style do <html> antes da hidratação.
+      suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: BRAND_BOOTSTRAP }} />
+      </head>
       <body className="min-h-full flex flex-col bg-brand-gray">
         <AuthProvider>
           <DynamicThemeProvider>

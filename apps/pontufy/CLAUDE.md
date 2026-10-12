@@ -250,6 +250,7 @@ Chip tonal:          bg-md-tertiary-container text-md-on-tertiary-container
 - Não use opacidade em texto (`text-.../60`, `opacity-50` em bloco de texto). Escolha o papel de texto mais fraco que ainda passa: `md-on-surface-muted`.
 - Piso tipográfico de **12px** (`text-xs`, `text-label-sm`). Nada de `text-[9px]`, `text-[10px]` ou `text-[11px]`.
 - Foco: o `:focus-visible` global desenha `outline` de 2px em `md-focus` (#f7d0a9). Não use `focus:outline-none`, exceto em campo com `focus:border-md-focus`.
+- **White-label**: a cor do cliente sobrescreve `md-primary`, `md-primary-container`, `md-on-primary(-container)`, `md-primary-text` e `md-secondary` no `<html>` (`DynamicThemeProvider` → `deriveBrandTheme` em `lib/branding.ts`, que ajusta a cor até 4,5:1). Por isso, nada de hex fixo da paleta em componente: sobre `bg-md-primary` o texto é `text-md-on-primary` (pode ser escuro), nunca `text-white`. Em fundo tingido da marca (`bg-md-primary/15`), use `text-md-on-surface`, não `muted`. Logo e nome da empresa vêm de `useBrand()` / `<BrandMark />`.
 
 **Proibido** (reprovado pelo `check:theme`)
 

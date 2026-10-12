@@ -7,11 +7,13 @@ import { useStore } from '@/store/useStore';
 import { useUserStore } from '@/store/useUserStore';
 import { isSoundEnabled, setSoundEnabled } from '@/lib/feedback';
 import AchievementsCard from '@/components/profile/AchievementsCard';
+import { useBrand } from '@/components/theme/DynamicThemeProvider';
 import { AlertDialog } from '@/components/ui/AlertDialog';
 import { Loader2, User, Coins, Save, ShieldCheck, Building2, Volume2, VolumeX, LogOut, Wallet, Award, Network } from 'lucide-react';
 import { ListSkeleton, LoadingRegion } from '@/components/ui/Skeleton';
 
 export default function ProfilePage() {
+  const brand = useBrand();
   const { data: session, status } = useSession();
   const currentUser = useStore((s) => s.currentUser);
   const { currentPoints } = useUserStore();
@@ -130,7 +132,7 @@ export default function ProfilePage() {
                 <div className="flex items-center gap-2 text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">
                   <Building2 size={13} className="text-md-tertiary" /> Empresa
                 </div>
-                <div className="text-sm font-semibold text-white mt-1.5">{session?.user?.tenantId ? 'Conta corporativa' : '—'}</div>
+                <div className="text-sm font-semibold text-white mt-1.5">{brand.name ?? '—'}</div>
               </div>
             </div>
           </section>

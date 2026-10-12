@@ -346,7 +346,8 @@ export default function AIWizard() {
                     <span className="text-label-lg font-bold leading-tight text-md-on-surface">
                       {CONTENT_TYPE_LABELS[type]}
                     </span>
-                    <span className="text-xs text-md-on-surface-variant leading-tight">
+                    {/* Selecionado: texto claro, porque o tinte da marca do cliente pode ser claro. */}
+                    <span className={`text-xs leading-tight ${selected ? 'text-md-on-surface' : 'text-md-on-surface-variant'}`}>
                       {CONTENT_TYPE_CONFIG[type].description}
                     </span>
                   </button>

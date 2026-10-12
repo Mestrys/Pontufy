@@ -1,77 +1,110 @@
 'use client';
 
-import { useEffect } from 'react';
-import { buildBrandingCssVars, sanitizeHexColor } from '@/lib/branding';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import {
+  BRAND_CSS_VARS,
+  brandThemeCssVars,
+  customBrandColor,
+  deriveBrandTheme,
+  sanitizeBrandingUrl,
+} from '@/lib/branding';
 
 interface BrandingResponse {
+  name?: string | null;
   logoUrl?: string | null;
   faviconUrl?: string | null;
   primaryColor?: string | null;
   accentColor?: string | null;
 }
 
+export interface BrandInfo {
+  /** Nome da empresa (tenant); null antes de carregar ou sem sessão. */
+  name: string | null;
+  logoUrl: string | null;
+  /** Busca a marca de novo (depois que o RH salva a identidade visual). */
+  refresh: () => void;
+}
+
+const BrandContext = createContext<BrandInfo>({ name: null, logoUrl: null, refresh: () => {} });
+
+export const useBrand = () => useContext(BrandContext);
+
+/** Chave do cache local dos tokens, lida também pelo script do <head> (layout.tsx). */
+export const BRAND_CACHE_KEY = 'pontufy-brand-vars';
+
+function applyVars(vars: Record<string, string> | null) {
+  const root = document.documentElement;
+  for (const name of BRAND_CSS_VARS) {
+    if (vars?.[name]) root.style.setProperty(name, vars[name]);
+    else root.style.removeProperty(name);
+  }
+  try {
+    if (vars) localStorage.setItem(BRAND_CACHE_KEY, JSON.stringify(vars));
+    else localStorage.removeItem(BRAND_CACHE_KEY);
+  } catch {
+    // Sem storage (aba privada): só perde o cache contra o "flash" de cor.
+  }
+}
+
 /**
- * Aplica as CSS variables do white-label do tenant no <html> (documentElement).
- * - `--brand-primary` / `--brand-accent`: sempre valores hex sanitizados
- *   (fallback para os padrões Pontufy) — nunca injetar input bruto.
- * - `--brand-logo` / `--brand-favicon`: URLs validadas, opcionais.
- * - Tokens base do dark theme (bg/surface/border) permanecem intactos.
+ * White-label do tenant. Busca a marca depois do login (e de novo se o tenant
+ * mudar) e sobrescreve no <html> os tokens md-primary, md-primary-container,
+ * on-primary, md-primary-text e md-secondary com valores derivados da cor do
+ * cliente e já ajustados para 4,5:1 (deriveBrandTheme). Sem cor própria, a
+ * paleta Pontufy do globals.css continua valendo. Nome e logo vão por contexto.
  */
 export default function DynamicThemeProvider({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    if (typeof document === 'undefined') return;
-    let cancelled = false;
+  const { data: session, status } = useSession();
+  const tenantId = (session?.user as { tenantId?: string } | undefined)?.tenantId ?? null;
+  // Guardado com o tenant de origem: ao sair ou trocar de tenant, o valor velho deixa de valer.
+  const [brand, setBrand] = useState<{ tenantId: string; name: string | null; logoUrl: string | null } | null>(null);
+  const [version, setVersion] = useState(0);
+  const refresh = useCallback(() => setVersion((v) => v + 1), []);
 
+  useEffect(() => {
+    if (status === 'loading') return;
+    if (status !== 'authenticated' || !tenantId) {
+      // Sem sessão (login, landing): volta à marca Pontufy.
+      applyVars(null);
+      return;
+    }
+
+    let cancelled = false;
     fetch('/api/admin/branding', { cache: 'no-store' })
-      .then(async (res) => {
-        if (!res.ok) return null;
-        return (await res.json()) as BrandingResponse | null;
-      })
+      .then((res) => (res.ok ? (res.json() as Promise<BrandingResponse>) : null))
       .then((branding) => {
         if (cancelled || !branding) return;
 
-        const root = document.documentElement;
-        const vars = buildBrandingCssVars(branding);
-        root.style.setProperty('--brand-primary', vars['--brand-primary']);
-        root.style.setProperty('--brand-accent', vars['--brand-accent']);
+        const primary = customBrandColor(branding.primaryColor);
+        const accent = customBrandColor(branding.accentColor);
+        applyVars(primary ? brandThemeCssVars(deriveBrandTheme(primary, accent)) : null);
 
-        if (branding.logoUrl) {
-          root.style.setProperty('--brand-logo', `url(${JSON.stringify(branding.logoUrl)})`);
-        } else {
-          root.style.removeProperty('--brand-logo');
-        }
+        setBrand({
+          tenantId,
+          name: branding.name?.trim() || null,
+          logoUrl: sanitizeBrandingUrl(branding.logoUrl),
+        });
 
-        if (branding.faviconUrl) {
+        const favicon = sanitizeBrandingUrl(branding.faviconUrl);
+        if (favicon) {
           const icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
-          if (icon) icon.href = branding.faviconUrl;
+          if (icon) icon.href = favicon;
         }
       })
       .catch(() => {
-        // Mantém os padrões (CSS vars já definidas no globals.css).
+        // Mantém o que já está aplicado.
       });
 
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [status, tenantId, version]);
 
-  // Re-aplica a cor primária do tenant a elementos marcados com
-  // `data-brand-primary` (botões/CTAs que devem acompanhar a marca).
-  useEffect(() => {
-    if (typeof document === 'undefined') return;
-    const observer = new MutationObserver(() => {
-      const root = document.documentElement;
-      const primary = root.style.getPropertyValue('--brand-primary');
-      if (!primary || !sanitizeHexColor(primary)) return;
-      document
-        .querySelectorAll<HTMLElement>('[data-brand-primary]')
-        .forEach((el) => {
-          el.style.backgroundColor = primary;
-        });
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-    return () => observer.disconnect();
-  }, []);
-
-  return <>{children}</>;
+  const current = status === 'authenticated' && brand?.tenantId === tenantId ? brand : null;
+  const value = useMemo(
+    () => ({ name: current?.name ?? null, logoUrl: current?.logoUrl ?? null, refresh }),
+    [current, refresh],
+  );
+  return <BrandContext.Provider value={value}>{children}</BrandContext.Provider>;
 }
