@@ -266,6 +266,7 @@ model Invitation {
   token     String   @unique
   role      String   @default("employee") // 'admin_rh', 'employee', 'guest'
   status    String   @default("pending") // 'pending', 'accepted', 'expired'
+  department String?  // TAREFA 13.2 — pré-atribuído pelo RH; copiado para User no registro
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime @default(now())

@@ -25,15 +25,13 @@ export async function PATCH(request: Request) {
       data.name = sanitizeAiText(name.trim()).slice(0, 120);
     }
 
-    // 13.2 — Departamento p/ ranking interdepartamental (opcional, sanitizado).
+    // 13.2 — Departamento é atribuído exclusivamente pelo RH (tela Equipe),
+    // para que o colaborador não migre de departamento e manipule o ranking.
     if (department !== undefined) {
-      if (department === null || department === '') {
-        data.department = '';
-      } else if (typeof department === 'string' && department.trim().length >= 2 && department.trim().length <= 60) {
-        data.department = sanitizeAiText(department.trim());
-      } else {
-        return NextResponse.json({ error: 'Departamento deve ter entre 2 e 60 caracteres.' }, { status: 400 });
-      }
+      return NextResponse.json(
+        { error: 'O departamento é definido pelo RH da sua empresa.' },
+        { status: 403 },
+      );
     }
 
     if (newPassword) {
