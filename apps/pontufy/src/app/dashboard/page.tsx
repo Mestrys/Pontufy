@@ -8,6 +8,7 @@ import StreakCard from '@/components/dashboard/StreakCard';
 import { useCourses, useEnrolledCourses } from '@/hooks/useApi';
 import { getCachedCourses, reconcileWithApi, type CachedCourse } from '@/lib/local-courses';
 import { Loader2 } from 'lucide-react';
+import { DashboardSkeleton, LoadingRegion } from '@/components/ui/Skeleton';
 
 function mergeCourses(apiCourses: any[], local: CachedCourse[]): any[] {
   const apiIds = new Set(apiCourses.map((c: any) => c.id));
@@ -87,9 +88,9 @@ export default function Home() {
       <SurpriseRewardToast />
 
       {isLoading ? (
-        <div className="flex items-center justify-center h-[60vh]">
-          <Loader2 className="animate-spin text-md-primary-text" size={40} />
-        </div>
+        <LoadingRegion label="Carregando o início…">
+          <DashboardSkeleton />
+        </LoadingRegion>
       ) : (
         <>
           {heroCourse && <HeroCourse course={heroCourse} />}

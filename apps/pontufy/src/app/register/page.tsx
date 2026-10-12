@@ -63,7 +63,7 @@ function RegisterForm() {
   if (!token) {
     return (
       <div className="md-card-outlined md-elevation-3 p-8 text-center">
-        <Link href="/" className="inline-flex items-center gap-2 text-3xl font-black tracking-tight text-white mb-6">
+        <Link href="/" className="inline-flex items-center min-h-11 gap-2 text-3xl font-black tracking-tight text-white mb-6">
           <span className="text-md-primary-text">Pontu</span>fy
         </Link>
         <div className="text-md-error mb-4" style={{fontSize: '48px'}}>📨</div>
@@ -75,7 +75,7 @@ function RegisterForm() {
           <Building2 size={18} className="mr-2" />
           Cadastrar minha empresa
         </Link>
-        <Link href="/login" className="text-label-lg text-md-primary-text hover:text-md-on-surface transition-colors inline-block">
+        <Link href="/login" className="inline-flex items-center min-h-11 text-label-lg text-md-primary-text hover:text-md-on-surface transition-colors">
           Já tenho uma conta
         </Link>
       </div>
@@ -85,13 +85,13 @@ function RegisterForm() {
   if (inviteError) {
     return (
       <div className="md-card-outlined md-elevation-3 p-8 text-center">
-        <Link href="/" className="inline-flex items-center gap-2 text-3xl font-black tracking-tight text-white mb-6">
+        <Link href="/" className="inline-flex items-center min-h-11 gap-2 text-3xl font-black tracking-tight text-white mb-6">
           <span className="text-md-primary-text">Pontu</span>fy
         </Link>
         <div className="text-md-error mb-4" style={{fontSize: '48px'}}>⚠️</div>
         <h1 className="text-headline-sm font-bold text-md-on-surface mb-2">Convite indisponível</h1>
         <p className="text-body-md text-md-on-surface-variant mb-4">{inviteError}</p>
-        <Link href="/login" className="text-label-lg text-md-primary-text hover:text-md-on-surface transition-colors inline-block">
+        <Link href="/login" className="inline-flex items-center min-h-11 text-label-lg text-md-primary-text hover:text-md-on-surface transition-colors">
           Ir para o login
         </Link>
       </div>
@@ -101,7 +101,7 @@ function RegisterForm() {
   if (success) {
     return (
       <div className="md-card-outlined md-elevation-3 p-8 text-center">
-        <Link href="/" className="inline-flex items-center gap-2 text-3xl font-black tracking-tight text-white mb-6">
+        <Link href="/" className="inline-flex items-center min-h-11 gap-2 text-3xl font-black tracking-tight text-white mb-6">
           <span className="text-md-primary-text">Pontu</span>fy
         </Link>
         <CheckCircle2 size={48} className="text-md-tertiary mx-auto mb-4" />
@@ -229,7 +229,7 @@ function RegisterForm() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-4 flex items-center text-md-on-surface-muted hover:text-md-on-surface transition-colors"
+              className="absolute inset-y-0 right-0 w-12 flex items-center justify-center text-md-on-surface-muted hover:text-md-on-surface transition-colors"
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>

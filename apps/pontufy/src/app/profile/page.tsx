@@ -9,6 +9,7 @@ import { isSoundEnabled, setSoundEnabled } from '@/lib/feedback';
 import AchievementsCard from '@/components/profile/AchievementsCard';
 import { AlertDialog } from '@/components/ui/AlertDialog';
 import { Loader2, User, Coins, Save, ShieldCheck, Building2, Volume2, VolumeX, LogOut } from 'lucide-react';
+import { ListSkeleton, LoadingRegion } from '@/components/ui/Skeleton';
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
@@ -66,8 +67,10 @@ export default function ProfilePage() {
 
   if (status === 'loading') {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-md-surface-dim">
-        <Loader2 className="animate-spin text-md-primary-text" size={36} />
+      <main className="min-h-screen bg-md-surface-dim pt-24 pb-12 px-4">
+        <LoadingRegion label="Carregando o perfil…" className="max-w-2xl mx-auto">
+          <ListSkeleton rows={3} />
+        </LoadingRegion>
       </main>
     );
   }
@@ -122,13 +125,13 @@ export default function ProfilePage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Seu nome completo"
-                className="flex-1 px-4 py-2.5 rounded-lg bg-md-surface-container border border-md-outline text-white placeholder:text-md-on-surface-muted focus:outline-none focus:border-md-focus text-sm"
+                className="flex-1 px-4 py-3 rounded-lg bg-md-surface-container border border-md-outline text-white placeholder:text-md-on-surface-muted focus:outline-none focus:border-md-focus text-sm"
               />
               <button
                 type="button"
                 onClick={handleSaveName}
                 disabled={isSaving}
-                className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg font-bold text-md-on-primary bg-md-primary hover:bg-md-primary-container transition-colors text-sm disabled:opacity-50"
+                className="flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-bold text-md-on-primary bg-md-primary hover:bg-md-primary-container transition-colors text-sm disabled:opacity-50"
               >
                 {isSaving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
                 Salvar
@@ -192,7 +195,7 @@ export default function ProfilePage() {
             <button
               type="button"
               onClick={() => setConfirmRevoke(true)}
-              className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 transition-colors text-sm"
+              className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 transition-colors text-sm"
             >
               <LogOut size={15} />
               Encerrar sessões em todos os dispositivos
@@ -210,7 +213,7 @@ export default function ProfilePage() {
           />
 
           <div className="text-center">
-            <Link href="/wallet" className="text-sm text-gray-400 hover:text-white transition-colors font-medium">
+            <Link href="/wallet" className="inline-flex items-center min-h-11 text-sm text-gray-400 hover:text-white transition-colors font-medium">
               ← Ver histórico de pontos na Carteira
             </Link>
           </div>

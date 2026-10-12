@@ -151,7 +151,7 @@ export default function TeamClient() {
           <div>
             <Link
               href="/admin"
-              className="inline-flex items-center gap-1.5 text-sm text-md-on-surface-muted hover:text-gray-300 transition-colors mb-2"
+              className="inline-flex items-center min-h-11 gap-1.5 text-sm text-md-on-surface-muted hover:text-gray-300 transition-colors"
             >
               <ArrowLeft size={15} /> Voltar ao painel
             </Link>

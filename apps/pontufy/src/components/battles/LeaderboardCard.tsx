@@ -61,9 +61,10 @@ export default function LeaderboardCard() {
 
       {ranking && ranking.length === 0 && (
         <div className="text-center py-10">
-          <Users className="mx-auto text-md-on-surface-muted mb-3" size={36} />
-          <p className="text-gray-400 text-sm">
-            Nenhum departamento definido ainda. Defina o seu departamento no perfil para entrar no ranking.
+          <Users className="mx-auto text-md-on-surface-muted mb-3" size={36} aria-hidden="true" />
+          <p className="text-gray-300 text-sm font-semibold">O ranking ainda está vazio</p>
+          <p className="text-md-on-surface-muted text-sm mt-1 max-w-xs mx-auto">
+            Ele aparece quando as pessoas têm um departamento cadastrado. Se o seu não aparecer, fale com o RH da sua empresa.
           </p>
         </div>
       )}

@@ -248,7 +248,7 @@ export default function BrandingClient() {
                 key={preset}
                 type="button"
                 onClick={() => setPrimaryColor(preset)}
-                className="h-9 w-9 rounded-full border border-md-outline transition-transform hover:scale-110"
+                className="size-11 rounded-full border border-md-outline transition-transform motion-safe:hover:scale-110"
                 style={{ backgroundColor: preset }}
                 aria-label={`Usar cor ${preset}`}
               />

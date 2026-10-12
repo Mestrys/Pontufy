@@ -5,6 +5,9 @@ import { usePointsHistory } from '@/hooks/useApi';
 import BalanceCard from '@/components/wallet/BalanceCard';
 import PointsHistory from '@/components/wallet/PointsHistory';
 import { Loader2 } from 'lucide-react';
+import { ListSkeleton, LoadingRegion } from '@/components/ui/Skeleton';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { History } from 'lucide-react';
 
 function computeLevel(points: number) {
   if (points >= 5000)
@@ -51,15 +54,19 @@ export default function WalletPage() {
         <BalanceCard data={userData} />
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="animate-spin text-md-tertiary" size={36} />
-          </div>
+          <LoadingRegion label="Carregando o histórico de pontos…">
+            <ListSkeleton rows={5} />
+          </LoadingRegion>
         ) : history.length > 0 ? (
           <PointsHistory history={history} />
         ) : (
-          <div className="bg-[#141414] rounded-xl border border-[#2a2a2a] p-8 text-center text-md-on-surface-muted">
-            Nenhuma movimentação registrada ainda. Complete aulas para ganhar pontos!
-          </div>
+          <EmptyState
+            icon={History}
+            title="Nenhuma movimentação ainda"
+            description="Cada aula concluída soma pontos aqui. Comece por um dos seus cursos."
+            actionLabel="Ir para Meus Cursos"
+            actionHref="/cursos"
+          />
         )}
       </div>
     </main>

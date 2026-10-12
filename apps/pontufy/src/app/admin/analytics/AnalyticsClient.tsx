@@ -95,7 +95,7 @@ export default function AnalyticsClient() {
 
           <a
             href="/api/admin/payroll/export?period=month"
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-md-on-primary bg-md-primary hover:bg-md-primary-container transition-colors"
+            className="flex items-center gap-2 px-5 h-11 rounded-full text-sm font-bold text-md-on-primary bg-md-primary hover:bg-md-primary-container transition-colors"
           >
             <Download size={15} /> Exportar Folha (CSV)
           </a>

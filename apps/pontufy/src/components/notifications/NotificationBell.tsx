@@ -47,7 +47,7 @@ export function NotificationBell() {
       <button
         type="button"
         onClick={() => setIsDrawerOpen(true)}
-        className="relative p-2 text-gray-400 hover:text-white transition-colors"
+        className="relative size-11 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
         aria-label="Notificações"
       >
         <Bell size={20} />

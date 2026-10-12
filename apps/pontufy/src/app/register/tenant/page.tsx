@@ -81,7 +81,7 @@ export default function TenantRegisterPage() {
         />
 
         <div className="md-card-outlined md-elevation-3 p-8 w-full max-w-md mx-auto text-center">
-          <Link href="/" className="inline-flex items-center gap-2 text-3xl font-black tracking-tight text-white mb-8">
+          <Link href="/" className="inline-flex items-center min-h-11 gap-2 text-3xl font-black tracking-tight text-white mb-8">
             <span className="text-md-primary-text">Pontu</span>fy
           </Link>
 
@@ -117,7 +117,7 @@ export default function TenantRegisterPage() {
       />
 
       <div className="w-full max-w-md">
-        <Link href="/" className="inline-flex items-center gap-2 text-3xl font-black tracking-tight text-white mb-8">
+        <Link href="/" className="inline-flex items-center min-h-11 gap-2 text-3xl font-black tracking-tight text-white mb-8">
           <span className="text-md-primary-text">Pontu</span>fy
         </Link>
 
@@ -231,7 +231,7 @@ export default function TenantRegisterPage() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-md-on-surface-muted hover:text-md-on-surface transition-colors"
+                  className="absolute inset-y-0 right-0 w-12 flex items-center justify-center text-md-on-surface-muted hover:text-md-on-surface transition-colors"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -273,13 +273,13 @@ export default function TenantRegisterPage() {
 
           <div className="mt-6 space-y-3 text-center">
             <p className="text-body-sm text-md-on-surface-variant">
-              <Link href="/login" className="font-semibold text-md-primary-text hover:text-md-on-surface transition-colors flex items-center justify-center gap-1">
+              <Link href="/login" className="font-semibold text-md-primary-text hover:text-md-on-surface transition-colors min-h-11 flex items-center justify-center gap-1">
                 <ArrowLeft size={16} />
                 Já tem conta? Fazer login
               </Link>
             </p>
             <p className="text-body-sm text-md-on-surface-variant">
-              <Link href="/register" className="font-semibold text-md-primary-text hover:text-md-on-surface transition-colors flex items-center justify-center gap-1">
+              <Link href="/register" className="font-semibold text-md-primary-text hover:text-md-on-surface transition-colors min-h-11 flex items-center justify-center gap-1">
                 <Mail size={16} />
                 Recebeu um convite? Criar conta
               </Link>

@@ -101,7 +101,7 @@ export default function AuditLogsClient() {
           <div>
             <Link
               href="/admin"
-              className="inline-flex items-center gap-1.5 text-sm text-md-on-surface-muted hover:text-gray-300 transition-colors mb-2"
+              className="inline-flex items-center min-h-11 gap-1.5 text-sm text-md-on-surface-muted hover:text-gray-300 transition-colors"
             >
               <ArrowLeft size={15} /> Voltar ao painel
             </Link>
@@ -114,7 +114,7 @@ export default function AuditLogsClient() {
           <button
             type="button"
             onClick={handleExport}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-md-on-primary bg-md-primary hover:bg-md-primary-container transition-colors"
+            className="flex items-center gap-2 px-5 py-3 rounded-full text-sm font-bold text-md-on-primary bg-md-primary hover:bg-md-primary-container transition-colors"
           >
             <Download size={15} /> Exportar CSV
           </button>
@@ -134,7 +134,7 @@ export default function AuditLogsClient() {
                   setAction(e.target.value);
                   setPage(1);
                 }}
-                className="w-full px-4 py-2.5 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg text-white focus:outline-none focus:border-md-focus text-sm transition-colors"
+                className="w-full px-4 py-3 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg text-white focus:outline-none focus:border-md-focus text-sm transition-colors"
               >
                 <option value="">Todas</option>
                 {availableActions.map((a) => (
@@ -157,7 +157,7 @@ export default function AuditLogsClient() {
                   setFrom(e.target.value);
                   setPage(1);
                 }}
-                className="w-full px-4 py-2.5 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg text-white focus:outline-none focus:border-md-focus text-sm transition-colors"
+                className="w-full px-4 py-3 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg text-white focus:outline-none focus:border-md-focus text-sm transition-colors"
               />
             </div>
 
@@ -173,7 +173,7 @@ export default function AuditLogsClient() {
                   setTo(e.target.value);
                   setPage(1);
                 }}
-                className="w-full px-4 py-2.5 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg text-white focus:outline-none focus:border-md-focus text-sm transition-colors"
+                className="w-full px-4 py-3 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg text-white focus:outline-none focus:border-md-focus text-sm transition-colors"
               />
             </div>
           </div>
@@ -266,7 +266,7 @@ export default function AuditLogsClient() {
                 type="button"
                 disabled={page <= 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
-                className="px-4 py-2 rounded-full text-sm font-bold text-white bg-[#1f1f1f] border border-[#2a2a2a] hover:border-md-tertiary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="h-11 px-4 rounded-full text-sm font-bold text-white bg-[#1f1f1f] border border-[#2a2a2a] hover:border-md-tertiary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Anterior
               </button>
@@ -277,7 +277,7 @@ export default function AuditLogsClient() {
                 type="button"
                 disabled={page >= totalPages}
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                className="px-4 py-2 rounded-full text-sm font-bold text-white bg-[#1f1f1f] border border-[#2a2a2a] hover:border-md-tertiary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="h-11 px-4 rounded-full text-sm font-bold text-white bg-[#1f1f1f] border border-[#2a2a2a] hover:border-md-tertiary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Próxima
               </button>

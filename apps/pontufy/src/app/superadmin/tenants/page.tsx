@@ -48,7 +48,7 @@ export default async function SuperAdminTenantsPage() {
           <div>
             <Link
               href="/superadmin"
-              className="inline-flex items-center gap-1.5 text-sm text-md-on-surface-muted hover:text-gray-300 transition-colors mb-2"
+              className="inline-flex items-center min-h-11 gap-1.5 text-sm text-md-on-surface-muted hover:text-gray-300 transition-colors"
             >
               ← Voltar ao console
             </Link>

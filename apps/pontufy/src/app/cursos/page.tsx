@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { useEnrolledCourses } from '@/hooks/useApi';
 import { useStore } from '@/store/useStore';
 import { getCachedCourses, reconcileWithApi, type CachedCourse } from '@/lib/local-courses';
-import { PlayCircle, CheckCircle2, BookOpen, Loader2, Clock, Award } from 'lucide-react';
+import { PlayCircle, CheckCircle2, BookOpen, Clock, Award } from 'lucide-react';
+import { CatalogSkeleton, LoadingRegion } from '@/components/ui/Skeleton';
 
 type FilterStatus = 'all' | 'in_progress' | 'completed' | 'available';
 
@@ -84,9 +85,11 @@ export default function CoursesPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-[70vh] bg-[#0a0a0a]">
-        <Loader2 className="animate-spin text-md-tertiary" size={36} />
-      </div>
+      <main className="min-h-screen bg-md-surface-dim pt-24 pb-12 px-4 sm:px-8 md:px-16">
+        <LoadingRegion label="Carregando seus cursos…">
+          <CatalogSkeleton count={6} />
+        </LoadingRegion>
+      </main>
     );
   }
 
@@ -104,7 +107,7 @@ export default function CoursesPage() {
             <button
               key={f.key}
               onClick={() => setFilter(f.key)}
-              className={`px-4 py-2 rounded-full text-sm font-semibold transition-all border ${
+              className={`h-11 px-4 rounded-full text-sm font-semibold transition-all border ${
                 filter === f.key
                   ? 'bg-md-primary text-md-on-primary border-md-primary'
                   : 'bg-[#1f1f1f] text-gray-400 border-[#2a2a2a] hover:border-[#3a3a3a] hover:text-white'

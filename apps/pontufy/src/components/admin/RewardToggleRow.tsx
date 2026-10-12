@@ -92,19 +92,27 @@ export default function RewardToggleRow({ catalog }: { catalog: RewardItem[] }) 
                   </span>
                 </td>
                 <td className="px-4 py-3 text-center">
+                  {/* Alvo de 44px; o trilho visível continua com 24px de altura. */}
                   <button
+                    type="button"
+                    role="switch"
+                    aria-checked={item.active}
                     onClick={() => handleToggle(item.id)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-md-focus focus:ring-offset-2 focus:ring-offset-md-surface ${
-                      item.active ? 'bg-md-tertiary' : 'bg-md-outline'
-                    }`}
-                    aria-label={item.active ? 'Desativar recompensa' : 'Ativar recompensa'}
-                    aria-pressed={item.active}
+                    className="h-11 w-14 inline-flex items-center justify-center rounded-full"
+                    aria-label={`Disponível no Clube de Benefícios: ${item.title}`}
                   >
                     <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm ${
-                        item.active ? 'translate-x-6' : 'translate-x-1'
+                      aria-hidden="true"
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        item.active ? 'bg-md-tertiary' : 'bg-md-outline-variant'
                       }`}
-                    />
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm ${
+                          item.active ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </span>
                   </button>
                 </td>
               </tr>

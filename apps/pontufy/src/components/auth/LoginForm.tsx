@@ -69,7 +69,7 @@ export function LoginForm() {
   return (
     <div className="md-card-outlined md-elevation-3 p-8 w-full max-w-md mx-auto">
       <div className="text-center mb-8">
-        <Link href="/" className="inline-flex items-center gap-2 text-3xl font-black tracking-tight text-white mb-6">
+        <Link href="/" className="inline-flex items-center min-h-11 gap-2 text-3xl font-black tracking-tight text-white mb-6">
           <span className="text-md-primary-text">Pontu</span>fy
         </Link>
         <h1 className="text-headline-sm font-bold text-md-on-surface mb-2">Entrar</h1>
@@ -129,7 +129,7 @@ export function LoginForm() {
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-              className="absolute inset-y-0 right-0 pr-4 flex items-center text-md-on-surface-muted hover:text-md-on-surface transition-colors"
+              className="absolute inset-y-0 right-0 w-12 flex items-center justify-center text-md-on-surface-muted hover:text-md-on-surface transition-colors"
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
@@ -139,7 +139,7 @@ export function LoginForm() {
         <div className="flex justify-end pt-1">
           <Link
             href="/forgot-password"
-            className="text-label-lg text-md-primary-text hover:text-md-on-surface transition-colors"
+            className="inline-flex items-center min-h-11 text-label-lg text-md-primary-text hover:text-md-on-surface transition-colors"
           >
             Esqueceu a senha?
           </Link>

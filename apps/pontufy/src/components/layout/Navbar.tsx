@@ -66,7 +66,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between">
           {/* Left: Logo + Desktop links */}
           <div className="flex items-center gap-8">
-            <Link href="/dashboard" className="text-xl font-black tracking-tight text-white flex-shrink-0">
+            <Link href="/dashboard" className="min-h-11 inline-flex items-center text-xl font-black tracking-tight text-white flex-shrink-0">
               <span className="text-md-primary-text">Pontu</span>fy
             </Link>
 
@@ -109,7 +109,11 @@ export default function Navbar() {
           {/* Right: Actions */}
           <div className="flex items-center gap-2">
             {/* Points badge (terciário #a1c0ae — padrão MD3 obrigatório) */}
-            <Link href="/wallet">
+            <Link
+              href="/wallet"
+              className="min-h-11 inline-flex items-center"
+              aria-label={`${pointsBalance.toLocaleString('pt-BR')} pontos — ver carteira`}
+            >
               <PointsChip value={pointsBalance} />
             </Link>
 

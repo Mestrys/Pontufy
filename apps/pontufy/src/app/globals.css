@@ -142,7 +142,7 @@
 }
 
 @layer components {
-  /* Botões M3: base comum (pill, 40dp, label-large) + state layer via ::after */
+  /* Botões M3: base comum (pill, 44px de alvo, label-large) + state layer via ::after */
   .md-btn {
     position: relative;
     isolation: isolate;
@@ -151,7 +151,7 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    height: 2.5rem;
+    height: 2.75rem;
     padding-inline: 1.5rem;
     border-radius: 9999px;
     font-size: 0.875rem;

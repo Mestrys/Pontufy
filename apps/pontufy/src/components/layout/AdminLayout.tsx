@@ -191,7 +191,7 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
           {/* Drawer Header */}
           <div className={`flex items-center justify-between p-4 border-b border-md-outline ${navCollapsed ? 'justify-center' : ''}`}>
             {!navCollapsed && (
-              <Link href="/admin" className="flex items-center gap-2 text-xl font-black tracking-tighter text-md-on-surface">
+              <Link href="/admin" className="min-h-11 flex items-center gap-2 text-xl font-black tracking-tighter text-md-on-surface">
                 <span className="text-md-primary-text">Pontu</span>fy
                 <span className="text-md-primary-text">Admin</span>
               </Link>
@@ -199,7 +199,7 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
             <button
               type="button"
               onClick={() => setNavCollapsed(!navCollapsed)}
-              className={`p-2 rounded-xl hover:bg-md-surface-container-high transition-colors ${
+              className={`size-11 flex items-center justify-center rounded-xl hover:bg-md-surface-container-high transition-colors ${
                 navCollapsed ? 'mx-auto' : 'ml-auto'
               }`}
               aria-label={navCollapsed ? 'Expandir menu' : 'Colapsar menu'}
@@ -245,7 +245,7 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
                       key={item.href}
                       href={item.href}
                       aria-current={active ? 'page' : undefined}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-body-md font-medium transition-all duration-200 ${
+                      className={`flex items-center gap-3 px-3 py-3 rounded-xl text-body-md font-medium transition-all duration-200 ${
                         active
                           ? 'bg-md-primary-container text-md-on-primary-container'
                           : 'text-md-on-surface-variant hover:bg-md-surface-container-high hover:text-md-on-surface'
@@ -275,7 +275,7 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
               <>
                 <Link
                   href="/dashboard"
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-body-md font-medium text-md-on-surface-variant hover:bg-md-surface-container-high hover:text-md-on-surface transition-colors mb-2"
+                  className="flex items-center gap-3 px-3 py-3 rounded-xl text-body-md font-medium text-md-on-surface-variant hover:bg-md-surface-container-high hover:text-md-on-surface transition-colors mb-2"
                   onClick={() => setNavOpen(false)}
                 >
                   <span className="flex-shrink-0"><LayoutDashboard size={20} /></span>
@@ -284,7 +284,7 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
                 <button
                   type="button"
                   onClick={handleSignOut}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-body-md font-medium text-md-error hover:bg-md-error/10 transition-colors"
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-body-md font-medium text-md-error hover:bg-md-error/10 transition-colors"
                 >
                   <span className="flex-shrink-0"><LogOut size={20} /></span>
                   <span>Sair</span>

@@ -16,7 +16,8 @@ import { useStore } from '@/store/useStore';
 import { getCachedCourses } from '@/lib/local-courses';
 import { downloadCertificate } from '@/lib/download-certificate';
 import { getUserTier, TIERS } from '@/lib/gamification';
-import { Loader2, BookOpen, ArrowLeft, Award, Trophy, Crown, Medal, LoaderCircle } from 'lucide-react';
+import { BookOpen, ArrowLeft, Award, Trophy, Crown, Medal, LoaderCircle } from 'lucide-react';
+import { LoadingRegion, PlayerSkeleton } from '@/components/ui/Skeleton';
 
 interface LessonItem {
   id: string;
@@ -107,9 +108,9 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
 
   if (isLoading && !localCourse) {
     return (
-      <div className="flex items-center justify-center h-dvh bg-md-surface-dim">
-        <Loader2 className="animate-spin text-md-primary-text" size={36} />
-      </div>
+      <LoadingRegion label="Carregando a aula…">
+        <PlayerSkeleton />
+      </LoadingRegion>
     );
   }
 

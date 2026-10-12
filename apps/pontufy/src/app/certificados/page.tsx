@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Award, Loader2, BookOpen } from 'lucide-react';
+import { Award, BookOpen } from 'lucide-react';
 import { useToast } from '@/components/ui/Toast';
 import { downloadCertificate } from '@/lib/download-certificate';
 import CertificateBadgeMural from '@/components/certificates/CertificateBadgeMural';
+import { ListSkeleton, LoadingRegion } from '@/components/ui/Skeleton';
 
 interface Certificate {
   id: string;
@@ -44,9 +45,11 @@ export default function CertificatesPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-[70vh] bg-md-surface-dim">
-        <Loader2 className="animate-spin text-md-primary-text" size={36} />
-      </div>
+      <main className="min-h-screen bg-md-surface-dim pt-24 pb-12 px-4 sm:px-8 md:px-16">
+        <LoadingRegion label="Carregando seus certificados…" className="max-w-4xl mx-auto">
+          <ListSkeleton rows={3} />
+        </LoadingRegion>
+      </main>
     );
   }
 
@@ -71,7 +74,7 @@ export default function CertificatesPage() {
             <p className="text-md-on-surface-muted text-sm mb-6">Conclua um curso para receber seu certificado com badge de raridade.</p>
             <a
               href="/cursos"
-              className="inline-block px-5 py-2.5 rounded-full text-sm font-bold text-md-on-primary bg-md-primary hover:opacity-90 transition"
+              className="inline-flex items-center h-11 px-5 rounded-full text-sm font-bold text-md-on-primary bg-md-primary hover:opacity-90 transition"
             >
               Ver cursos disponíveis
             </a>
