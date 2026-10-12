@@ -3,10 +3,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Sparkles, CheckCircle, ChevronRight, ArrowLeft, AlertCircle, Upload, X, FileText, AlertTriangle, Zap, Loader2,
+  Sparkles, CheckCircle, ChevronRight, ArrowLeft, AlertCircle, Upload, X, FileText, AlertTriangle, Zap,
   Video, Mic, LayoutTemplate, HelpCircle, PenLine, BookOpen,
 } from 'lucide-react';
-import { generateTrainingCourse, checkAIProviders, setCourseStatus } from '@/actions/course-generator';
+import { generateTrainingCourse, checkAIProviders } from '@/actions/course-generator';
+import { getCourseForReview } from '@/actions/course-review';
+import type { ReviewCourse } from '@/actions/course-review';
+import CourseReview from '@/components/admin/CourseReview';
+import { Skeleton, LoadingRegion } from '@/components/ui/Skeleton';
 import type { GenerateTrainingResult } from '@/actions/course-generator';
 import { CONTENT_TYPE_LABELS } from '@/lib/course-types';
 import type { ContentType } from '@/lib/course-types';
@@ -61,8 +65,8 @@ export default function AIWizard() {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [activeChecklist, setActiveChecklist] = useState(0);
   const [result, setResult] = useState<SuccessResult | null>(null);
-  const [publishState, setPublishState] = useState<'idle' | 'publishing' | 'published'>('idle');
-  const [publishError, setPublishError] = useState('');
+  const [review, setReview] = useState<ReviewCourse | null>(null);
+  const [reviewError, setReviewError] = useState('');
 
   const [providerStatus, setProviderStatus] = useState<{
     available: string[];
@@ -193,9 +197,14 @@ export default function AIWizard() {
 
       setResult(res);
       window.dispatchEvent(new CustomEvent('pontufy:ai-credits', { detail: res.creditsRemaining }));
-      setPublishState('idle');
-      setPublishError('');
+      setReview(null);
+      setReviewError('');
       setStep(3);
+      if (res.persisted) {
+        getCourseForReview(res.course.id)
+          .then((r) => (r.success ? setReview(r.course) : setReviewError(r.error)))
+          .catch(() => setReviewError('Não foi possível abrir a revisão agora. Abra o curso pelo painel.'));
+      }
 
       mutate('/api/courses?limit=50');
       mutate('/api/courses?page=1&limit=12');
@@ -539,52 +548,25 @@ export default function AIWizard() {
   if (step === 3 && result) {
     const lessons = result.course.lessons;
     const isTemplate = result.provider.startsWith('local:');
-    const isPublished = publishState === 'published';
-
-    const handlePublish = async () => {
-      setPublishState('publishing');
-      setPublishError('');
-      try {
-        const res = await setCourseStatus({ courseId: result.course.id, status: 'published' });
-        if (!res.success) {
-          setPublishError(res.error);
-          setPublishState('idle');
-          return;
-        }
-        setPublishState('published');
-        mutate('/api/courses?limit=50');
-        mutate('/api/courses?page=1&limit=12');
-        mutate('/api/courses/enrolled');
-      } catch {
-        setPublishError('Não foi possível publicar agora. Verifique a conexão e tente de novo.');
-        setPublishState('idle');
-      }
-    };
-    const typeLabel = CONTENT_TYPE_LABELS[result.course.contentType];
 
     return (
       <div className="md-card-outlined md-elevation-1 p-6 sm:p-8 animate-[fadeIn_0.3s_ease-out]">
         {renderStepIndicator()}
 
-        <div className="mb-8 flex flex-wrap items-start justify-between gap-3">
+        <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <h2 className="text-headline-sm font-bold text-md-on-surface flex items-center gap-2">
               <CheckCircle className="text-md-tertiary" aria-hidden="true" />
-              {!result.persisted
-                ? 'Curso salvo só neste navegador'
-                : isPublished
-                  ? 'Curso publicado'
-                  : 'Rascunho pronto para revisão'}
+              {result.persisted ? 'Revise o curso antes de publicar' : 'Curso salvo só neste navegador'}
             </h2>
             <p className="text-body-md text-md-on-surface-variant mt-1" role="status">
-              {!result.persisted ? (
-                <>Não foi possível salvar <strong>{result.course.title}</strong> no servidor. Ele fica disponível só neste navegador e não chega aos colaboradores.</>
-              ) : isPublished ? (
-                <><strong>{result.course.title}</strong> já está visível para os colaboradores.</>
+              {result.persisted ? (
+                <><strong>{result.course.title}</strong> está salvo como rascunho e ainda não aparece para os colaboradores.</>
               ) : (
-                <><strong>{result.course.title}</strong> ainda não está visível para os colaboradores. Pré-visualize o conteúdo gerado pela IA e publique quando estiver correto.</>
+                <>Não foi possível salvar <strong>{result.course.title}</strong> no servidor. Ele fica disponível só neste navegador e não chega aos colaboradores.</>
               )}
             </p>
+            <p className="text-body-sm text-md-on-surface-muted mt-1">Créditos de IA restantes: {result.creditsRemaining}</p>
           </div>
           <button
             type="button"
@@ -593,6 +575,7 @@ export default function AIWizard() {
               setPrompt('');
               setFiles([]);
               setResult(null);
+              setReview(null);
             }}
             className="h-11 text-body-sm font-semibold text-md-on-surface-variant hover:text-md-primary-text flex items-center gap-1 transition-colors"
           >
@@ -606,7 +589,7 @@ export default function AIWizard() {
             <div className="text-body-sm">
               <p className="font-bold">Rascunho básico, sem IA</p>
               <p className="mt-1">
-                A IA não respondeu agora, então criamos um rascunho a partir de um modelo padrão. Revise e complete o conteúdo antes de publicar, ou gere de novo mais tarde.
+                A IA não respondeu agora, então criamos um rascunho a partir de um modelo padrão. Edite as aulas antes de publicar, ou gere o curso de novo mais tarde.
               </p>
               {result.aiErrors && result.aiErrors.length > 0 && (
                 <details className="mt-2">
@@ -620,87 +603,33 @@ export default function AIWizard() {
           </div>
         )}
 
-        <div className="flex flex-wrap items-center gap-3 mb-6 text-body-sm">
-          <span className="bg-md-tertiary-container text-md-on-tertiary-container font-bold px-3 py-1 rounded-full">
-            {result.lessonsCount} módulos
-          </span>
-          <span className="bg-md-secondary/15 text-md-secondary font-medium px-3 py-1 rounded-full">
-            {typeLabel}
-          </span>
-          <span className={`font-medium px-3 py-1 rounded-full ${
-            isTemplate ? 'bg-md-highlight/10 text-md-highlight' : 'bg-md-tertiary-container text-md-on-tertiary-container'
-          }`}>
-            {isTemplate ? 'Modelo padrão' : 'Gerado com IA'}
-          </span>
-          <span className="bg-md-surface-container-high text-md-on-surface-variant font-medium px-3 py-1 rounded-full">
-            Créditos restantes: {result.creditsRemaining}
-          </span>
-          {!result.persisted && (
-            <span className="bg-md-highlight/10 text-md-highlight font-medium px-3 py-1 rounded-full">
-              Salvo só neste navegador
-            </span>
-          )}
-        </div>
-
-        {lessons.length > 0 && (
-          <div className="bg-md-surface-container border border-md-outline rounded-xl p-6 mb-8">
-            <h3 className="text-title-lg font-bold text-md-on-surface mb-4">Estrutura do Curso</h3>
-            <div className="divide-y divide-md-outline bg-md-surface-container-high border border-md-outline rounded-lg overflow-hidden shadow-sm">
-              {lessons.map((lesson, i) => (
-                <div key={i} className="px-4 py-3 flex justify-between items-center">
-                  <span className="text-body-md font-medium text-md-on-surface">{lesson.title}</span>
-                  <span className="text-label-sm font-bold text-md-on-primary-container bg-md-primary-container px-2 py-1 rounded-full">
-                    +{lesson.pointsAssigned} pts
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {publishError && (
-          <p role="alert" className="mb-4 text-body-sm text-md-error">
-            {publishError}
-          </p>
-        )}
-
-        <div className="flex flex-wrap items-center justify-end gap-3">
-          {result.persisted && (
-            <a
-              href={`/player/${result.course.id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="md-btn md-btn-outlined"
-            >
-              Pré-visualizar
-            </a>
-          )}
-          {result.persisted && !isPublished ? (
-            <>
-              <a href="/admin" className="md-btn md-btn-text">
-                Publicar depois
-              </a>
-              <button
-                type="button"
-                onClick={handlePublish}
-                disabled={publishState === 'publishing'}
-                className="md-btn md-btn-filled"
-              >
-                {publishState === 'publishing' ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" aria-hidden="true" /> Publicando…
-                  </>
-                ) : (
-                  'Publicar curso'
-                )}
-              </button>
-            </>
+        {result.persisted ? (
+          review ? (
+            <CourseReview initial={review} />
+          ) : reviewError ? (
+            <p role="alert" className="text-body-sm text-md-error">
+              {reviewError} <a href={`/admin/courses/${result.course.id}`} className="underline">Abrir a revisão</a>
+            </p>
           ) : (
-            <a href="/admin" className="md-btn md-btn-filled">
-              Voltar ao painel
-            </a>
-          )}
-        </div>
+            <LoadingRegion label="Abrindo a revisão…" className="space-y-3">
+              {lessons.map((l) => <Skeleton key={l.id} className="h-16 w-full rounded-xl" />)}
+            </LoadingRegion>
+          )
+        ) : (
+          <>
+            <ol className="divide-y divide-md-outline bg-md-surface-container border border-md-outline rounded-xl overflow-hidden mb-6">
+              {lessons.map((lesson, i) => (
+                <li key={i} className="px-4 py-3 flex justify-between items-center gap-3">
+                  <span className="text-body-md font-medium text-md-on-surface">{lesson.title}</span>
+                  <span className="text-label-sm text-md-on-surface-muted">+{lesson.pointsAssigned} pts</span>
+                </li>
+              ))}
+            </ol>
+            <div className="flex justify-end">
+              <a href="/admin" className="md-btn md-btn-filled">Voltar ao painel</a>
+            </div>
+          </>
+        )}
       </div>
     );
   }

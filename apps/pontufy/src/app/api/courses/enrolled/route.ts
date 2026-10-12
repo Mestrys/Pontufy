@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { LESSON_ORDER } from '@/lib/lesson-order';
 import { getSessionContext } from '@/backend/session';
 import { getTenantDb } from '@/backend/db';
 
@@ -12,7 +13,7 @@ export async function GET() {
 
     const courses = await db.course.findMany({
       where: { status: 'published' },
-      include: { lessons: { select: { id: true, title: true }, orderBy: { createdAt: 'asc' } } },
+      include: { lessons: { select: { id: true, title: true }, orderBy: LESSON_ORDER } },
       orderBy: { createdAt: 'desc' },
     });
 

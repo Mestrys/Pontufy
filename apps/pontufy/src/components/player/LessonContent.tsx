@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, BookOpen } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, BookOpen, Sparkles } from 'lucide-react';
 import LessonMarkdown from './LessonMarkdown';
 
 // Renderiza EXCLUSIVAMENTE o markdown da aula ativa (prop `content`) — nunca a
@@ -22,6 +22,8 @@ interface LessonContentProps {
   preview?: boolean;
   /** Motivo da última falha ao concluir, exibido junto ao botão. */
   completionError?: string;
+  /** Transparência de IA: "Criado com IA, revisado por …". */
+  aiNotice?: string;
 }
 
 export default function LessonContent({
@@ -37,6 +39,7 @@ export default function LessonContent({
   onNext,
   preview = false,
   completionError = '',
+  aiNotice = '',
 }: LessonContentProps) {
   return (
     <div className="flex flex-col flex-1 min-h-0">
@@ -44,9 +47,17 @@ export default function LessonContent({
       <div className="flex-1 overflow-y-auto" tabIndex={0} role="region" aria-label="Conteúdo da aula">
         {/* Cabeçalho da aula */}
         <div className="bg-md-surface border-b border-md-outline px-6 sm:px-10 py-6">
-          <div className="flex items-center gap-2 text-md-on-surface-muted text-xs mb-2">
-            <BookOpen size={13} />
-            <span>Aula {lessonIndex} de {totalLessons}</span>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-md-on-surface-muted text-xs mb-2">
+            <span className="inline-flex items-center gap-2">
+              <BookOpen size={13} aria-hidden="true" />
+              Aula {lessonIndex} de {totalLessons}
+            </span>
+            {aiNotice && (
+              <span className="inline-flex items-center gap-1 text-md-secondary">
+                <Sparkles size={13} aria-hidden="true" />
+                {aiNotice}
+              </span>
+            )}
           </div>
           <h2 className="max-w-[34ch] text-2xl sm:text-3xl font-black text-white text-balance">{lessonTitle}</h2>
         </div>

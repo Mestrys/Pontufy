@@ -290,7 +290,15 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
     }
   };
 
+  const aiMeta = course as { aiGenerated?: boolean; reviewedBy?: string | null };
+  const aiNotice = aiMeta.aiGenerated
+    ? aiMeta.reviewedBy
+      ? `Criado com IA, revisado por ${aiMeta.reviewedBy}`
+      : 'Criado com IA'
+    : '';
+
   const lessonNavProps = {
+    aiNotice,
     lessonTitle: activeLesson.title,
     lessonIndex: currentIndex + 1,
     totalLessons: lessons.length,

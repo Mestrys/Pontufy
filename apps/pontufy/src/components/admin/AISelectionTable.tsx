@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Sparkles, Users, Eye, Loader2 } from 'lucide-react';
+import { Sparkles, Users, FileSearch, Loader2 } from 'lucide-react';
 import { setCourseStatus } from '@/actions/course-generator';
 
 interface CourseRow {
@@ -79,7 +79,15 @@ export default function AISelectionTable({
           <tbody className="divide-y divide-md-outline">
             {courses.map((course) => (
               <tr key={course.id} className="hover:bg-md-surface-container-high/50 transition-colors">
-                <td className="px-4 sm:px-6 py-4 font-medium text-md-on-surface max-w-[300px] truncate">{course.title}</td>
+                <td className="px-4 sm:px-6 py-4 font-medium text-md-on-surface max-w-[300px] truncate">
+                  {course.status === 'Só neste navegador' ? (
+                    course.title
+                  ) : (
+                    <Link href={`/admin/courses/${course.id}`} className="hover:text-md-primary-text hover:underline">
+                      {course.title}
+                    </Link>
+                  )}
+                </td>
                 <td className="px-3 sm:px-6 py-4 text-center">
                   <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-label-sm font-semibold ${
                     course.status === 'Publicado'
@@ -101,14 +109,12 @@ export default function AISelectionTable({
                     {course.status !== 'Só neste navegador' && (
                       <>
                         <Link
-                          href={`/player/${course.id}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="size-11 flex items-center justify-center rounded-xl text-md-on-surface-variant hover:bg-md-surface-container-high hover:text-md-secondary transition-colors"
-                          title="Pré-visualizar"
-                          aria-label={`Pré-visualizar ${course.title}`}
+                          href={`/admin/courses/${course.id}`}
+                          className="size-11 flex items-center justify-center rounded-xl text-md-on-surface-variant hover:bg-md-surface-container-high hover:text-md-primary-text transition-colors"
+                          title="Revisar aulas"
+                          aria-label={`Revisar ${course.title}`}
                         >
-                          <Eye size={18} aria-hidden="true" />
+                          <FileSearch size={18} aria-hidden="true" />
                         </Link>
                         <button
                           type="button"
