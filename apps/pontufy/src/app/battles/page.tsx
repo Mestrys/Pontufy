@@ -109,7 +109,7 @@ export default function BattlesPage() {
   };
 
   return (
-    <main className="min-h-screen pb-20 pt-24 bg-md-surface-dim">
+    <div className="min-h-screen pb-20 pt-8 bg-md-surface-dim">
       <div className="max-w-5xl mx-auto px-6 md:px-8">
         <header className="mb-8">
           <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
@@ -256,6 +256,6 @@ export default function BattlesPage() {
           />
         )}
       </Dialog>
-    </main>
+    </div>
   );
 }

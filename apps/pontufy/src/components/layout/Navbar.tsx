@@ -11,6 +11,7 @@ import { MD3SearchBar } from '@/components/ui/MD3SearchBar';
 import { MD3NavigationDrawer } from '@/components/layout/MD3NavigationDrawer';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { useDismissableMenu } from '@/hooks/useDismissableMenu';
+import { isRouteActive } from '@/components/layout/shell-routes';
 
 export default function Navbar() {
   const { data: session, status } = useSession();
@@ -52,7 +53,7 @@ export default function Navbar() {
     { href: '/certificados', label: 'Certificados' },
   ];
 
-  const isActive = (href: string) => pathname === href;
+  const isActive = (href: string) => isRouteActive(pathname, href);
 
   return (
     <>
@@ -75,6 +76,7 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
+                  aria-current={pathname === link.href ? 'page' : undefined}
                   className={`px-3 py-1.5 text-sm font-medium transition-colors rounded-full ${
                     isActive(link.href)
                       ? 'text-white font-bold bg-md-primary/20'

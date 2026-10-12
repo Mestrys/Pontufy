@@ -85,16 +85,16 @@ export default function CoursesPage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-md-surface-dim pt-24 pb-12 px-4 sm:px-8 md:px-16">
+      <div className="min-h-screen bg-md-surface-dim pt-8 pb-12 px-4 sm:px-8 md:px-16">
         <LoadingRegion label="Carregando seus cursos…">
           <CatalogSkeleton count={6} />
         </LoadingRegion>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="min-h-screen pb-20 pt-24 bg-[#0a0a0a]">
+    <div className="min-h-screen pb-20 pt-8 bg-md-surface-dim">
       <div className="max-w-[1200px] mx-auto px-6 md:px-16">
         <header className="mb-8">
           <h1 className="text-3xl font-black text-white tracking-tight">Meus Cursos & Trilhas</h1>
@@ -182,6 +182,6 @@ export default function CoursesPage() {
           </div>
         )}
       </div>
-    </main>
+    </div>
   );
 }

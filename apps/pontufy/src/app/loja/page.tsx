@@ -56,7 +56,7 @@ export default function MarketplacePage() {
   };
 
   return (
-    <main className="min-h-screen pb-20 pt-24 bg-md-surface-dim">
+    <div className="min-h-screen pb-20 pt-8 bg-md-surface-dim">
       <div className="max-w-[1600px] mx-auto">
         <div className="px-4 sm:px-8 md:px-16 mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -134,6 +134,6 @@ export default function MarketplacePage() {
         userBalance={userPoints}
         onSuccess={handleRedeemSuccess}
       />
-    </main>
+    </div>
   );
 }

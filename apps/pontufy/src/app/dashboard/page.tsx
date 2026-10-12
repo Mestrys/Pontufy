@@ -104,7 +104,7 @@ export default function Home() {
   const isLoading = loadingCourses || loadingEnrolled;
 
   return (
-    <main className="min-h-screen pb-20 bg-md-surface-dim">
+    <div className="min-h-screen pb-20 bg-md-surface-dim">
       <SurpriseRewardToast />
 
       {isLoading ? (
@@ -112,7 +112,7 @@ export default function Home() {
           <DashboardSkeleton />
         </LoadingRegion>
       ) : (
-        <div className="pt-24 px-4 sm:px-8 md:px-16 space-y-8">
+        <div className="pt-6 px-4 sm:px-8 md:px-16 space-y-8">
           <h1 className="sr-only">Início</h1>
           {continueCourse && !searchQuery && <ContinueCard course={continueCourse} />}
           {heroCourse && !searchQuery && <HeroCourse course={heroCourse} />}
@@ -138,6 +138,6 @@ export default function Home() {
           )}
         </div>
       )}
-    </main>
+    </div>
   );
 }

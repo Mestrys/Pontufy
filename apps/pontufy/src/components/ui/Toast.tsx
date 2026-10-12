@@ -1,6 +1,7 @@
 'use client';
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import { bottomOffsetClass } from '@/components/layout/shell-routes';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, CheckCircle2, Info, X } from 'lucide-react';
 
@@ -65,9 +66,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   );
 
   const value = useMemo(() => ({ toast, dismiss }), [toast, dismiss]);
-  // No player a barra de ações fica no rodapé: o toast sobe para não cobrir "Concluir".
+  // Sobe acima da barra de ações do player e da barra de navegação do celular.
   const pathname = usePathname();
-  const bottom = pathname?.startsWith('/player') ? 'bottom-24' : 'bottom-4';
+  const bottom = bottomOffsetClass(pathname);
 
   return (
     <ToastContext.Provider value={value}>

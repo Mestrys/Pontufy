@@ -45,11 +45,11 @@ export default function CertificatesPage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-md-surface-dim pt-24 pb-12 px-4 sm:px-8 md:px-16">
+      <div className="min-h-screen bg-md-surface-dim pt-8 pb-12 px-4 sm:px-8 md:px-16">
         <LoadingRegion label="Carregando seus certificados…" className="max-w-4xl mx-auto">
           <ListSkeleton rows={3} />
         </LoadingRegion>
-      </main>
+      </div>
     );
   }
 
@@ -57,7 +57,7 @@ export default function CertificatesPage() {
   const tenantName = typeof window !== 'undefined' ? (document.querySelector('[data-tenant-name]')?.getAttribute('data-tenant-name') || '') : '';
 
   return (
-    <main className="min-h-screen pb-20 pt-24 bg-md-surface-dim">
+    <div className="min-h-screen pb-20 pt-8 bg-md-surface-dim">
       <div className="max-w-5xl mx-auto px-6 md:px-8">
         <header className="mb-8 flex items-center gap-3">
           <Award size={28} className="text-md-primary-text" />
@@ -85,6 +85,6 @@ export default function CertificatesPage() {
           />
         )}
       </div>
-    </main>
+    </div>
   );
 }

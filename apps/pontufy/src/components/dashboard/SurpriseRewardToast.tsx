@@ -53,7 +53,7 @@ export default function SurpriseRewardToast() {
         type="button"
         onClick={triggerAutopilot}
         disabled={isLoading}
-        className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-50 bg-md-highlight text-md-on-highlight px-3 sm:px-4 py-2 rounded-full font-medium shadow-lg hover:shadow-xl hover:bg-md-highlight/90 transition-all flex items-center space-x-2 text-sm"
+        className="fixed bottom-24 md:bottom-6 right-4 sm:right-6 z-50 bg-md-highlight text-md-on-highlight px-3 sm:px-4 py-2 rounded-full font-medium shadow-lg hover:shadow-xl hover:bg-md-highlight/90 transition-all flex items-center space-x-2 text-sm"
       >
         {isLoading ? (
           <span className="animate-pulse">Analisando Perfil...</span>
@@ -73,7 +73,7 @@ export default function SurpriseRewardToast() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="fixed bottom-32 sm:bottom-20 right-4 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-80 bg-md-highlight rounded-2xl shadow-2xl overflow-hidden border border-md-highlight"
+            className="fixed bottom-40 md:bottom-20 right-4 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-80 bg-md-highlight rounded-2xl shadow-2xl overflow-hidden border border-md-highlight"
           >
             {/* Header / Brand Gradient Bar (acento primary #5c4152 → container) */}
             <div className="h-2 bg-gradient-to-r from-md-primary to-md-primary-container w-full"></div>

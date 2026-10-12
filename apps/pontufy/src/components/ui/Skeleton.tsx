@@ -72,7 +72,8 @@ export function ListSkeleton({ rows = 5 }: { rows?: number }) {
 // Início: destaque + trilhas.
 export function DashboardSkeleton() {
   return (
-    <div className="pt-24 px-4 sm:px-8 md:px-16 space-y-10">
+    <div className="pt-6 px-4 sm:px-8 md:px-16 space-y-8">
+      <Skeleton className="h-36 w-full rounded-2xl" />
       <div className="space-y-4 max-w-2xl">
         <Skeleton className="h-7 w-32 rounded-full" />
         <Skeleton className="h-12 w-full" />

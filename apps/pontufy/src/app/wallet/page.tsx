@@ -33,7 +33,7 @@ export default function WalletPage() {
   };
 
   return (
-    <main className="min-h-screen pb-20 pt-24 bg-[#0a0a0a]">
+    <div className="min-h-screen pb-20 pt-8 bg-md-surface-dim">
       <div className="max-w-[1000px] mx-auto px-6 md:px-8">
         <header className="mb-8">
           <h1 className="text-3xl font-black text-white tracking-tight">Central de Conquistas</h1>
@@ -60,6 +60,6 @@ export default function WalletPage() {
           />
         )}
       </div>
-    </main>
+    </div>
   );
 }

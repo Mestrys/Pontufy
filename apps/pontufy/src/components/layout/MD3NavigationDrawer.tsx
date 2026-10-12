@@ -6,6 +6,7 @@ import { LayoutDashboard, LogOut, ShieldCheck, User, X } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
 import { MD3SearchBar } from '@/components/ui/MD3SearchBar';
 import { Dialog } from '@/components/ui/Dialog';
+import { isRouteActive } from './shell-routes';
 
 export interface MD3DrawerLink {
   href: string;
@@ -28,7 +29,7 @@ export function MD3NavigationDrawer({ open, onClose, links, activeHref }: MD3Nav
   const [isOnline, setIsOnline] = useState<boolean>(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
   const role = (session?.user as { role?: string } | undefined)?.role;
-  const isActive = (href: string) => pathname === href || activeHref === href;
+  const isActive = (href: string) => isRouteActive(pathname ?? activeHref, href);
 
   useEffect(() => {
     const goOnline = () => setIsOnline(true);
@@ -77,6 +78,7 @@ export function MD3NavigationDrawer({ open, onClose, links, activeHref }: MD3Nav
                 <Link
                   key={link.href}
                   href={link.href}
+                  aria-current={pathname === link.href ? 'page' : undefined}
                   onClick={onClose}
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                     isActive(link.href)

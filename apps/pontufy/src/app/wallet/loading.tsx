@@ -1,6 +1,6 @@
 export default function WalletLoading() {
   return (
-    <main className="pb-20 pt-8">
+    <div className="pb-20 pt-8">
       <div className="max-w-[1000px] mx-auto px-6 md:px-8">
         <div className="h-8 w-56 bg-gray-200 rounded mb-2 animate-pulse" />
         <div className="h-4 w-80 bg-gray-100 rounded mb-8 animate-pulse" />
@@ -14,6 +14,6 @@ export default function WalletLoading() {
           ))}
         </div>
       </div>
-    </main>
+    </div>
   );
 }

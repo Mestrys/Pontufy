@@ -8,7 +8,7 @@ import { useUserStore } from '@/store/useUserStore';
 import { isSoundEnabled, setSoundEnabled } from '@/lib/feedback';
 import AchievementsCard from '@/components/profile/AchievementsCard';
 import { AlertDialog } from '@/components/ui/AlertDialog';
-import { Loader2, User, Coins, Save, ShieldCheck, Building2, Volume2, VolumeX, LogOut } from 'lucide-react';
+import { Loader2, User, Coins, Save, ShieldCheck, Building2, Volume2, VolumeX, LogOut, Wallet, Award, Network } from 'lucide-react';
 import { ListSkeleton, LoadingRegion } from '@/components/ui/Skeleton';
 
 export default function ProfilePage() {
@@ -67,23 +67,42 @@ export default function ProfilePage() {
 
   if (status === 'loading') {
     return (
-      <main className="min-h-screen bg-md-surface-dim pt-24 pb-12 px-4">
+      <div className="min-h-screen bg-md-surface-dim pt-8 pb-12 px-4">
         <LoadingRegion label="Carregando o perfil…" className="max-w-2xl mx-auto">
           <ListSkeleton rows={3} />
         </LoadingRegion>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="min-h-screen pb-20 pt-24 bg-md-surface-dim">
+    <div className="min-h-screen pb-20 pt-8 bg-md-surface-dim">
       <div className="max-w-[720px] mx-auto px-6 md:px-8">
         <header className="mb-8">
-          <h1 className="text-3xl font-black text-white tracking-tight">Meu Perfil</h1>
+          <h1 className="text-3xl font-black text-white tracking-tight">Meu perfil</h1>
           <p className="text-md-on-surface-muted mt-1.5 text-sm">Gerencie suas informações pessoais.</p>
         </header>
 
         <div className="space-y-6">
+          {/* Atalhos: no celular a barra inferior leva ao Perfil, e daqui à Carteira,
+              aos Certificados e às Trilhas. */}
+          <nav aria-label="Atalhos do perfil" className="grid grid-cols-3 gap-3">
+            {[
+              { href: '/wallet', label: 'Carteira', icon: Wallet },
+              { href: '/certificados', label: 'Certificados', icon: Award },
+              { href: '/skills', label: 'Trilhas', icon: Network },
+            ].map(({ href, label, icon: Icon }) => (
+              <Link
+                key={href}
+                href={href}
+                className="flex min-h-20 flex-col items-center justify-center gap-2 rounded-xl border border-md-outline bg-md-surface p-3 text-sm font-semibold text-white transition-colors hover:bg-md-surface-container"
+              >
+                <Icon size={20} className="text-md-primary-text" aria-hidden="true" />
+                {label}
+              </Link>
+            ))}
+          </nav>
+
           {/* Identity card */}
           <section className="bg-md-surface border border-md-outline rounded-xl p-6">
             <div className="flex items-center gap-4 mb-6">
@@ -219,6 +238,6 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

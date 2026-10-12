@@ -4,25 +4,14 @@ import { usePathname } from 'next/navigation';
 import { motion, useReducedMotion } from 'framer-motion';
 import Navbar from './Navbar';
 import Footer from './Footer';
+import MobileTabBar from './MobileTabBar';
+import { hasAppShell } from './shell-routes';
 
-// Rotas sem navbar/rodapé globais. O player tem barra própria e precisa da
-// altura inteira da tela para a aula e para a ação "Concluir".
-const NO_SHELL_ROUTES = [
-  '/player',
-  '/login',
-  '/register',
-  '/forgot-password',
-  '/reset-password',
-  '/superadmin',
-  '/admin',
-];
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const reduced = useReducedMotion();
-  const isAuthPage = NO_SHELL_ROUTES.some((r) => pathname.startsWith(r));
-
-  if (isAuthPage) {
+  if (!hasAppShell(pathname)) {
     return <>{children}</>;
   }
 
@@ -42,7 +31,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           {children}
         </motion.main>
       </div>
-      <Footer />
+      {/* Espaço para a barra inferior no celular não cobrir o rodapé. */}
+      <div className="pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
+        <Footer />
+      </div>
+      <MobileTabBar />
     </>
   );
 }
