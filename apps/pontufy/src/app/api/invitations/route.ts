@@ -4,6 +4,7 @@ import { getSessionContext } from '@/backend/session';
 import { getTenantDb, prisma } from '@/backend/db';
 import { logAudit, extractRequestMeta } from '@/lib/audit';
 import { resolveBaseUrl, sendInvitationEmail } from '@/lib/email';
+import { parseDepartment } from '@/lib/validations/department';
 
 const VALID_ROLES = ['admin_rh', 'employee', 'guest'] as const;
 const INVITATION_EXPIRY_DAYS = 7;
@@ -32,6 +33,7 @@ export async function GET() {
           email: true,
           role: true,
           pointsBalance: true,
+          department: true,
           createdAt: true,
         },
         orderBy: { createdAt: 'asc' },
@@ -44,6 +46,7 @@ export async function GET() {
         email: invite.email,
         role: invite.role,
         status: invite.status,
+        department: invite.department ?? null,
         expiresAt: invite.expiresAt.toISOString(),
         usedAt: invite.usedAt?.toISOString() ?? null,
         createdAt: invite.createdAt.toISOString(),
@@ -55,8 +58,13 @@ export async function GET() {
         email: user.email,
         role: user.role,
         pointsBalance: user.pointsBalance,
+        department: user.department ?? null,
         createdAt: user.createdAt.toISOString(),
       })),
+      // Sugestões p/ o RH reutilizar o mesmo nome (o ranking agrupa por string exata).
+      departments: Array.from(
+        new Set(users.map((user) => user.department).filter((d): d is string => !!d)),
+      ).sort((a, b) => a.localeCompare(b, 'pt-BR')),
     });
   } catch (error) {
     if (error instanceof Error && error.message === 'Não autenticado.') {
@@ -77,6 +85,7 @@ export async function POST(request: Request) {
 
     const body = await request.json();
     const { email, role: inviteRole } = body;
+    const parsedDepartment = parseDepartment(body?.department);
 
     if (typeof email !== 'string' || !email.includes('@')) {
       return NextResponse.json({ error: 'Email inválido.' }, { status: 400 });
@@ -88,6 +97,11 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
+
+    if (!parsedDepartment.ok) {
+      return NextResponse.json({ error: parsedDepartment.error }, { status: 400 });
+    }
+    const department = parsedDepartment.value;
 
     const normalizedEmail = email.trim().toLowerCase();
 
@@ -125,6 +139,7 @@ export async function POST(request: Request) {
         token,
         role: inviteRole,
         status: 'pending',
+        department,
         expiresAt,
       },
     });
@@ -145,7 +160,12 @@ export async function POST(request: Request) {
       entityId: invitation.id,
       ipAddress: meta.ipAddress,
       userAgent: meta.userAgent,
-      newValue: { email: normalizedEmail, role: inviteRole, expiresAt: expiresAt.toISOString() },
+      newValue: {
+        email: normalizedEmail,
+        role: inviteRole,
+        department,
+        expiresAt: expiresAt.toISOString(),
+      },
     });
 
     return NextResponse.json({
@@ -155,6 +175,7 @@ export async function POST(request: Request) {
         email: invitation.email,
         role: invitation.role,
         status: invitation.status,
+        department: invitation.department ?? null,
         expiresAt: invitation.expiresAt.toISOString(),
         signupUrl,
       },

@@ -63,7 +63,7 @@ export default function LeaderboardCard() {
         <div className="text-center py-10">
           <Users className="mx-auto text-gray-600 mb-3" size={36} />
           <p className="text-gray-400 text-sm">
-            Nenhum departamento definido ainda. Defina o seu departamento no perfil para entrar no ranking.
+            Nenhum departamento definido ainda. O RH da sua empresa atribui os departamentos na tela Equipe.
           </p>
         </div>
       )}

@@ -11,6 +11,9 @@ import {
   Users,
   Mail,
   ArrowLeft,
+  Building2,
+  Pencil,
+  X,
 } from 'lucide-react';
 
 interface TeamUser {
@@ -19,6 +22,7 @@ interface TeamUser {
   email: string;
   role: string;
   pointsBalance: number;
+  department: string | null;
   createdAt: string;
 }
 
@@ -27,6 +31,7 @@ interface InvitationRow {
   email: string;
   role: string;
   status: string;
+  department: string | null;
   expiresAt: string;
   usedAt: string | null;
   createdAt: string;
@@ -51,11 +56,113 @@ function statusLabel(status: string): string {
   return 'Expirado';
 }
 
+const DEPARTMENT_MAX_LENGTH = 60;
+const DEPARTMENTS_DATALIST_ID = 'team-departments';
+
+// TAREFA 13.2 — Edição inline do departamento (fonte do ranking interdepartamental).
+function DepartmentCell({
+  user,
+  onSaved,
+  onError,
+}: {
+  user: TeamUser;
+  onSaved: (id: string, department: string | null) => void;
+  onError: (message: string) => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(user.department ?? '');
+  const [saving, setSaving] = useState(false);
+
+  const startEditing = () => {
+    setValue(user.department ?? '');
+    setEditing(true);
+  };
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault();
+    onError('');
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/admin/users/${encodeURIComponent(user.id)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ department: value.trim() || null }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        onSaved(user.id, data.user.department ?? null);
+        setEditing(false);
+      } else {
+        onError(data.error || 'Erro ao salvar departamento.');
+      }
+    } catch {
+      onError('Erro ao conectar ao servidor.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (!editing) {
+    return (
+      <button
+        type="button"
+        onClick={startEditing}
+        className="group inline-flex items-center gap-1.5 text-left"
+        aria-label={`Editar departamento de ${user.name}`}
+      >
+        {user.department ? (
+          <span className="text-gray-300">{user.department}</span>
+        ) : (
+          <span className="text-gray-500 italic">Sem departamento</span>
+        )}
+        <Pencil size={13} className="text-gray-500 group-hover:text-emerald-400 transition-colors" />
+      </button>
+    );
+  }
+
+  return (
+    <form onSubmit={save} className="flex items-center gap-1.5">
+      <input
+        autoFocus
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') setEditing(false);
+        }}
+        list={DEPARTMENTS_DATALIST_ID}
+        maxLength={DEPARTMENT_MAX_LENGTH}
+        placeholder="Ex.: Vendas"
+        aria-label={`Departamento de ${user.name}`}
+        className="w-36 px-2.5 py-1.5 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500 text-xs transition-colors"
+      />
+      <button
+        type="submit"
+        disabled={saving}
+        aria-label="Salvar departamento"
+        className="p-1.5 rounded-lg text-emerald-400 hover:text-emerald-300 transition-colors disabled:opacity-50"
+      >
+        {saving ? <Loader2 className="animate-spin" size={14} /> : <Check size={14} />}
+      </button>
+      <button
+        type="button"
+        onClick={() => setEditing(false)}
+        disabled={saving}
+        aria-label="Cancelar edição"
+        className="p-1.5 rounded-lg text-gray-500 hover:text-gray-300 transition-colors disabled:opacity-50"
+      >
+        <X size={14} />
+      </button>
+    </form>
+  );
+}
+
 export default function TeamClient() {
   const [users, setUsers] = useState<TeamUser[]>([]);
   const [invitations, setInvitations] = useState<InvitationRow[]>([]);
   const [email, setEmail] = useState('');
   const [inviteRole, setInviteRole] = useState('employee');
+  const [inviteDepartment, setInviteDepartment] = useState('');
+  const [departments, setDepartments] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -72,6 +179,7 @@ export default function TeamClient() {
         if (res.ok) {
           setUsers(data.users ?? []);
           setInvitations(data.invitations ?? []);
+          setDepartments(data.departments ?? []);
         } else {
           setError(data.error || 'Erro ao carregar equipe.');
         }
@@ -97,12 +205,17 @@ export default function TeamClient() {
       const res = await fetch('/api/invitations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), role: inviteRole }),
+        body: JSON.stringify({
+          email: email.trim(),
+          role: inviteRole,
+          department: inviteDepartment.trim() || null,
+        }),
       });
       const data = await res.json();
 
       if (res.ok && data.success) {
         setEmail('');
+        setInviteDepartment('');
         setLastInviteUrl(data.invitation.signupUrl);
         setReloadKey((k) => k + 1);
       } else {
@@ -134,6 +247,17 @@ export default function TeamClient() {
     }
   };
 
+  const handleDepartmentSaved = (id: string, department: string | null) => {
+    setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, department } : u)));
+    if (department) {
+      setDepartments((prev) =>
+        prev.includes(department)
+          ? prev
+          : [...prev, department].sort((a, b) => a.localeCompare(b, 'pt-BR')),
+      );
+    }
+  };
+
   const copyLink = async (id: string, url: string) => {
     try {
       await navigator.clipboard.writeText(url);
@@ -157,7 +281,7 @@ export default function TeamClient() {
             </Link>
             <h1 className="text-2xl font-bold text-white">Equipe</h1>
             <p className="text-sm text-gray-500 mt-1">
-              Convide colaboradores e gerencie o acesso à plataforma
+              Convide colaboradores, defina departamentos e gerencie o acesso à plataforma
             </p>
           </div>
         </div>
@@ -167,6 +291,12 @@ export default function TeamClient() {
             {error}
           </div>
         )}
+
+        <datalist id={DEPARTMENTS_DATALIST_ID}>
+          {departments.map((dept) => (
+            <option key={dept} value={dept} />
+          ))}
+        </datalist>
 
         {/* ── Convite ─────────────────────────────────────────────────── */}
         <section className="bg-[#141414] border border-[#2a2a2a] rounded-2xl p-6">
@@ -195,6 +325,18 @@ export default function TeamClient() {
               <option value="admin_rh">Administrador</option>
               <option value="guest">Convidado</option>
             </select>
+            <div className="sm:w-48 relative">
+              <Building2 size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-600" />
+              <input
+                value={inviteDepartment}
+                onChange={(e) => setInviteDepartment(e.target.value)}
+                list={DEPARTMENTS_DATALIST_ID}
+                maxLength={DEPARTMENT_MAX_LENGTH}
+                placeholder="Departamento"
+                aria-label="Departamento (opcional)"
+                className="w-full pl-10 pr-4 py-3 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 text-sm transition-colors"
+              />
+            </div>
             <button
               type="submit"
               disabled={submitting}
@@ -250,7 +392,8 @@ export default function TeamClient() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-white truncate">{invite.email}</p>
                       <p className="text-xs text-gray-500 mt-0.5">
-                        {ROLE_LABELS[invite.role] ?? invite.role} · Expira em{' '}
+                        {ROLE_LABELS[invite.role] ?? invite.role}
+                        {invite.department ? ` · ${invite.department}` : ''} · Expira em{' '}
                         {new Date(invite.expiresAt).toLocaleDateString('pt-BR')}
                       </p>
                     </div>
@@ -307,6 +450,7 @@ export default function TeamClient() {
                     <th className="pb-3 pr-4 font-semibold">Nome</th>
                     <th className="pb-3 pr-4 font-semibold">Email</th>
                     <th className="pb-3 pr-4 font-semibold">Perfil</th>
+                    <th className="pb-3 pr-4 font-semibold">Departamento</th>
                     <th className="pb-3 font-semibold">Pontos</th>
                   </tr>
                 </thead>
@@ -321,6 +465,13 @@ export default function TeamClient() {
                         <span className="text-xs font-bold px-3 py-1 rounded-full border border-[#2a2a2a] bg-[#1f1f1f] text-gray-300">
                           {ROLE_LABELS[user.role] ?? user.role}
                         </span>
+                      </td>
+                      <td className="py-3 pr-4 whitespace-nowrap">
+                        <DepartmentCell
+                          user={user}
+                          onSaved={handleDepartmentSaved}
+                          onError={setError}
+                        />
                       </td>
                       <td className="py-3 text-emerald-400 font-bold">{user.pointsBalance}</td>
                     </tr>

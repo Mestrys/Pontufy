@@ -70,6 +70,8 @@ export async function POST(request: Request) {
           passwordHash,
           role: invitation.role,
           tenantId: invitation.tenantId,
+          // 13.2 — Departamento definido pelo RH no convite (validado na criação).
+          department: invitation.department ?? null,
         },
       }),
       prisma.invitation.update({
