@@ -20,6 +20,8 @@ interface LessonContentProps {
   onNext: (() => void) | null;
   /** Pré-visualização de rascunho (RH): só navega, não conclui nem pontua. */
   preview?: boolean;
+  /** Motivo da última falha ao concluir, exibido junto ao botão. */
+  completionError?: string;
 }
 
 function formatInline(text: string): ReactNode[] {
@@ -132,6 +134,7 @@ export default function LessonContent({
   onPrevious,
   onNext,
   preview = false,
+  completionError = '',
 }: LessonContentProps) {
   return (
     <div className="flex flex-col flex-1 min-h-0">
@@ -165,6 +168,11 @@ export default function LessonContent({
           O acesso é sequencial (o sumário bloqueia as aulas seguintes), então
           não há botão para pular a aula sem concluí-la. */}
       <div className="flex-shrink-0 px-4 sm:px-10 py-3 sm:py-4 bg-md-surface border-t border-md-outline">
+        {completionError && (
+          <p role="alert" className="mb-3 max-w-4xl text-sm text-md-error">
+            {completionError}
+          </p>
+        )}
         <div className="flex items-center gap-2 sm:gap-3 max-w-4xl">
           <button
             type="button"

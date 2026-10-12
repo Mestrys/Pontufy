@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Swords, Users, Loader2, Hourglass, CheckCircle2, XCircle } from 'lucide-react';
 import BattleArena from '@/components/battles/BattleArena';
+import { Dialog } from '@/components/ui/Dialog';
 import LeaderboardCard from '@/components/battles/LeaderboardCard';
 
 // TAREFA 13 — Batalhas de Conhecimento: desafio 1x1 assíncrono (13.1),
@@ -36,6 +37,7 @@ export default function BattlesPage() {
   const [selectedOpponent, setSelectedOpponent] = useState('');
   const [creating, setCreating] = useState(false);
   const [activeBattleId, setActiveBattleId] = useState<string | null>(null);
+  const [battleLocked, setBattleLocked] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
 
@@ -234,17 +236,26 @@ export default function BattlesPage() {
       </div>
 
       {/* Arena de duelo (timer 15s + detecção de foco) */}
-      {activeBattleId && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-md-surface-dim border border-white/10 rounded-2xl p-6 relative">
-            <BattleArena
-              battleId={activeBattleId}
-              onClose={() => setActiveBattleId(null)}
-              onFinished={load}
-            />
-          </div>
-        </div>
-      )}
+      {/* Durante as perguntas o duelo não fecha (Escape e fundo ficam
+          inativos): sair no meio anularia o turno sem aviso. */}
+      <Dialog
+        open={!!activeBattleId}
+        onClose={() => setActiveBattleId(null)}
+        dismissible={!battleLocked}
+        ariaLabel="Duelo"
+        zIndexClassName="z-50"
+        backdropClassName="bg-black/80 backdrop-blur-sm"
+        className="w-full max-w-3xl max-h-[90dvh] overflow-y-auto bg-md-surface-dim border border-white/10 rounded-2xl p-6"
+      >
+        {activeBattleId && (
+          <BattleArena
+            battleId={activeBattleId}
+            onClose={() => setActiveBattleId(null)}
+            onFinished={load}
+            onLockChange={setBattleLocked}
+          />
+        )}
+      </Dialog>
     </main>
   );
 }

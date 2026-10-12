@@ -64,6 +64,8 @@ export async function triggerLessonCompletion(
   queued?: boolean;
   message?: string;
   error?: string;
+  /** Código HTTP da resposta (ausente quando não houve conexão). */
+  status?: number;
 }> {
   const res = await fetch('/api/lessons/complete', {
     method: 'POST',
@@ -91,14 +93,14 @@ export async function triggerLessonCompletion(
     return { success: false, error: 'Sem conexão.' };
   }
 
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
   if (data.success && data.newBalance !== undefined) {
     useStore.getState().setPointsBalance(data.newBalance);
     mutate('/api/users/me');
     mutate('/api/users/me/history');
     mutate('/api/courses/enrolled');
   }
-  return data;
+  return { ...data, success: Boolean(data.success), status: res.status };
 }
 
 export async function triggerRewardRedemption(rewardId: string): Promise<{
@@ -108,18 +110,23 @@ export async function triggerRewardRedemption(rewardId: string): Promise<{
   redemptionId?: string;
   message?: string;
   error?: string;
+  /** Pontos que faltam quando o saldo é insuficiente. */
+  missing?: number;
+  /** Código HTTP da resposta (ausente quando não houve conexão). */
+  status?: number;
 }> {
   const res = await fetch('/api/rewards/redeem', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ rewardId }),
-  });
-  const data = await res.json();
+  }).catch(() => null);
+  if (!res) return { success: false };
+  const data = await res.json().catch(() => ({}));
   if (data.success && data.newBalance !== undefined) {
     useStore.getState().setPointsBalance(data.newBalance);
     mutate('/api/users/me');
     mutate('/api/users/me/history');
     mutate('/api/rewards');
   }
-  return data;
+  return { ...data, success: Boolean(data.success), status: res.status };
 }

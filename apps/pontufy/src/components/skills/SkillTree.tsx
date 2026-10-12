@@ -1,8 +1,9 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useId, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Lock, CheckCircle2, PlayCircle, Target } from 'lucide-react';
+import { Dialog } from '@/components/ui/Dialog';
 
 // TAREFA 12.2 — Árvore de Habilidades interativa em SVG (estética MD3).
 // Nós: locked (cinza) / available (primária) / in_progress (secundária) /
@@ -187,6 +188,7 @@ function SkillBranch({
 }
 
 function NodeDetail({ node, onClose }: { node: SkillNodeView; onClose: () => void }) {
+  const titleId = useId();
   const statusLabel: Record<SkillNodeView['status'], string> = {
     locked: 'Bloqueado',
     available: 'Disponível',
@@ -195,14 +197,15 @@ function NodeDetail({ node, onClose }: { node: SkillNodeView; onClose: () => voi
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-4" onClick={onClose}>
-      <div
-        className="w-full max-w-sm bg-md-surface border border-md-outline rounded-2xl p-6"
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-      >
-        <h3 className="font-black text-white text-lg">{node.title}</h3>
+    <Dialog
+      open
+      onClose={onClose}
+      labelledBy={titleId}
+      zIndexClassName="z-50"
+      backdropClassName="bg-black/60"
+      className="w-full max-w-sm bg-md-surface border border-md-outline rounded-2xl p-6"
+    >
+        <h3 id={titleId} className="font-black text-white text-lg">{node.title}</h3>
         <p className="text-sm text-md-on-surface-muted mt-1">{node.description ?? 'Sem descrição.'}</p>
 
         <div className="mt-4 space-y-2 text-sm">
@@ -248,7 +251,6 @@ function NodeDetail({ node, onClose }: { node: SkillNodeView; onClose: () => voi
             Fechar
           </button>
         </div>
-      </div>
-    </div>
+    </Dialog>
   );
 }

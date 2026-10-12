@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Award, Loader2, BookOpen } from 'lucide-react';
+import { useToast } from '@/components/ui/Toast';
 import { downloadCertificate } from '@/lib/download-certificate';
 import CertificateBadgeMural from '@/components/certificates/CertificateBadgeMural';
 
@@ -14,6 +15,7 @@ interface Certificate {
 }
 
 export default function CertificatesPage() {
+  const { toast } = useToast();
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [downloading, setDownloading] = useState<string | null>(null);
@@ -33,7 +35,8 @@ export default function CertificatesPage() {
     try {
       await downloadCertificate(cert.courseId, cert.courseName);
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Erro ao baixar certificado.');
+      console.error(err);
+      toast({ tone: 'error', title: 'Não foi possível baixar o certificado.', description: 'Tente de novo em instantes.' });
     } finally {
       setDownloading(null);
     }

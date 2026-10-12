@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useId, useRef } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { useId, useRef } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Coins, Trophy, Sparkles, Crown, Medal } from 'lucide-react';
+import { Dialog } from '@/components/ui/Dialog';
 
 interface CelebrationModalProps {
   isVisible: boolean;
@@ -58,29 +59,9 @@ export default function CelebrationModal({
   const titleId = useId();
   const subtitleId = useId();
   const continueRef = useRef<HTMLButtonElement>(null);
-  // Ref evita reinstalar o efeito (e devolver o foco) a cada render do pai,
-  // que costuma passar onComplete como arrow function inline.
-  const onCompleteRef = useRef(onComplete);
-  useEffect(() => {
-    onCompleteRef.current = onComplete;
-  });
-
-  // Fecha só por ação da pessoa (sem timer): foco vai para "Continuar",
-  // Escape fecha e o foco volta para onde estava.
-  useEffect(() => {
-    if (!isVisible) return;
-    const previouslyFocused = document.activeElement as HTMLElement | null;
-    const focusTimer = setTimeout(() => continueRef.current?.focus(), 50);
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onCompleteRef.current();
-    };
-    document.addEventListener('keydown', onKey);
-    return () => {
-      clearTimeout(focusTimer);
-      document.removeEventListener('keydown', onKey);
-      previouslyFocused?.focus?.();
-    };
-  }, [isVisible]);
+  // Fecha só por ação da pessoa (sem timer). O Dialog cuida do foco em
+  // "Continuar", do Escape, do foco preso e de devolver o foco ao fechar; ele
+  // guarda onClose em ref, então o arrow function inline do pai não reabre nada.
 
   // Com movimento reduzido, nenhum loop (escala, rotação, partículas).
   const loop = <T,>(value: T) => (reduced ? undefined : value);
@@ -90,28 +71,15 @@ export default function CelebrationModal({
   const tierBg = newTier ? TIER_BG[newTier.name] : 'bg-md-tertiary/10 border-md-tertiary/30';
 
   return (
-    <AnimatePresence>
-      {isVisible && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-black/60"
-            onClick={onComplete}
-            aria-hidden="true"
-          />
-          <motion.div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={titleId}
-            aria-describedby={subtitleId}
-            initial={reduced ? { opacity: 0 } : { scale: 0.5, opacity: 0, y: 60 }}
-            animate={reduced ? { opacity: 1 } : { scale: 1, opacity: 1, y: 0 }}
-            exit={reduced ? { opacity: 0 } : { scale: 0.8, opacity: 0, y: 24 }}
-            transition={reduced ? { duration: 0.15 } : { type: 'spring', stiffness: 220, damping: 18 }}
-            className="relative bg-[#141414] px-10 py-8 rounded-2xl shadow-2xl border border-[#2a2a2a] flex flex-col items-center gap-4 max-w-md w-full mx-4"
-          >
+    <Dialog
+      open={isVisible}
+      onClose={onComplete}
+      labelledBy={titleId}
+      describedBy={subtitleId}
+      initialFocus={continueRef}
+      backdropClassName="bg-black/60"
+      className="bg-[#141414] px-10 py-8 rounded-2xl shadow-2xl border border-[#2a2a2a] flex flex-col items-center gap-4 max-w-md w-full"
+    >
             {/* Animated background glow */}
             <motion.div
               animate={loop({ scale: [1, 1.08, 1], opacity: [0.3, 0.6, 0.3] })}
@@ -222,9 +190,6 @@ export default function CelebrationModal({
                 Continue evoluindo — cada aula te aproxima do próximo nível
               </p>
             )}
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
+    </Dialog>
   );
 }

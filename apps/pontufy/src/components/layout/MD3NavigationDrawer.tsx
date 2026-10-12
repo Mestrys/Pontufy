@@ -1,11 +1,11 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { LayoutDashboard, LogOut, ShieldCheck, User, X } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
 import { MD3SearchBar } from '@/components/ui/MD3SearchBar';
+import { Dialog } from '@/components/ui/Dialog';
 
 export interface MD3DrawerLink {
   href: string;
@@ -25,28 +25,10 @@ interface MD3NavigationDrawerProps {
 export function MD3NavigationDrawer({ open, onClose, links, activeHref }: MD3NavigationDrawerProps) {
   const { data: session, status } = useSession();
   const pathname = usePathname();
-  const panelRef = useRef<HTMLDivElement>(null);
   const [isOnline, setIsOnline] = useState<boolean>(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
   const role = (session?.user as { role?: string } | undefined)?.role;
   const isActive = (href: string) => pathname === href || activeHref === href;
-
-  useEffect(() => {
-    if (!open) return;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
 
   useEffect(() => {
     const goOnline = () => setIsOnline(true);
@@ -60,29 +42,15 @@ export function MD3NavigationDrawer({ open, onClose, links, activeHref }: MD3Nav
   }, []);
 
   return (
-    <AnimatePresence>
-      {open && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <motion.button
-            type="button"
-            aria-label="Fechar menu"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="absolute inset-0 w-full h-full bg-black/60"
-          />
-          <motion.aside
-            ref={panelRef}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Menu de navegação"
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', stiffness: 340, damping: 34 }}
-            className="absolute top-0 right-0 bottom-0 w-[320px] max-w-[85vw] bg-md-surface border-l border-md-outline shadow-2xl flex flex-col"
-          >
+    <Dialog
+      open={open}
+      onClose={onClose}
+      variant="right"
+      ariaLabel="Menu de navegação"
+      zIndexClassName="z-50"
+      backdropClassName="bg-black/60"
+      className="h-full w-[320px] max-w-[85vw] bg-md-surface border-l border-md-outline shadow-2xl flex flex-col"
+    >
             {/* Header do drawer */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-md-outline flex-shrink-0">
               <Link href="/dashboard" onClick={onClose} className="text-lg font-black tracking-tight text-white">
@@ -92,9 +60,9 @@ export function MD3NavigationDrawer({ open, onClose, links, activeHref }: MD3Nav
                 type="button"
                 onClick={onClose}
                 aria-label="Fechar menu"
-                className="p-2 text-gray-400 hover:text-white transition-colors rounded-full"
+                className="-mr-2 size-11 flex items-center justify-center text-gray-400 hover:text-white transition-colors rounded-full"
               >
-                <X size={20} />
+                <X size={20} aria-hidden="true" />
               </button>
             </div>
 
@@ -180,9 +148,6 @@ export function MD3NavigationDrawer({ open, onClose, links, activeHref }: MD3Nav
                 </button>
               </div>
             )}
-          </motion.aside>
-        </div>
-      )}
-    </AnimatePresence>
+    </Dialog>
   );
 }

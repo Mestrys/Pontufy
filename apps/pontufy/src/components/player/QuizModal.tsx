@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useId, useState } from 'react';
 import {
   X,
   CheckCircle2,
@@ -15,6 +14,9 @@ import {
 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { playFeedbackSound, haptic } from '@/lib/feedback';
+import { friendlyApiError } from '@/lib/api-errors';
+import { Dialog } from '@/components/ui/Dialog';
+import { AlertDialog } from '@/components/ui/AlertDialog';
 
 export interface QuizQuestion {
   question: string;
@@ -68,6 +70,9 @@ export default function QuizModal({
   const [confirmed, setConfirmed] = useState(false);
   const [answers, setAnswers] = useState<(number | null)[]>(() => questions.map(() => null));
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [confirmLeave, setConfirmLeave] = useState(false);
+  const titleId = useId();
   const [result, setResult] = useState<QuizResult | null>(
     alreadyPassed ? { score: 0, total: 0, passed: true, bonusAwarded: false } : null,
   );
@@ -83,6 +88,17 @@ export default function QuizModal({
     setAnswers(questions.map(() => null));
     setResult(null);
     setSubmitting(false);
+    setSubmitError('');
+  };
+
+  // Fechar no meio do quiz descarta as respostas: pede confirmação antes.
+  const requestClose = () => {
+    if (submitting) return;
+    if (!result && answeredCount > 0) {
+      setConfirmLeave(true);
+      return;
+    }
+    onClose();
   };
 
   const handleConfirm = () => {
@@ -105,15 +121,16 @@ export default function QuizModal({
   const handleSubmit = async () => {
     if (submitting) return;
     setSubmitting(true);
+    setSubmitError('');
     try {
       const res = await fetch(`/api/courses/${courseId}/quiz`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ answers: answers.map((a) => a ?? -1) }),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        alert(data.error || 'Erro ao enviar o quiz.');
+        setSubmitError(friendlyApiError({ status: res.status, error: data.error }, 'quiz'));
         return;
       }
       const r: QuizResult = {
@@ -130,36 +147,31 @@ export default function QuizModal({
         haptic([40, 60, 40]);
       }
     } catch {
-      alert('Falha de conexão ao enviar o quiz. Tente novamente.');
+      setSubmitError(friendlyApiError({}, 'quiz'));
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-[90] flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-        onClick={submitting ? undefined : onClose}
-      />
-
-      <motion.div
-        initial={{ scale: 0.85, opacity: 0, y: 24 }}
-        animate={{ scale: 1, opacity: 1, y: 0 }}
-        exit={{ scale: 0.9, opacity: 0, y: 12 }}
-        transition={{ type: 'spring', stiffness: 280, damping: 24 }}
-        className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto bg-[#141414] border border-[#2a2a2a] rounded-2xl p-6 sm:p-8"
+    <>
+      <Dialog
+        open
+        onClose={requestClose}
+        dismissible={!submitting}
+        labelledBy={titleId}
+        zIndexClassName="z-[90]"
+        backdropClassName="bg-black/70 backdrop-blur-sm"
+        className="w-full max-w-2xl max-h-[85dvh] overflow-y-auto bg-[#141414] border border-[#2a2a2a] rounded-2xl p-6 sm:p-8"
       >
         <button
-          onClick={onClose}
+          type="button"
+          onClick={requestClose}
           disabled={submitting}
-          className="absolute top-4 right-4 text-md-on-surface-muted hover:text-white transition-colors"
+          className="absolute top-2 right-2 size-11 flex items-center justify-center rounded-lg text-md-on-surface-muted hover:text-white hover:bg-white/5 transition-colors"
           aria-label="Fechar quiz"
         >
-          <X size={20} />
+          <X size={20} aria-hidden="true" />
         </button>
 
         {result ? (
@@ -169,7 +181,7 @@ export default function QuizModal({
               <div className="w-16 h-16 mx-auto rounded-full bg-md-tertiary/10 flex items-center justify-center mb-5">
                 <Trophy size={32} className="text-md-tertiary" />
               </div>
-              <h2 className="text-2xl font-black text-white mb-1">
+              <h2 id={titleId} className="text-2xl font-black text-white mb-1">
                 {alreadyPassed ? 'Quiz Já Aprovado' : 'Quiz Aprovado!'}
               </h2>
               <p className="text-gray-400 text-sm mb-2">{courseTitle}</p>
@@ -219,7 +231,7 @@ export default function QuizModal({
               <div className="w-16 h-16 mx-auto rounded-full bg-red-500/10 flex items-center justify-center mb-5">
                 <XCircle size={32} className="text-red-400" />
               </div>
-              <h2 className="text-2xl font-black text-white mb-1">Não foi dessa vez</h2>
+              <h2 id={titleId} className="text-2xl font-black text-white mb-1">Não foi dessa vez</h2>
               <p className="text-gray-400 text-sm mb-4">{courseTitle}</p>
               <p className="text-5xl font-black text-red-400 mb-1">
                 {result.score}/{result.total}
@@ -253,7 +265,7 @@ export default function QuizModal({
             <div className="flex items-center justify-between mb-1">
               <div className="flex items-center gap-2">
                 <ClipboardCheck size={18} className="text-md-tertiary" />
-                <h3 className="text-base font-bold text-white">Quiz de Avaliação</h3>
+                <h2 id={titleId} className="text-base font-bold text-white">Quiz de Avaliação</h2>
                 <span className="text-xs font-bold text-amber-400 bg-amber-400/10 border border-amber-400/30 rounded-full px-2 py-0.5">
                   +50 pts
                 </span>
@@ -307,6 +319,12 @@ export default function QuizModal({
               })}
             </div>
 
+            {submitError && (
+              <p role="alert" className="mt-5 text-sm text-md-error bg-md-error/10 border border-md-error/30 rounded-xl px-4 py-3">
+                {submitError}
+              </p>
+            )}
+
             <div className="mt-6 flex justify-end">
               {!confirmed ? (
                 <button
@@ -341,7 +359,19 @@ export default function QuizModal({
             </div>
           </div>
         )}
-      </motion.div>
-    </div>
+      </Dialog>
+
+      <AlertDialog
+        open={confirmLeave}
+        onClose={() => setConfirmLeave(false)}
+        // Fecha a confirmação antes do quiz, para o foco voltar ao botão que abriu o quiz.
+        onConfirm={() => setTimeout(onClose, 0)}
+        title="Sair do quiz?"
+        description={`Você respondeu ${answeredCount} de ${questions.length} perguntas. Ao sair, as respostas são descartadas e o quiz recomeça do início.`}
+        confirmLabel="Sair e descartar"
+        cancelLabel="Continuar o quiz"
+        destructive
+      />
+    </>
   );
 }

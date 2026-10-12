@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
+import { useState, useEffect, useCallback, useRef, useSyncExternalStore, createContext, useContext, ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
+import { useModalBehavior } from '@/components/ui/Dialog';
+import { useDismissableMenu } from '@/hooks/useDismissableMenu';
 import {
   LayoutDashboard,
   BarChart3,
@@ -97,6 +99,14 @@ function currentSectionLabel(pathname: string): string {
   return 'Painel';
 }
 
+// No celular (< md) a gaveta lateral vira um modal; no desktop é navegação fixa.
+const MOBILE_QUERY = '(max-width: 767px)';
+function subscribeMobile(cb: () => void) {
+  const mq = window.matchMedia(MOBILE_QUERY);
+  mq.addEventListener('change', cb);
+  return () => mq.removeEventListener('change', cb);
+}
+
 export function AdminLayoutProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -106,6 +116,26 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [aiCredits, setAiCredits] = useState(0);
   const [tenant, setTenant] = useState<{ name: string; aiCredits: number } | null>(null);
+  const isMobile = useSyncExternalStore(subscribeMobile, () => window.matchMedia(MOBILE_QUERY).matches, () => false);
+  const asideRef = useRef<HTMLElement>(null);
+  const closeNav = useCallback(() => setNavOpen(false), []);
+  useModalBehavior({ open: navOpen && isMobile, panelRef: asideRef, onClose: closeNav });
+
+  // Fecha a gaveta ao trocar de página.
+  const [navPath, setNavPath] = useState(pathname);
+  if (navPath !== pathname) {
+    setNavPath(pathname);
+    setNavOpen(false);
+  }
+
+  const profileRef = useRef<HTMLDivElement>(null);
+  const profileButtonRef = useRef<HTMLButtonElement>(null);
+  const notificationsRef = useRef<HTMLDivElement>(null);
+  const notificationsButtonRef = useRef<HTMLButtonElement>(null);
+  const closeProfile = useCallback(() => setProfileOpen(false), []);
+  const closeNotifications = useCallback(() => setNotificationsOpen(false), []);
+  useDismissableMenu(profileOpen, closeProfile, profileRef, profileButtonRef);
+  useDismissableMenu(notificationsOpen, closeNotifications, notificationsRef, notificationsButtonRef);
 
   // Load tenant info and AI credits
   useEffect(() => {
@@ -130,21 +160,6 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('pontufy:ai-credits', onCredits);
   }, []);
 
-  // Handle outside click for profile dropdown
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (!target.closest('[data-profile-dropdown]')) {
-        setProfileOpen(false);
-      }
-      if (!target.closest('[data-notifications-dropdown]')) {
-        setNotificationsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
   const handleSignOut = () => signOut({ callbackUrl: '/login' });
 
   return (
@@ -161,6 +176,11 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
 
         {/* Navigation Drawer */}
         <aside
+          ref={asideRef}
+          // Fechada no celular, sai da ordem de Tab; aberta, é um diálogo modal.
+          inert={isMobile && !navOpen}
+          role={isMobile && navOpen ? 'dialog' : undefined}
+          aria-modal={isMobile && navOpen ? true : undefined}
           className={`fixed h-full z-50 transition-all duration-300 ease-standard bg-md-surface-container border-r border-md-outline flex flex-col ${
             navCollapsed
               ? 'w-16 md:w-16'
@@ -321,15 +341,16 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
               {/* Actions */}
               <div className="flex items-center gap-2">
                 {/* Notifications */}
-                <div className="relative" data-notifications-dropdown>
+                <div className="relative" ref={notificationsRef}>
                   <button
+                    ref={notificationsButtonRef}
                     type="button"
                     onClick={() => setNotificationsOpen(!notificationsOpen)}
-                    className="p-2 rounded-xl text-md-on-surface-variant hover:bg-md-surface-container-high hover:text-md-on-surface transition-colors"
+                    className="size-11 flex items-center justify-center rounded-xl text-md-on-surface-variant hover:bg-md-surface-container-high hover:text-md-on-surface transition-colors"
                     aria-label="Notificações"
                     aria-expanded={notificationsOpen}
                   >
-                    <Bell size={22} />
+                    <Bell size={22} aria-hidden="true" />
                     {/* Badge would go here */}
                   </button>
                   {notificationsOpen && (
@@ -340,11 +361,12 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
                 </div>
 
                 {/* Profile Dropdown */}
-                <div className="relative" data-profile-dropdown>
+                <div className="relative" ref={profileRef}>
                   <button
+                    ref={profileButtonRef}
                     type="button"
                     onClick={() => setProfileOpen(!profileOpen)}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-md-surface-container-high transition-colors"
+                    className="flex items-center gap-2 px-3 min-h-11 rounded-xl hover:bg-md-surface-container-high transition-colors"
                     aria-label="Menu do perfil"
                     aria-expanded={profileOpen}
                   >

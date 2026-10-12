@@ -1,8 +1,9 @@
 'use client';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { X, CheckCheck, Coins, Gift, GraduationCap, TrendingUp, Megaphone, Bell, Swords, Trophy, Award } from 'lucide-react';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useId } from 'react';
 import { useStore } from '@/store/useStore';
+import { Dialog } from '@/components/ui/Dialog';
 
 export type NotificationType =
   | 'POINTS_EARNED'
@@ -61,6 +62,7 @@ async function fetchNotifications(page = 1, limit = 30) {
 }
 
 export function NotificationDrawer({ isOpen, onClose }: NotificationDrawerProps) {
+  const titleId = useId();
   const unreadNotifications = useStore((s) => s.unreadNotifications);
   const setUnreadNotifications = useStore((s) => s.setUnreadNotifications);
   const [items, setItems] = useState<NotificationItem[]>([]);
@@ -106,26 +108,16 @@ export function NotificationDrawer({ isOpen, onClose }: NotificationDrawerProps)
   }, [setUnreadNotifications]);
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
-            onClick={onClose}
-          />
-          <motion.aside
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 26, stiffness: 220 }}
-            className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-[#141414] border-l border-[#2a2a2a] shadow-2xl z-50 flex flex-col"
-          >
+    <Dialog
+      open={isOpen}
+      onClose={onClose}
+      variant="right"
+      labelledBy={titleId}
+      className="w-full max-w-md h-full bg-[#141414] border-l border-[#2a2a2a] shadow-2xl flex flex-col"
+    >
             <div className="flex items-center justify-between p-4 border-b border-[#2a2a2a]">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Bell size={18} className="text-md-tertiary" />
+              <h2 id={titleId} className="text-lg font-bold text-white flex items-center gap-2">
+                <Bell size={18} className="text-md-tertiary" aria-hidden="true" />
                 Notificações
                 {unreadNotifications > 0 && (
                   <span className="bg-md-tertiary/20 text-md-tertiary text-xs font-bold px-2 py-0.5 rounded-full">
@@ -138,18 +130,18 @@ export function NotificationDrawer({ isOpen, onClose }: NotificationDrawerProps)
                   type="button"
                   onClick={markAllRead}
                   disabled={unreadNotifications === 0}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-400 hover:text-md-tertiary hover:bg-white/5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="flex items-center gap-1.5 px-3 h-11 rounded-lg text-xs font-semibold text-gray-400 hover:text-md-tertiary hover:bg-white/5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  <CheckCheck size={14} />
+                  <CheckCheck size={14} aria-hidden="true" />
                   Marcar todas
                 </button>
                 <button
                   type="button"
                   aria-label="Fechar notificações"
                   onClick={onClose}
-                  className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition-colors"
+                  className="size-11 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition-colors"
                 >
-                  <X size={20} />
+                  <X size={20} aria-hidden="true" />
                 </button>
               </div>
             </div>
@@ -208,15 +200,16 @@ export function NotificationDrawer({ isOpen, onClose }: NotificationDrawerProps)
                           </div>
                           <p className="text-sm text-gray-400 mt-0.5">{item.message}</p>
                         </div>
-                        {!item.read && <span className="w-2 h-2 rounded-full bg-md-tertiary mt-2 flex-shrink-0" />}
+                        {!item.read && (
+                          <span className="w-2 h-2 rounded-full bg-md-tertiary mt-2 flex-shrink-0">
+                            <span className="sr-only">Não lida</span>
+                          </span>
+                        )}
                       </div>
                     </motion.button>
                   );
                 })}
             </div>
-          </motion.aside>
-        </>
-      )}
-    </AnimatePresence>
+    </Dialog>
   );
 }

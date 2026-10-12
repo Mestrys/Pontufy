@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { User, LogOut, LayoutDashboard, ShieldCheck, Building2, Menu, X } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
@@ -10,6 +10,7 @@ import { PointsChip } from '@/components/ui/Chip';
 import { MD3SearchBar } from '@/components/ui/MD3SearchBar';
 import { MD3NavigationDrawer } from '@/components/layout/MD3NavigationDrawer';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import { useDismissableMenu } from '@/hooks/useDismissableMenu';
 
 export default function Navbar() {
   const { data: session, status } = useSession();
@@ -21,6 +22,9 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const avatarButtonRef = useRef<HTMLButtonElement>(null);
+  const closeDropdown = useCallback(() => setIsDropdownOpen(false), []);
+  useDismissableMenu(isDropdownOpen, closeDropdown, dropdownRef, avatarButtonRef);
   const pathnameRef = useRef(pathname);
 
   const role = (session?.user as { role?: string } | undefined)?.role;
@@ -37,17 +41,6 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  useEffect(() => {
-    if (!isDropdownOpen) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setIsDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isDropdownOpen]);
 
   const navLinks = [
     { href: '/dashboard', label: 'Início' },
@@ -131,22 +124,25 @@ export default function Navbar() {
             {/* User menu (desktop) */}
             {status === 'authenticated' && (
               <div className="hidden md:block relative" ref={dropdownRef}>
+                {/* Alvo de 44px; o círculo visível continua com 32px. */}
                 <button
+                  ref={avatarButtonRef}
                   type="button"
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  aria-label="Menu do perfil"
-                  aria-haspopup="menu"
+                  aria-label={isOnline ? 'Menu do perfil' : 'Menu do perfil (sem conexão)'}
                   aria-expanded={isDropdownOpen}
-                  className="relative w-8 h-8 rounded-full bg-md-primary flex items-center justify-center hover:bg-md-primary-container transition-colors text-white font-black text-sm"
+                  className="group size-11 -m-1.5 flex items-center justify-center rounded-full"
                 >
-                  {session?.user?.name?.[0]?.toUpperCase() ?? <User size={16} />}
-                  {/* Badge de status de conexão (3.4) */}
-                  <span
-                    className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-md-surface ${
-                      isOnline ? 'bg-md-tertiary' : 'bg-red-500'
-                    }`}
-                    title={isOnline ? 'Conectado' : 'Offline'}
-                  />
+                  <span className="relative w-8 h-8 rounded-full bg-md-primary flex items-center justify-center group-hover:bg-md-primary-container transition-colors text-white font-black text-sm">
+                    {session?.user?.name?.[0]?.toUpperCase() ?? <User size={16} aria-hidden="true" />}
+                    {/* Badge de status de conexão (3.4) */}
+                    <span
+                      aria-hidden="true"
+                      className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-md-surface ${
+                        isOnline ? 'bg-md-tertiary' : 'bg-red-500'
+                      }`}
+                    />
+                  </span>
                 </button>
 
                 {isDropdownOpen && (
@@ -195,9 +191,10 @@ export default function Navbar() {
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label="Abrir menu de navegação"
-              className="md:hidden p-2 text-gray-400 hover:text-white transition-colors"
+              aria-expanded={isMobileMenuOpen}
+              className="md:hidden -mr-2 size-11 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
             >
-              {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+              {isMobileMenuOpen ? <X size={22} aria-hidden="true" /> : <Menu size={22} aria-hidden="true" />}
             </button>
           </div>
         </div>

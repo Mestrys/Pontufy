@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useId, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import { X, CheckCircle2, Copy, Coins, Loader2, ExternalLink } from "lucide-react";
 import { triggerRewardRedemption } from "@/hooks/useApi";
+import { friendlyApiError } from "@/lib/api-errors";
+import { partnerDisplayName } from "@/lib/partner-name";
+import { Dialog } from "@/components/ui/Dialog";
 
 type CheckoutStep = "confirm" | "loading" | "success";
 
@@ -15,6 +18,7 @@ interface Reward {
   pricePoints?: number;
   pointsRequired?: number;
   imageUrl?: string;
+  originalUrl?: string;
 }
 
 interface CheckoutDrawerProps {
@@ -40,9 +44,11 @@ export default function CheckoutDrawer({
   const [redeemError, setRedeemError] = useState<string>("");
   const [copied, setCopied] = useState(false);
   const [lastIsOpen, setLastIsOpen] = useState(isOpen);
+  const titleId = useId();
+  const headingRef = useRef<HTMLHeadingElement>(null);
 
   const price = reward?.pointsRequired || reward?.pricePoints || 0;
-  const partner = reward?.partner || reward?.partnerStore || "Parceiro";
+  const partner = reward ? partnerDisplayName(reward) : "Parceiro";
   const title = reward?.title || "Recompensa";
 
   // Reset state when opening
@@ -57,6 +63,12 @@ export default function CheckoutDrawer({
     }
   }
 
+  // A cada troca de etapa o botão focado some; o foco vai para o título, que
+  // também anuncia "Resgate registrado" para leitores de tela.
+  useEffect(() => {
+    if (isOpen && step !== "confirm") headingRef.current?.focus();
+  }, [isOpen, step]);
+
   const handleRedeem = async () => {
     if (!reward?.id) return;
     setStep("loading");
@@ -65,8 +77,7 @@ export default function CheckoutDrawer({
       const response = await triggerRewardRedemption(reward.id);
 
       if (!response.success) {
-        // Mostra o motivo real devolvido pela API (saldo, bloqueio, indisponível).
-        setRedeemError(response.error || "Não foi possível concluir o resgate. Tente de novo.");
+        setRedeemError(friendlyApiError(response, "redeem"));
         setStep("confirm");
         return;
       }
@@ -83,7 +94,7 @@ export default function CheckoutDrawer({
       }
     } catch (error) {
       console.error(error);
-      setRedeemError("Sem conexão com o servidor. Seus pontos não foram debitados; tente de novo.");
+      setRedeemError(friendlyApiError({}, "redeem"));
       setStep("confirm");
     }
   };
@@ -97,42 +108,31 @@ export default function CheckoutDrawer({
     }
   };
 
-  // If Drawer is closed or no reward is selected, don't render content
-  if (!isOpen || !reward) return null;
-
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-[100] flex justify-end">
-        {/* Backdrop */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={step === "loading" ? undefined : onClose}
-          className="absolute inset-0 bg-brand-slate/20 backdrop-blur-sm"
-        />
-
-        {/* Drawer Panel */}
-        <motion.div
-          initial={{ x: "100%" }}
-          animate={{ x: 0 }}
-          exit={{ x: "100%" }}
-          transition={{ type: "spring", damping: 25, stiffness: 200 }}
-          className="relative w-full max-w-md h-full bg-md-surface shadow-2xl flex flex-col"
-        >
+    <Dialog
+      open={isOpen && !!reward}
+      onClose={onClose}
+      dismissible={step !== "loading"}
+      variant="right"
+      labelledBy={titleId}
+      backdropClassName="bg-black/60 backdrop-blur-sm"
+      className="w-full max-w-md h-full bg-md-surface shadow-2xl flex flex-col"
+    >
+      {reward && (
+        <>
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-md-outline">
-            <h2 className="text-xl font-bold text-md-on-surface">
-              {step === "success" ? "Resgate Concluído" : "Confirmar Resgate"}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-md-outline">
+            <h2 id={titleId} ref={headingRef} tabIndex={-1} className="text-xl font-bold text-md-on-surface outline-none">
+              {step === "success" ? "Resgate registrado" : "Confirmar resgate"}
             </h2>
             <button
               type="button"
               aria-label="Fechar"
               onClick={onClose}
               disabled={step === "loading"}
-              className="p-2 text-gray-400 hover:text-md-on-surface transition-colors disabled:opacity-50"
+              className="-mr-2 size-11 flex items-center justify-center rounded-lg text-md-on-surface-variant hover:text-md-on-surface hover:bg-md-surface-container transition-colors disabled:opacity-50"
             >
-              <X size={24} />
+              <X size={24} aria-hidden="true" />
             </button>
           </div>
 
@@ -141,11 +141,11 @@ export default function CheckoutDrawer({
             {/* PRODUCT SUMMARY CARD */}
             <div className="bg-md-surface-container rounded-xl p-5 mb-8 border border-md-outline flex items-center gap-4">
               {reward.imageUrl ? (
-                <div className="w-16 h-16 bg-md-surface rounded-lg p-2 border border-md-outline flex-shrink-0">
+                <div className="w-16 h-16 bg-md-surface-container-high rounded-lg p-2 border border-md-outline flex-shrink-0">
                   <img
                     src={reward.imageUrl}
-                    alt={title}
-                    className="w-full h-full object-contain mix-blend-multiply"
+                    alt=""
+                    className="w-full h-full object-contain"
                   />
                 </div>
               ) : (
@@ -173,15 +173,15 @@ export default function CheckoutDrawer({
               >
                 <div className="space-y-4">
                   <div className="flex justify-between items-center py-3 border-b border-md-outline">
-                    <span className="text-md-on-surface-muted">Seu Saldo Atual</span>
+                    <span className="text-md-on-surface-muted">Seu saldo atual</span>
                     <span className="font-bold text-md-tertiary">{userBalance} pts</span>
                   </div>
                   <div className="flex justify-between items-center py-3 border-b border-md-outline">
-                    <span className="text-md-on-surface-muted">Valor do Resgate</span>
-                    <span className="font-bold text-md-error">- {price} pts</span>
+                    <span className="text-md-on-surface-muted">Valor do resgate</span>
+                    <span className="font-bold text-md-on-surface">− {price} pts</span>
                   </div>
                   <div className="flex justify-between items-center py-3">
-                    <span className="font-medium text-md-on-surface">Saldo Final</span>
+                    <span className="font-medium text-md-on-surface">Saldo depois do resgate</span>
                     <span className="font-black text-md-tertiary text-lg">
                       {userBalance - price} pts
                     </span>
@@ -200,7 +200,7 @@ export default function CheckoutDrawer({
                     onClick={handleRedeem}
                     className="w-full py-4 rounded-xl font-bold text-md-on-primary shadow-lg bg-md-primary hover:bg-md-primary-container hover:shadow-xl transition-all hover:scale-[1.02] flex items-center justify-center gap-2"
                   >
-                    Confirmar Resgate
+                    Confirmar resgate
                   </button>
                 </div>
               </motion.div>
@@ -220,12 +220,12 @@ export default function CheckoutDrawer({
                   <div className="absolute inset-2 bg-md-primary rounded-full animate-pulse opacity-20"></div>
                   <Loader2 className="absolute inset-0 m-auto text-md-primary-text animate-spin" size={32} />
                 </div>
-                <div className="text-center space-y-2">
-                  <h3 className="font-bold text-md-on-surface text-lg">
-                    Processando transação...
-                  </h3>
-                  <p className="text-md-on-surface-muted text-sm animate-pulse">
-                    Comunicação segura com a API
+                <div className="text-center space-y-2" role="status">
+                  <p className="font-bold text-md-on-surface text-lg">
+                    Registrando seu resgate…
+                  </p>
+                  <p className="text-md-on-surface-muted text-sm">
+                    Não feche esta janela.
                   </p>
                 </div>
               </motion.div>
@@ -283,28 +283,32 @@ export default function CheckoutDrawer({
                       rel="noopener noreferrer"
                       className="w-full py-3.5 rounded-xl font-bold text-md-on-primary shadow-md bg-md-primary hover:bg-md-primary-container transition-colors flex items-center justify-center gap-2"
                     >
-                      Acessar {partner} <ExternalLink size={18} />
+                      Acessar {partner} <ExternalLink size={18} aria-hidden="true" />
                     </a>
                   ) : (
                     <button
+                      type="button"
                       onClick={onClose}
                       className="w-full py-3.5 rounded-xl font-bold text-md-on-primary shadow-md bg-md-primary hover:bg-md-primary-container transition-colors flex items-center justify-center gap-2"
                     >
-                      Fechar
+                      Voltar ao catálogo
                     </button>
                   )}
-                  <button
-                    onClick={onClose}
-                    className="w-full py-3.5 rounded-xl font-bold text-md-primary-text hover:bg-md-surface-container transition-colors"
-                  >
-                    Voltar para o Catálogo
-                  </button>
+                  {affiliateUrl && (
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      className="w-full py-3.5 rounded-xl font-bold text-md-primary-text hover:bg-md-surface-container transition-colors"
+                    >
+                      Voltar ao catálogo
+                    </button>
+                  )}
                 </div>
               </motion.div>
             )}
           </div>
-        </motion.div>
-      </div>
-    </AnimatePresence>
+        </>
+      )}
+    </Dialog>
   );
 }

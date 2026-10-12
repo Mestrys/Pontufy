@@ -1,5 +1,6 @@
 // Guarda do tema: reprova classes que já causaram regressão de contraste ou de
-// tamanho de texto (auditoria de design, Fase 2). Roda no build e no CI.
+// tamanho de texto (auditoria de design, Fase 2) e diálogos nativos do
+// navegador (Fase 3). Roda no build e no CI.
 //
 // Cada regra tem a troca correta na mensagem. Para texto, os papéis são:
 //   text-md-on-surface         texto principal
@@ -35,6 +36,10 @@ const RULES = [
   {
     re: /text-\[(?:\d|1[01])(?:\.\d+)?px\]/g,
     msg: 'texto abaixo de 12px; o piso é text-xs (12px)',
+  },
+  {
+    re: /(?<![\w.$])(?:window\.)?(?:alert|confirm|prompt)\(/g,
+    msg: 'diálogo nativo do navegador; use useToast (aviso), erro inline perto do controle ou AlertDialog (confirmação)',
   },
 ];
 

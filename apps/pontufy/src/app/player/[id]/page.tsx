@@ -10,6 +10,8 @@ import QuizModal, { type QuizModuleData } from '@/components/player/QuizModal';
 import PointsCelebration from '@/components/gamification/PointsCelebration';
 import CelebrationModal from '@/components/gamification/CelebrationModal';
 import { useCourse, triggerLessonCompletion } from '@/hooks/useApi';
+import { friendlyApiError } from '@/lib/api-errors';
+import { useToast } from '@/components/ui/Toast';
 import { useStore } from '@/store/useStore';
 import { getCachedCourses } from '@/lib/local-courses';
 import { downloadCertificate } from '@/lib/download-certificate';
@@ -82,6 +84,9 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
   const [celebrationPoints, setCelebrationPoints] = useState(0);
   const [celebrationMessage, setCelebrationMessage] = useState('Você acaba de ganhar');
   const [isCompleting, setIsCompleting] = useState(false);
+  // Erro de conclusão mostrado junto ao botão "Concluir"; some ao trocar de aula.
+  const [completionError, setCompletionError] = useState<{ lessonId: string; message: string } | null>(null);
+  const { toast } = useToast();
   const [quizOpen, setQuizOpen] = useState(false);
   const [quizPassed, setQuizPassed] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -207,6 +212,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
     const previousPoints = useStore.getState().currentPointsBalance;
     const lessonPoints = activeLesson.points;
     setIsCompleting(true);
+    setCompletionError(null);
     // Otimista: reflete os pontos imediatamente no store global (Navbar reativa).
     // A celebração e a subida de nível só acontecem após a confirmação.
     addPoints(lessonPoints);
@@ -237,12 +243,12 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
       } else {
         // Rollback do saldo otimista em caso de falha.
         deductPoints(activeLesson.points);
-        alert(res.error || 'Erro ao completar a aula.');
+        setCompletionError({ lessonId: activeLesson.id, message: friendlyApiError(res, 'lesson') });
       }
     } catch (error) {
       deductPoints(activeLesson.points);
       console.error(error);
-      alert('Erro ao concluir a aula.');
+      setCompletionError({ lessonId: activeLesson.id, message: friendlyApiError({}, 'lesson') });
     } finally {
       setIsCompleting(false);
     }
@@ -253,7 +259,12 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
     try {
       await downloadCertificate(course.id, course.title);
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Erro ao baixar certificado.');
+      console.error(err);
+      toast({
+        tone: 'error',
+        title: 'Não foi possível baixar o certificado.',
+        description: 'Tente de novo em instantes. Se continuar, o certificado também fica em Certificados.',
+      });
     } finally {
       setIsDownloading(false);
     }
@@ -281,6 +292,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
     onPrevious: prevLesson ? () => setActiveLessonId(prevLesson.id) : null,
     onNext: nextLesson ? () => setActiveLessonId(nextLesson.id) : null,
     preview: isPreview,
+    completionError: completionError?.lessonId === activeLesson.id ? completionError.message : '',
   };
 
   return (

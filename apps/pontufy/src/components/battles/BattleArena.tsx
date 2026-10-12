@@ -15,12 +15,14 @@ export interface BattleQuestionView {
 interface BattleArenaProps {
   battleId: string;
   onClose: () => void;
+  /** Avisa quando o duelo está em andamento (não pode ser fechado no meio). */
+  onLockChange?: (locked: boolean) => void;
   onFinished?: () => void;
 }
 
 type Phase = 'loading' | 'playing' | 'result' | 'error';
 
-export default function BattleArena({ battleId, onClose, onFinished }: BattleArenaProps) {
+export default function BattleArena({ battleId, onClose, onFinished, onLockChange }: BattleArenaProps) {
   const [phase, setPhase] = useState<Phase>('loading');
   const [questions, setQuestions] = useState<BattleQuestionView[]>([]);
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -59,6 +61,9 @@ export default function BattleArena({ battleId, onClose, onFinished }: BattleAre
 
   const phaseRef = useRef<Phase>('loading');
   phaseRef.current = phase;
+  useEffect(() => {
+    onLockChange?.(phase === 'playing');
+  }, [phase, onLockChange]);
 
   // ── Carregamento das questões (somente quando é o seu turno) ─────────────
   useEffect(() => {
