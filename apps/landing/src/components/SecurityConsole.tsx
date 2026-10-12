@@ -16,12 +16,20 @@ export default function SecurityConsole({ language, logs, addSecurityLog }: Secu
   const t = translations[language].security;
   const secLogs = translations[language].security.logs;
 
-  const logEndRef = useRef<HTMLDivElement>(null);
+  // Rola só o contêiner do console, nunca a janela: scrollIntoView movia a
+  // página inteira até esta seção no carregamento e a cada log novo.
+  const logContainerRef = useRef<HTMLDivElement>(null);
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
-    if (logEndRef.current) {
-      logEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
     }
+    const el = logContainerRef.current;
+    if (!el) return;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    el.scrollTo({ top: el.scrollHeight, behavior: reduceMotion ? 'auto' : 'smooth' });
   }, [logs]);
 
   const handleToggleZeroTrust = () => {
@@ -87,8 +95,9 @@ export default function SecurityConsole({ language, logs, addSecurityLog }: Secu
                 </div>
 
                 <div className="flex items-center space-x-3 text-[11px]">
-                  <span className="text-slate-500">Tenant:</span>
+                  <label htmlFor="security-console-tenant" className="text-slate-500">Tenant:</label>
                   <select
+                    id="security-console-tenant"
                     value={tenant}
                     onChange={(e) => {
                       const newTenant = e.target.value;
@@ -132,7 +141,13 @@ export default function SecurityConsole({ language, logs, addSecurityLog }: Secu
               </div>
 
               {/* Console Logs */}
-              <div className="h-64 p-6 overflow-y-auto space-y-3 bg-slate-950/80">
+              <div
+                ref={logContainerRef}
+                role="log"
+                aria-label={t.consoleTitle}
+                tabIndex={0}
+                className="h-64 p-6 overflow-y-auto space-y-3 bg-slate-950/80"
+              >
                 {logs.map((log) => (
                   <div key={log.id} className="leading-relaxed">
                     <span className="text-slate-500">[{log.timestamp}]</span>{' '}
@@ -150,7 +165,6 @@ export default function SecurityConsole({ language, logs, addSecurityLog }: Secu
                     <span className="text-slate-300">— {log.details}</span>
                   </div>
                 ))}
-                <div ref={logEndRef}></div>
               </div>
 
             </div>

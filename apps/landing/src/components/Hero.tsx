@@ -101,14 +101,16 @@ export default function Hero({ onStartSimulation, language }: HeroProps) {
 
                   {/* Corporate Email */}
                   <div className="space-y-1">
-                    <label className="block text-xs font-medium text-slate-500">
+                    <label htmlFor="lead-email" className="block text-xs font-medium text-slate-500">
                       {t.labelEmail}
                     </label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <input
+                        id="lead-email"
                         type="email"
                         required
+                        autoComplete="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="nome@empresa.com"
@@ -119,12 +121,13 @@ export default function Hero({ onStartSimulation, language }: HeroProps) {
 
                   {/* Role Selection */}
                   <div className="space-y-1">
-                    <label className="block text-xs font-medium text-slate-500">
+                    <label htmlFor="lead-role" className="block text-xs font-medium text-slate-500">
                       {t.labelRole}
                     </label>
                     <div className="relative">
                       <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <select
+                        id="lead-role"
                         required
                         value={role}
                         onChange={(e) => setRole(e.target.value)}
@@ -143,12 +146,13 @@ export default function Hero({ onStartSimulation, language }: HeroProps) {
 
                   {/* Company Size */}
                   <div className="space-y-1">
-                    <label className="block text-xs font-medium text-slate-500">
+                    <label htmlFor="lead-size" className="block text-xs font-medium text-slate-500">
                       {t.labelSize}
                     </label>
                     <div className="relative">
                       <Building className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <select
+                        id="lead-size"
                         required
                         value={companySize}
                         onChange={(e) => setCompanySize(e.target.value)}
