@@ -12,10 +12,13 @@ import { buildProviderChain } from '@/lib/ai-providers';
 //    rede 5s/questão). Perda de foco é reportada pelo cliente e anula o turno.
 // ═══════════════════════════════════════════════════════════════════════════
 
-export const BATTLE_QUESTIONS = 5;
-export const QUESTION_TIME_LIMIT_SECONDS = 15;
-// Tolerância total para latência de rede/UI (5s extras por questão).
-export const TURN_TIME_LIMIT_SECONDS = BATTLE_QUESTIONS * (QUESTION_TIME_LIMIT_SECONDS + 5);
+export {
+  BATTLE_QUESTIONS,
+  QUESTION_TIME_LIMIT_SECONDS,
+  TURN_TIME_LIMIT_SECONDS,
+  EXTENDED_TIME_FACTOR,
+} from '@/lib/battle-rules';
+import { BATTLE_QUESTIONS } from '@/lib/battle-rules';
 export const BATTLE_TTL_HOURS = 72;
 
 const battleQuestionSchema = z.object({

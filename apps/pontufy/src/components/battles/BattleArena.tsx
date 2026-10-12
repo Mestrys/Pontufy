@@ -3,8 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Loader2, Timer, AlertTriangle, Swords, Trophy, RotateCcw } from 'lucide-react';
 import { playFeedbackSound, haptic } from '@/lib/feedback';
+import { isExtendedTime } from '@/lib/accessibility-prefs';
+import { EXTENDED_TIME_FACTOR, QUESTION_TIME_LIMIT_SECONDS } from '@/lib/battle-rules';
 
-// TAREFA 13.4 — Arena de batalha: cronômetro estrito de 15s/questão +
+// TAREFA 13.4 — Arena de batalha: cronômetro estrito de 15s/questão (30s com
+// tempo estendido, escolhido no Perfil) +
 // detecção de perda de foco (anula o turno para evitar consulta externa).
 
 export interface BattleQuestionView {
@@ -28,7 +31,10 @@ export default function BattleArena({ battleId, onClose, onFinished, onLockChang
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [answers, setAnswers] = useState<number[]>([]);
-  const [secondsLeft, setSecondsLeft] = useState(15);
+  // Tempo estendido (Perfil) vale para o duelo inteiro, lido quando a arena abre.
+  const [extended] = useState(() => isExtendedTime());
+  const perQuestion = QUESTION_TIME_LIMIT_SECONDS * (extended ? EXTENDED_TIME_FACTOR : 1);
+  const [secondsLeft, setSecondsLeft] = useState(perQuestion);
   const [focusLost, setFocusLost] = useState(false);
   const [result, setResult] = useState<{
     score: number;
@@ -113,7 +119,7 @@ export default function BattleArena({ battleId, onClose, onFinished, onLockChang
   // ── Cronômetro estrito: 15s por questão, auto-avanço sem resposta ────────
   useEffect(() => {
     if (phase !== 'playing') return;
-    setSecondsLeft(15);
+    setSecondsLeft(perQuestion);
     clearTimer();
     timerRef.current = setInterval(() => {
       setSecondsLeft((s) => {
@@ -126,7 +132,7 @@ export default function BattleArena({ battleId, onClose, onFinished, onLockChang
       });
     }, 1000);
     return clearTimer;
-  }, [currentIdx, phase, clearTimer, advance]);
+  }, [currentIdx, phase, clearTimer, advance, perQuestion]);
 
   const submitTurn = async () => {
     if (phaseRef.current !== 'playing') return;
@@ -140,6 +146,7 @@ export default function BattleArena({ battleId, onClose, onFinished, onLockChang
         body: JSON.stringify({
           answers,
           elapsedSeconds,
+          extendedTime: extended,
           focusLost: focusLostRef.current,
         }),
       });
@@ -183,7 +190,7 @@ export default function BattleArena({ battleId, onClose, onFinished, onLockChang
   };
 
   const renderTimer = () => {
-    const pct = (secondsLeft / 15) * 100;
+    const pct = (secondsLeft / perQuestion) * 100;
     const urgent = secondsLeft <= 5;
     return (
       <div className="w-full max-w-md mx-auto mb-6">
@@ -191,6 +198,7 @@ export default function BattleArena({ battleId, onClose, onFinished, onLockChang
           <span className={urgent ? 'text-red-400' : 'text-gray-400'}>
             <Timer size={14} className="inline mr-1" />
             {secondsLeft}s
+            {extended && <span className="ml-1 font-normal text-md-on-surface-muted">(tempo estendido)</span>}
           </span>
           <span className="text-md-on-surface-muted">
             Questão {currentIdx + 1} de {questions.length}

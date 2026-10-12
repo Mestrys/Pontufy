@@ -8,12 +8,47 @@ import { useUserStore } from '@/store/useUserStore';
 import { isSoundEnabled, setSoundEnabled } from '@/lib/feedback';
 import AchievementsCard from '@/components/profile/AchievementsCard';
 import { useBrand } from '@/components/theme/DynamicThemeProvider';
+import { setExtendedTime, useExtendedTime } from '@/lib/accessibility-prefs';
 import { AlertDialog } from '@/components/ui/AlertDialog';
-import { Loader2, User, Coins, Save, ShieldCheck, Building2, Volume2, VolumeX, LogOut, Wallet, Award, Network } from 'lucide-react';
+import { Loader2, User, Coins, Save, ShieldCheck, Building2, Volume2, VolumeX, LogOut, Wallet, Award, Network, Timer, type LucideIcon } from 'lucide-react';
 import { ListSkeleton, LoadingRegion } from '@/components/ui/Skeleton';
+
+function PreferenceSwitch({
+  label,
+  description,
+  icon: Icon,
+  checked,
+  onChange,
+}: {
+  label: string;
+  description: string;
+  icon: LucideIcon;
+  checked: boolean;
+  onChange: (next: boolean) => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className="flex w-full items-center gap-3 py-3 text-left"
+    >
+      <Icon size={20} className={checked ? 'text-md-tertiary' : 'text-md-on-surface-muted'} aria-hidden="true" />
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-semibold text-white">{label}</span>
+        <span className="block text-xs text-md-on-surface-muted">{description}</span>
+      </span>
+      <span aria-hidden="true" className={`relative h-6 w-10 flex-none rounded-full transition-colors ${checked ? 'bg-md-primary' : 'bg-md-outline-variant'}`}>
+        <span className={`absolute top-0.5 h-5 w-5 rounded-full transition-all ${checked ? 'left-[18px] bg-md-on-primary' : 'left-0.5 bg-white'}`} />
+      </span>
+    </button>
+  );
+}
 
 export default function ProfilePage() {
   const brand = useBrand();
+  const extendedTime = useExtendedTime();
   const { data: session, status } = useSession();
   const currentUser = useStore((s) => s.currentUser);
   const { currentPoints } = useUserStore();
@@ -139,7 +174,7 @@ export default function ProfilePage() {
 
           {/* Edit name */}
           <section className="bg-md-surface border border-md-outline rounded-xl p-6">
-            <h3 className="font-bold text-white mb-4">Editar Nome</h3>
+            <h2 className="font-bold text-white mb-4">Editar nome</h2>
             <div className="flex flex-col sm:flex-row gap-3">
               <input
                 type="text"
@@ -165,42 +200,29 @@ export default function ProfilePage() {
             )}
           </section>
 
-          {/* Preferências de feedback sensorial (5.2) */}
-          <section className="bg-md-surface border border-md-outline rounded-xl p-6">
-            <h3 className="font-bold text-white mb-1">Feedback Sonoro</h3>
-            <p className="text-sm text-md-on-surface-muted mb-4">
-              Sons sutis e vibração háptica ao ganhar pontos, acertar quizzes e concluir cursos.
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                const next = !soundEnabled;
-                setSoundEnabled(next);
-                setSound(next);
-              }}
-              aria-pressed={soundEnabled}
-              className={`flex items-center justify-between w-full px-4 py-3 rounded-xl border transition-colors ${
-                soundEnabled
-                  ? 'bg-md-primary/15 border-md-primary/40 text-white'
-                  : 'bg-md-surface-container border-md-outline text-gray-400'
-              }`}
-            >
-              <span className="flex items-center gap-2 font-medium text-sm">
-                {soundEnabled ? <Volume2 size={18} className="text-md-tertiary" /> : <VolumeX size={18} />}
-                {soundEnabled ? 'Sons e vibração ativados' : 'Mudo'}
-              </span>
-              <span
-                className={`w-10 h-6 rounded-full transition-colors relative ${
-                  soundEnabled ? 'bg-md-primary' : 'bg-md-outline'
-                }`}
-              >
-                <span
-                  className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all ${
-                    soundEnabled ? 'left-[18px]' : 'left-0.5'
-                  }`}
-                />
-              </span>
-            </button>
+          {/* Preferências deste aparelho: feedback sensorial (5.2) e tempo estendido (H13) */}
+          <section className="bg-md-surface border border-md-outline rounded-xl p-6" aria-labelledby="prefs-heading">
+            <h2 id="prefs-heading" className="font-bold text-white mb-4">Preferências</h2>
+            <div className="divide-y divide-md-outline">
+              <PreferenceSwitch
+                label="Sons e vibração"
+                description="Ao ganhar pontos, acertar quizzes e concluir cursos."
+                icon={soundEnabled ? Volume2 : VolumeX}
+                checked={soundEnabled}
+                onChange={(next) => {
+                  setSoundEnabled(next);
+                  setSound(next);
+                }}
+              />
+              <PreferenceSwitch
+                label="Tempo estendido nas batalhas"
+                description="Dobra o tempo por questão (30 segundos em vez de 15)."
+                icon={Timer}
+                checked={extendedTime}
+                onChange={setExtendedTime}
+              />
+            </div>
+            <p className="mt-3 text-xs text-md-on-surface-muted">Valem para este aparelho.</p>
           </section>
 
           {/* Conquistas (11.4) */}
@@ -208,7 +230,7 @@ export default function ProfilePage() {
 
           {/* Segurança (7.3) — revogação instantânea de sessões */}
           <section className="bg-md-surface border border-md-outline rounded-xl p-6">
-            <h3 className="font-bold text-white mb-1">Sessões Ativas</h3>
+            <h2 className="font-bold text-white mb-1">Sessões ativas</h2>
             <p className="text-sm text-md-on-surface-muted mb-4">
               Encerra todas as sessões em outros dispositivos imediatamente (útil se seu
               dispositivo for perdido ou roubado).

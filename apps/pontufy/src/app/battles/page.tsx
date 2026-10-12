@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 
 import { useEffect, useState } from 'react';
 import { Swords, Users, Loader2, Hourglass, CheckCircle2, XCircle } from 'lucide-react';
@@ -6,7 +7,7 @@ import BattleArena from '@/components/battles/BattleArena';
 import { Dialog } from '@/components/ui/Dialog';
 import LeaderboardCard from '@/components/battles/LeaderboardCard';
 
-// TAREFA 13 — Batalhas de Conhecimento: desafio 1x1 assíncrono (13.1),
+// TAREFA 13 — Batalhas de conhecimento: desafio 1x1 assíncrono (13.1),
 // ranking interdepartamental (13.2) e bônus coletivo (13.5).
 
 interface BattleView {
@@ -118,7 +119,8 @@ export default function BattlesPage() {
           </h1>
           <p className="text-md-on-surface-muted mt-1.5 text-sm">
             Desafie um colega para um duelo de 5 questões com 15 segundos cada — seus acertos
-            alimentam o ranking do seu departamento.
+            alimentam o ranking do seu departamento. Precisa de mais tempo? Ative o{' '}
+            <Link href="/profile" className="text-md-primary-text underline underline-offset-2">tempo estendido no Perfil</Link>.
           </p>
         </header>
 
@@ -215,7 +217,8 @@ export default function BattlesPage() {
                         ) : playable ? (
                           <button
                             onClick={() => setActiveBattleId(b.id)}
-                            className="px-4 py-2 rounded-full bg-md-primary text-md-on-primary text-xs font-bold hover:opacity-90 transition shrink-0"
+                            type="button"
+                            className="h-11 px-5 rounded-full bg-md-primary text-md-on-primary text-sm font-bold hover:bg-md-primary-container transition-colors shrink-0"
                           >
                             Jogar turno
                           </button>
