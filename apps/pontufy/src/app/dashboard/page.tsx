@@ -7,7 +7,6 @@ import SurpriseRewardToast from '@/components/dashboard/SurpriseRewardToast';
 import StreakCard from '@/components/dashboard/StreakCard';
 import { useCourses, useEnrolledCourses } from '@/hooks/useApi';
 import { getCachedCourses, reconcileWithApi, type CachedCourse } from '@/lib/local-courses';
-import { Loader2 } from 'lucide-react';
 import { DashboardSkeleton, LoadingRegion } from '@/components/ui/Skeleton';
 
 function mergeCourses(apiCourses: any[], local: CachedCourse[]): any[] {

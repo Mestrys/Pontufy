@@ -265,7 +265,8 @@ export default function QuizModal({
         ) : (
           /* ── Questões ──────────────────────────────────────── */
           <div>
-            <div className="flex items-center justify-between mb-1">
+            {/* pr-10: espaço para o botão fechar (44px) no canto, sem cobrir o contador. */}
+            <div className="flex items-center justify-between mb-1 pr-10">
               <div className="flex items-center gap-2">
                 <ClipboardCheck size={18} className="text-md-tertiary" />
                 <h2 id={titleId} className="text-base font-bold text-white">Quiz de Avaliação</h2>
