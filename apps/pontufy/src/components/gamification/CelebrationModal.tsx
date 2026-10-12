@@ -24,25 +24,25 @@ interface CelebrationModalProps {
 }
 
 const TIER_ICONS: Record<string, typeof Trophy | typeof Crown | typeof Medal> = {
-  Iniciante: Trophy,
+  Aprendiz: Trophy,
   Analista: Medal,
-  'Analista Sénior': Trophy,
+  'Analista Sênior': Trophy,
   Especialista: Crown,
   Mestre: Crown,
 };
 
 const TIER_COLORS: Record<string, string> = {
-  Iniciante: 'text-gray-400',
+  Aprendiz: 'text-gray-400',
   Analista: 'text-md-tertiary',
-  'Analista Sénior': 'text-blue-400',
+  'Analista Sênior': 'text-blue-400',
   Especialista: 'text-amber-400',
   Mestre: 'text-purple-400',
 };
 
 const TIER_BG: Record<string, string> = {
-  Iniciante: 'bg-gray-400/10 border-gray-400/30',
+  Aprendiz: 'bg-gray-400/10 border-gray-400/30',
   Analista: 'bg-md-tertiary/10 border-md-tertiary/30',
-  'Analista Sénior': 'bg-blue-500/10 border-blue-500/30',
+  'Analista Sênior': 'bg-blue-500/10 border-blue-500/30',
   Especialista: 'bg-amber-500/10 border-amber-500/30',
   Mestre: 'bg-purple-500/10 border-purple-500/30',
 };
@@ -151,10 +151,12 @@ export default function CelebrationModal({
                   <div className="w-px h-10 bg-current/30" aria-hidden="true" />
                   <div className="text-center">
                     <p className="text-xs text-md-on-surface-muted uppercase tracking-wider mb-0.5">
-                      {newTier.maxPoints ? 'Próximo nível em' : 'Você chegou ao'}
+                      {newTier.maxPoints ? 'Para o próximo nível' : 'Você chegou ao'}
                     </p>
                     <p className="text-lg font-black text-gray-300">
-                      {newTier.maxPoints ? `${newTier.maxPoints.toLocaleString('pt-BR')} pts` : 'Nível máximo'}
+                      {newTier.maxPoints
+                        ? `Faltam ${Math.max(0, newTier.maxPoints - (points ?? 0)).toLocaleString('pt-BR')} pts`
+                        : 'Nível máximo'}
                     </p>
                   </div>
                 </div>

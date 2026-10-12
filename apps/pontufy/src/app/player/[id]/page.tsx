@@ -15,7 +15,7 @@ import { useToast } from '@/components/ui/Toast';
 import { useStore } from '@/store/useStore';
 import { getCachedCourses } from '@/lib/local-courses';
 import { downloadCertificate } from '@/lib/download-certificate';
-import { getUserTier, TIERS } from '@/lib/gamification';
+import { getUserTier, TIERS } from '@/lib/levels';
 import { BookOpen, ArrowLeft, Award, Trophy, Crown, Medal, LoaderCircle } from 'lucide-react';
 import { LoadingRegion, PlayerSkeleton } from '@/components/ui/Skeleton';
 
@@ -189,7 +189,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
           name: newTier.name,
           color: newTier.name === 'Mestre' ? 'text-purple-400' :
             newTier.name === 'Especialista' ? 'text-amber-400' :
-            newTier.name === 'Analista Sénior' ? 'text-blue-400' :
+            newTier.name === 'Analista Sênior' ? 'text-blue-400' :
             newTier.name === 'Analista' ? 'text-md-tertiary' : 'text-gray-400',
           icon: TierIcon,
           maxPoints: nextTier?.minPoints,
@@ -316,7 +316,8 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
         isVisible={showLevelUp}
         onComplete={() => { setShowLevelUp(false); setLevelUpData(null); }}
         type="levelUp"
-        title="Subiu de Nível!"
+        title="Você subiu de nível!"
+        points={levelUpData?.points}
         subtitle={`Parabéns! Você alcançou o nível ${levelUpData?.newTier?.name}.`}
         newTier={levelUpData ? {
           name: levelUpData.newTier.name,

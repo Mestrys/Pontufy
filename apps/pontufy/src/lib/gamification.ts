@@ -172,24 +172,5 @@ export async function getUnlockedAchievements(userId: string, tenantId: string):
 // Níveis de progressão (TAREFA 11 — level up). Base = saldo de pontos.
 // ═══════════════════════════════════════════════════════════════════════════
 
-export interface Tier {
-  name: string;
-  minPoints: number;
-  emoji: string;
-}
-
-export const TIERS: Tier[] = [
-  { name: 'Aprendiz', minPoints: 0, emoji: '🌱' },
-  { name: 'Analista', minPoints: 150, emoji: '📘' },
-  { name: 'Analista Sénior', minPoints: 350, emoji: '💼' },
-  { name: 'Especialista', minPoints: 700, emoji: '⭐' },
-  { name: 'Mestre', minPoints: 1200, emoji: '👑' },
-];
-
-export function getUserTier(pointsBalance: number): Tier {
-  let tier = TIERS[0];
-  for (const t of TIERS) {
-    if (pointsBalance >= t.minPoints) tier = t;
-  }
-  return tier;
-}
+export { TIERS, getUserTier, getLevelProgress } from '@/lib/levels';
+export type { Tier, LevelProgress } from '@/lib/levels';

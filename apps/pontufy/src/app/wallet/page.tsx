@@ -7,23 +7,14 @@ import PointsHistory from '@/components/wallet/PointsHistory';
 import { ListSkeleton, LoadingRegion } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { History } from 'lucide-react';
-
-function computeLevel(points: number) {
-  if (points >= 5000)
-    return { currentLevel: 'Especialista', nextLevel: 'Mestre', levelProgress: Math.min(100, ((points - 5000) / 5000) * 100) };
-  if (points >= 2000)
-    return { currentLevel: 'Analista Sênior', nextLevel: 'Especialista', levelProgress: ((points - 2000) / 3000) * 100 };
-  if (points >= 500)
-    return { currentLevel: 'Analista', nextLevel: 'Analista Sênior', levelProgress: ((points - 500) / 1500) * 100 };
-  return { currentLevel: 'Iniciante', nextLevel: 'Analista', levelProgress: (points / 500) * 100 };
-}
+import { getLevelProgress } from '@/lib/levels';
 
 export default function WalletPage() {
   const currentUser = useStore((s) => s.currentUser);
   const pointsBalance = useStore((s) => s.currentPointsBalance);
   const { data: apiHistory, isLoading } = usePointsHistory();
 
-  const level = computeLevel(pointsBalance);
+  const level = getLevelProgress(pointsBalance);
 
   const history = (apiHistory || []).map((tx: any) => ({
     id: tx.id,
@@ -35,9 +26,10 @@ export default function WalletPage() {
 
   const userData = {
     pointsBalance,
-    currentLevel: level.currentLevel,
-    nextLevel: level.nextLevel,
-    levelProgress: Math.round(level.levelProgress),
+    currentLevel: level.tier.name,
+    nextLevel: level.next?.name ?? null,
+    levelProgress: level.percent,
+    pointsToNext: level.pointsToNext,
   };
 
   return (
