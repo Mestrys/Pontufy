@@ -250,7 +250,7 @@ export default function CheckoutDrawer({
                     <strong className="text-md-tertiary">{price} pts</strong> foram debitados do seu saldo.
                     {affiliateUrl
                       ? ` Para usar o benefício, acesse a oferta de ${partner} pelo botão abaixo.`
-                      : " Você receberá as instruções do benefício nas notificações."}
+                      : " O resgate também fica registrado nas suas notificações."}
                   </p>
                 </div>
 
@@ -263,7 +263,7 @@ export default function CheckoutDrawer({
                       {protocol}
                     </p>
                     <p className="text-xs text-md-on-surface-variant mb-3">
-                      Use este número se precisar falar com o RH sobre o resgate.
+                      Guarde este número caso precise de suporte sobre o resgate.
                     </p>
                     <button
                       type="button"
