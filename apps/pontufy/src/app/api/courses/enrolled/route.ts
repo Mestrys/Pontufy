@@ -37,8 +37,8 @@ export async function GET() {
       if (completedLessons > 0 && completedLessons < totalLessons) status = 'in_progress';
       else if (completedLessons === totalLessons && totalLessons > 0) status = 'completed';
 
-      const nextLesson = course.lessons.find((l: any) => !completedIds.has(l.id));
-      const lastActivity = Math.max(0, ...course.lessons.map((l: any) => completedAt.get(l.id) ?? 0));
+      const nextLesson = course.lessons.find((l: { id: string; title: string }) => !completedIds.has(l.id));
+      const lastActivity = Math.max(0, ...course.lessons.map((l: { id: string }) => completedAt.get(l.id) ?? 0));
 
       return {
         id: course.id,

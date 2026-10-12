@@ -83,7 +83,7 @@ export default function AISelectionTable({
                   {course.status === 'Só neste navegador' ? (
                     course.title
                   ) : (
-                    <Link href={`/admin/courses/${course.id}`} className="hover:text-md-primary-text hover:underline">
+                    <Link href={`/admin/courses/${course.id}`} className="inline-flex min-h-11 max-w-full items-center hover:text-md-primary-text hover:underline">
                       {course.title}
                     </Link>
                   )}

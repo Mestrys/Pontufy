@@ -17,6 +17,26 @@ function mergeCourses(apiCourses: any[], local: CachedCourse[]): any[] {
   return [...fresh, ...apiCourses];
 }
 
+interface CourseSummary {
+  id: string;
+  title: string;
+  description?: string | null;
+  imageUrl?: string | null;
+  lessons?: { pointsAssigned?: number }[];
+}
+
+interface EnrolledCourse {
+  id: string;
+  title: string;
+  status: 'available' | 'in_progress' | 'completed';
+  progress: number;
+  completedLessons: number;
+  totalLessons: number;
+  nextLessonTitle?: string | null;
+  lastActivityAt?: string | null;
+  imageUrl?: string | null;
+}
+
 export default function Home() {
   const { data: coursesResponse, isLoading: loadingCourses } = useCourses();
   const { data: enrolledCourses, isLoading: loadingEnrolled } = useEnrolledCourses();
@@ -41,13 +61,13 @@ export default function Home() {
     );
   };
 
-  const lessonPoints = (c: any) =>
-    c.lessons?.reduce((sum: number, l: any) => sum + (l.pointsAssigned || 0), 0) || 0;
+  const lessonPoints = (c: CourseSummary) =>
+    c.lessons?.reduce((sum, l) => sum + (l.pointsAssigned || 0), 0) || 0;
 
   // "Continuar": o curso em andamento com atividade mais recente.
-  const inProgressEnrolled = enrolled
-    .filter((c: any) => c.status === 'in_progress')
-    .sort((a: any, b: any) => (b.lastActivityAt ?? '').localeCompare(a.lastActivityAt ?? ''));
+  const inProgressEnrolled = (enrolled as EnrolledCourse[])
+    .filter((c) => c.status === 'in_progress')
+    .sort((a, b) => (b.lastActivityAt ?? '').localeCompare(a.lastActivityAt ?? ''));
   const continueCourse: ContinueCourse | null = inProgressEnrolled[0]
     ? {
         id: inProgressEnrolled[0].id,
@@ -61,9 +81,9 @@ export default function Home() {
 
   // Destaque: o curso mais novo que a pessoa ainda não começou.
   const startedIds = new Set(
-    enrolled.filter((c: any) => c.status !== 'available').map((c: any) => c.id),
+    (enrolled as EnrolledCourse[]).filter((c) => c.status !== 'available').map((c) => c.id),
   );
-  const notStarted = allCourses.filter((c: any) => !startedIds.has(c.id));
+  const notStarted = (allCourses as CourseSummary[]).filter((c) => !startedIds.has(c.id));
   const heroSource = notStarted[0];
   const heroCourse: HeroCourseData | null = heroSource
     ? {
@@ -81,7 +101,7 @@ export default function Home() {
   // Os outros cursos em andamento (o primeiro já está no cartão "Continuar").
   // Com busca ativa, as linhas trazem todos os cursos (cartão e destaque somem).
   const skip = searchQuery ? 0 : 1;
-  const inProgress = inProgressEnrolled.slice(skip).map((c: any) => ({
+  const inProgress = inProgressEnrolled.slice(skip).map((c) => ({
     id: c.id,
     title: c.title,
     progress: c.progress,
@@ -91,7 +111,7 @@ export default function Home() {
       'https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&q=80&w=600',
   }));
 
-  const available = notStarted.slice(skip).map((c: any) => ({
+  const available = notStarted.slice(skip).map((c) => ({
     id: c.id,
     title: c.title,
     pointsReward: lessonPoints(c),
