@@ -25,6 +25,36 @@ export const authConfig = {
   trustHost: true,
   providers: [],
   callbacks: {
+    // Edge-safe authorization gate. NOTE: with a custom proxy handler (proxy.ts)
+    // this only takes effect when returning a Response (next-auth/lib/index.js
+    // runs the handler branch before the `!authorized` redirect). Kept as the
+    // authoritative allowlist for public routes — the handler relies on it for
+    // redirect semantics and any future matcher widening.
+    async authorized({ auth, request: { nextUrl } }) {
+      const isLoggedIn = !!auth?.user;
+      const pathname = nextUrl.pathname;
+
+      const isPublicRoute =
+        pathname.startsWith('/login') ||
+        pathname.startsWith('/register') ||
+        pathname.startsWith('/forgot-password') ||
+        pathname.startsWith('/reset-password') ||
+        pathname.startsWith('/superadmin/login') ||
+        pathname.startsWith('/termos') ||
+        pathname.startsWith('/privacidade') ||
+        pathname.startsWith('/api/auth') ||
+        pathname.startsWith('/api/webhooks');
+
+      if (isLoggedIn && pathname === '/login') {
+        return Response.redirect(new URL('/dashboard', nextUrl));
+      }
+
+      if (!isLoggedIn && !isPublicRoute) {
+        return false;
+      }
+
+      return true;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
@@ -48,11 +78,16 @@ export const authConfig = {
   session: {
     strategy: 'jwt',
     maxAge: 7 * 24 * 60 * 60,
+    // 7.5 — Rotação/renovação contínua: re-emite o JWT (sem relogar) quando o
+    // cookie tem mais de 24h, renovando a expiração de sessões ativas.
+    updateAge: 24 * 60 * 60,
   },
   cookies: {
     sessionToken: {
+      // 7.4 — __Host- em produção: exige Secure + path=/ + sem Domain (mais
+      // restritivo que __Secure-). Em dev usa nome simples (HTTP local).
       name: process.env.NODE_ENV === 'production'
-        ? '__Secure-authjs.session-token'
+        ? '__Host-authjs.session-token'
         : 'authjs.session-token',
       options: {
         httpOnly: true,

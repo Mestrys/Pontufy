@@ -1,12 +1,13 @@
 import useSWR, { mutate } from 'swr';
 import { useStore } from '@/store/useStore';
+import { enqueueOfflineCompletion } from '@/lib/sync-engine';
 
 const fetcher = async (url: string) => {
   const r = await fetch(url);
   if (!r.ok) {
     const info = await r.json().catch(() => ({}));
     const error = new Error(info.error || `Request failed with status ${r.status}`);
-    (error as any).status = r.status;
+    (error as Error & { status?: number }).status = r.status;
     throw error;
   }
   return r.json();
@@ -60,6 +61,7 @@ export async function triggerLessonCompletion(
   success: boolean;
   newBalance?: number;
   alreadyCompleted?: boolean;
+  queued?: boolean;
   message?: string;
   error?: string;
 }> {
@@ -67,7 +69,28 @@ export async function triggerLessonCompletion(
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ lessonId, coursePayload }),
-  });
+  }).catch(() => null);
+
+  // Sem conexão: fila local (IndexedDB, escopo tenantId:userId) — o motor de
+  // sync reenvia para /api/lessons/sync quando a rede voltar.
+  if (!res) {
+    const user = useStore.getState().currentUser;
+    if (user) {
+      await enqueueOfflineCompletion(
+        user.tenantId,
+        user.userId,
+        lessonId,
+        coursePayload?.courseId ?? '',
+      );
+      return {
+        success: false,
+        queued: true,
+        message: 'Sem conexão — conclusão salva e será sincronizada automaticamente.',
+      };
+    }
+    return { success: false, error: 'Sem conexão.' };
+  }
+
   const data = await res.json();
   if (data.success && data.newBalance !== undefined) {
     useStore.getState().setPointsBalance(data.newBalance);

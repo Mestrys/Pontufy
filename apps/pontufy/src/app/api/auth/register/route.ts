@@ -1,34 +1,33 @@
 import { NextResponse } from 'next/server';
-import { randomBytes, scrypt } from 'crypto';
-import { promisify } from 'util';
 import { prisma } from '@/backend/db';
+import { hashPassword } from '@/lib/crypto';
 import { sendWelcomeEmail } from '@/lib/email';
+import { getClientIp, ipRateLimit } from '@/lib/security/auth-guard';
+import { registerSchema, parseBody } from '@/lib/validations';
 
-const scryptAsync = promisify(scrypt);
-
-async function hashPassword(password: string): Promise<string> {
-  const salt = randomBytes(16).toString('hex');
-  const derived = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${salt}:${derived.toString('hex')}`;
-}
+const REGISTER_MAX = 10;
+const REGISTER_WINDOW = 15 * 60;
 
 export async function POST(request: Request) {
   try {
-    const { token, name, password } = await request.json();
-
-    if (!token || !name || !password) {
+    // 6.1 — Rate limiting por IP (10 criações de conta / 15 min)
+    const ip = getClientIp(request);
+    const rate = await ipRateLimit(ip, 'register', REGISTER_MAX, REGISTER_WINDOW);
+    if (!rate.allowed) {
       return NextResponse.json(
-        { error: 'Token, nome e senha são obrigatórios.' },
-        { status: 400 },
+        { error: 'Muitas tentativas. Aguarde alguns minutos.' },
+        { status: 429 },
       );
     }
 
-    if (typeof password !== 'string' || password.length < 8) {
-      return NextResponse.json(
-        { error: 'A senha deve ter pelo menos 8 caracteres.' },
-        { status: 400 },
-      );
+    // 8.1 — Validação centralizada via Zod
+    const raw = await request.json().catch(() => null);
+    const { data: body, error: validationError } = parseBody(registerSchema, raw);
+    if (validationError) {
+      return NextResponse.json({ error: validationError }, { status: 400 });
     }
+
+    const { token, name, password } = body;
 
     const invitation = await prisma.invitation.findUnique({ where: { token } });
 
@@ -36,7 +35,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Convite inválido.' }, { status: 404 });
     }
 
-    if (invitation.usedAt) {
+    if (invitation.status === 'accepted' || invitation.usedAt) {
       return NextResponse.json(
         { error: 'Este convite já foi utilizado.' },
         { status: 410 },
@@ -60,8 +59,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const passwordHash = await hashPassword(password);
+    const passwordHash = hashPassword(password);
 
+    // Criação do utilizador + aceitação do convite: transação atómica.
     await prisma.$transaction([
       prisma.user.create({
         data: {
@@ -74,14 +74,14 @@ export async function POST(request: Request) {
       }),
       prisma.invitation.update({
         where: { id: invitation.id },
-        data: { usedAt: new Date() },
+        data: { status: 'accepted', usedAt: new Date() },
       }),
     ]);
 
     sendWelcomeEmail(invitation.email, name.trim()).catch(() => {});
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error) {
     console.error('POST /api/auth/register:', error);
     return NextResponse.json(
       { error: 'Erro interno ao criar conta.' },

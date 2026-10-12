@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSessionContext } from '@/backend/session';
-import { searchOffers, getCoupons } from '@/lib/lomadee';
+import { lomadeeService } from '@/lib/lomadee';
 
 export async function GET(request: Request) {
   try {
@@ -12,7 +12,7 @@ export async function GET(request: Request) {
 
     if (type === 'coupons') {
       try {
-        const coupons = await getCoupons();
+        const coupons = await lomadeeService.fetchCoupons();
         return NextResponse.json({ data: coupons });
       } catch (error: any) {
         if (error.message?.includes('not configured')) {
@@ -28,8 +28,14 @@ export async function GET(request: Request) {
     }
 
     try {
-      const offers = await searchOffers(keyword);
-      return NextResponse.json({ data: offers });
+      const catalog = await lomadeeService.fetchCatalog();
+      // Filter offers by keyword
+      const filteredOffers = catalog.offers.filter(offer =>
+        offer.title.toLowerCase().includes(keyword.toLowerCase()) ||
+        offer.description?.toLowerCase().includes(keyword.toLowerCase()) ||
+        offer.partnerName.toLowerCase().includes(keyword.toLowerCase())
+      );
+      return NextResponse.json({ data: filteredOffers });
     } catch (error: any) {
       if (error.message?.includes('not configured')) {
         return NextResponse.json({ data: [], message: 'Lomadee not configured.' });

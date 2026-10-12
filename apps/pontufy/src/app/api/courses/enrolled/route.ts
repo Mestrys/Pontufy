@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSessionContext } from '@/backend/session';
-import { getTenantDb, prisma } from '@/backend/db';
+import { getTenantDb } from '@/backend/db';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -18,7 +18,7 @@ export async function GET() {
 
     const lessonIds = courses.flatMap((c: any) => c.lessons.map((l: any) => l.id));
 
-    const completions = await prisma.lessonCompletion.findMany({
+    const completions = await db.lessonCompletion.findMany({
       where: { userId, lessonId: { in: lessonIds } },
       select: { lessonId: true },
     });

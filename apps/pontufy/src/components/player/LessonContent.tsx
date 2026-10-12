@@ -1,9 +1,23 @@
 'use client';
 
 import { type ReactNode } from 'react';
+import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, BookOpen } from 'lucide-react';
+
+// Renderiza EXCLUSIVAMENTE o markdown da aula ativa (prop `content`) — nunca a
+// descrição global do curso. Aula de vídeo usa VideoPlayer + este mesmo
+// conteúdo abaixo; aulas de texto usam apenas este componente.
 
 interface LessonContentProps {
   content: string;
+  lessonTitle: string;
+  lessonIndex: number; // 1-based
+  totalLessons: number;
+  points: number;
+  completed: boolean;
+  isCompleting: boolean;
+  onComplete: () => void;
+  onPrevious: (() => void) | null;
+  onNext: (() => void) | null;
 }
 
 function formatInline(text: string): ReactNode[] {
@@ -19,11 +33,7 @@ function formatInline(text: string): ReactNode[] {
   });
 }
 
-export default function LessonContent({ content }: LessonContentProps) {
-  if (!content) {
-    return <p className="text-gray-500 italic">Conteúdo da aula não disponível.</p>;
-  }
-
+function MarkdownContent({ content }: { content: string }) {
   const lines = content.split('\n');
   const elements: ReactNode[] = [];
   let currentParagraph: string[] = [];
@@ -71,7 +81,7 @@ export default function LessonContent({ content }: LessonContentProps) {
     if (trimmed.startsWith('## ')) {
       flush();
       elements.push(
-        <h2 key={key++} className="text-xl font-bold text-white mt-8 mb-3 first:mt-0 border-b border-[#2a2a2a] pb-2">
+        <h2 key={key++} className="text-xl font-bold text-white mt-8 mb-3 first:mt-0 border-b border-md-outline pb-2">
           {formatInline(trimmed.slice(3))}
         </h2>,
       );
@@ -105,9 +115,96 @@ export default function LessonContent({ content }: LessonContentProps) {
   }
   flush();
 
+  return <div className="lesson-content text-sm sm:text-base leading-relaxed">{elements}</div>;
+}
+
+export default function LessonContent({
+  content,
+  lessonTitle,
+  lessonIndex,
+  totalLessons,
+  points,
+  completed,
+  isCompleting,
+  onComplete,
+  onPrevious,
+  onNext,
+}: LessonContentProps) {
   return (
-    <div className="lesson-content text-sm sm:text-base leading-relaxed">
-      {elements}
+    <div className="flex flex-col flex-1 min-h-0">
+      <div className="flex-1 overflow-y-auto">
+        {/* Cabeçalho da aula */}
+        <div className="bg-md-surface border-b border-md-outline px-6 sm:px-10 py-6">
+          <div className="flex items-center gap-2 text-gray-600 text-xs mb-2">
+            <BookOpen size={13} />
+            <span>Aula {lessonIndex} de {totalLessons}</span>
+          </div>
+          <h2 className="text-xl sm:text-2xl font-black text-white">{lessonTitle}</h2>
+        </div>
+
+        {/* Conteúdo markdown DA AULA ATIVA */}
+        <div className="px-6 sm:px-10 py-8 max-w-4xl">
+          {content ? (
+            <MarkdownContent content={content} />
+          ) : (
+            <div className="text-center py-16">
+              <BookOpen size={40} className="mx-auto text-gray-700 mb-4" />
+              <p className="text-gray-500">Conteúdo desta aula em breve.</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Barra de navegação inferior */}
+      <div className="flex-shrink-0 px-6 sm:px-10 py-5 bg-md-surface border-t border-md-outline">
+        <div className="flex flex-wrap items-center justify-between gap-3 max-w-4xl">
+          <button
+            onClick={() => onPrevious?.()}
+            disabled={!onPrevious}
+            className={`px-4 py-3 rounded-lg font-bold transition-all text-sm flex items-center gap-2 border ${
+              onPrevious
+                ? 'border-md-outline text-gray-300 hover:border-md-outline-variant hover:text-white'
+                : 'border-md-outline text-gray-700 cursor-not-allowed'
+            }`}
+          >
+            <ArrowLeft size={15} /> Aula Anterior
+          </button>
+
+          <button
+            onClick={onComplete}
+            disabled={completed || isCompleting}
+            className={`px-6 py-3 rounded-lg font-bold transition-all text-sm flex items-center gap-2 ${
+              completed
+                ? 'bg-md-surface-container text-gray-600 cursor-not-allowed border border-md-outline'
+                : 'bg-md-primary text-md-on-primary hover:bg-md-primary-container'
+            }`}
+          >
+            {completed ? (
+              <>
+                <CheckCircle2 size={16} /> Aula Concluída
+              </>
+            ) : isCompleting ? (
+              <>
+                <Loader2 size={16} className="animate-spin" /> Concluindo...
+              </>
+            ) : (
+              <>Concluir Aula (+{points} pts)</>
+            )}
+          </button>
+
+          <button
+            onClick={() => onNext?.()}
+            disabled={!onNext}
+            className={`px-4 py-3 rounded-lg font-bold transition-all text-sm flex items-center gap-2 ${
+              onNext
+                ? 'bg-md-secondary text-md-on-secondary hover:bg-md-secondary/90'
+                : 'bg-md-surface-container text-gray-700 cursor-not-allowed border border-md-outline'
+            }`}
+          >
+            Próxima Aula <ArrowRight size={15} />
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

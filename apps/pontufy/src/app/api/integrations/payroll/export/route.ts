@@ -1,20 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getSessionContext } from '@/backend/session';
 import { getTenantDb } from '@/backend/db';
+import { sanitizeCsvField } from '@/lib/csv-sanitizer';
 
-/**
- * Higieniza campos de CSV para prevenir CSV Injection/DDE.
- * Prefixa com apóstrofo quando o campo começa com '=' '+' '-' '@'.
- */
-function sanitizeCsvField(field: string | number): string {
-  const strField = String(field);
-  if (/^[=+\-@]/.test(strField)) {
-    return `'${strField}`;
-  }
-  return `"${strField.replace(/"/g, '""')}"`;
-}
-
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const { tenantId, role } = await getSessionContext();
 
@@ -66,8 +55,8 @@ export async function GET(request: Request) {
 
     return new NextResponse(csvContent, { status: 200, headers });
 
-  } catch (error: any) {
-    if (error.message === 'Não autenticado.') {
+  } catch (error) {
+    if (error instanceof Error && error.message === 'Não autenticado.') {
       return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 });
     }
     console.error('[PAYROLL EXPORT] Erro na geração da folha:', error);

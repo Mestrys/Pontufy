@@ -18,12 +18,12 @@
 // ═══════════════════════════════════════════════════════════════════════
 
 import type {
-  TenantId,
   AffiliateNetwork,
   CommissionEvent,
   CommissionStatus,
 } from './types';
 import { createLogger } from './logger';
+import { getTenantDb } from './db';
 import {
   resolveTenant,
   getAffiliateCredential,
@@ -31,6 +31,7 @@ import {
   TenantNotFoundError,
   UnauthorizedTenantAccessError,
 } from './tenant';
+import { notifySystem } from '@/lib/notifications';
 
 // ────────────────────── Validação de assinatura ─────────────────────
 
@@ -62,32 +63,76 @@ async function verifySignature(
   return expected === signature;
 }
 
-// ──────────────────── Idempotência (dedup de orders) ────────────────
+// ──────────────────────── Persistência de comissão ─────────────────────────
 
 /**
- * Set in-memory para MVP. Em produção, use Redis ou DynamoDB
- * com TTL de 72 h para evitar reprocessamento.
+ * Persiste o evento de comissão no banco (Zero Trust via getTenantDb).
+ *
+ * Idempotência é garantida pela constraint UNIQUE(tenantId, network, orderId):
+ * o interceptor injeta tenantId, e uma tentativa duplicada retorna a
+ * Commission já existente sem duplo crédito.
+ *
+ * Quando a rede reporta status 'approved' com comissão > 0, o crédito de
+ * pontos (PointsLedger gain + incremento do saldo) acontece na MESMA
+ * $transaction da persistência — atômico.
  */
-const processedOrders = new Set<string>();
+export async function persistCommission(
+  event: CommissionEvent,
+): Promise<{ commissionId: string; alreadyProcessed: boolean }> {
+  const db = getTenantDb(event.tenantId);
 
-function isDuplicate(tenantId: TenantId, orderId: string): boolean {
-  const key = `${tenantId}:${orderId}`;
-  if (processedOrders.has(key)) return true;
-  processedOrders.add(key);
-  return false;
-}
+  // findFirst (não findUnique): o interceptor injeta tenantId no where,
+  // e findUnique rejeita campos extras.
+  const existing = await db.commission.findFirst({
+    where: { orderId: event.orderId, network: event.network },
+  });
+  if (existing) {
+    return { commissionId: existing.id, alreadyProcessed: true };
+  }
 
-// ──────────────────────── Persistência stub ─────────────────────────
+  const pointsAwarded =
+    event.status === 'approved' && event.commissionValue > 0
+      ? Math.round(event.commissionValue * 10)
+      : 0;
 
-/**
- * Placeholder: persiste o evento de comissão.
- * Em produção → INSERT INTO commissions (...) VALUES (...)
- */
-async function persistCommission(event: CommissionEvent): Promise<void> {
-  console.log(JSON.stringify({
-    action: 'PERSIST_COMMISSION',
-    ...event,
-  }));
+  const commission = await db.$transaction(async (tx) => {
+    const created = await tx.commission.create({
+      data: {
+        id: event.id,
+        tenantId: event.tenantId,
+        network: event.network,
+        trackingId: event.trackingId,
+        userId: event.userId,
+        orderId: event.orderId,
+        orderValue: event.orderValue,
+        commissionValue: event.commissionValue,
+        currency: event.currency,
+        status: event.status,
+        pointsAwarded,
+        receivedAt: new Date(event.receivedAt),
+      },
+    });
+
+    if (pointsAwarded > 0) {
+      await tx.pointsLedger.create({
+        data: {
+          userId: event.userId,
+          tenantId: event.tenantId,
+          type: 'gain',
+          pointsAmount: pointsAwarded,
+          description: `Comissão ${event.network} - Pedido ${event.orderId}`,
+        },
+      });
+      await tx.user.update({
+        where: { id: event.userId },
+        data: { pointsBalance: { increment: pointsAwarded } },
+      });
+    }
+
+    return created;
+  });
+
+  return { commissionId: commission.id, alreadyProcessed: false };
 }
 
 // ═══════════════════════════════ HANDLER ═════════════════════════════
@@ -147,24 +192,16 @@ export async function handlePostback(
     // ── 3. Verificar ownership do trackingId (Zero Trust) ───────────
     validateTrackingOwnership(payload.trackingId, payload.tenantId);
 
-    // ── 4. Idempotência — rejeitar orders já processadas ────────────
-    if (isDuplicate(tenant.tenantId, payload.orderId)) {
-      log.warn('Order já processada (idempotência).', { orderId: payload.orderId });
-      return { success: true, message: 'ALREADY_PROCESSED' };
-    }
-
-    // ── 5. Extrair userId do trackingId ─────────────────────────────
+    // ── 4. Extrair userId do trackingId ─────────────────────────────
     const userId = payload.trackingId.split(':')[1];
     if (!userId) {
       log.error('trackingId malformado — userId ausente.', { trackingId: payload.trackingId });
       return { success: false, message: 'MALFORMED_TRACKING_ID' };
     }
 
-    // ── 6. Persistir evento de comissão ─────────────────────────────
-    const commissionId = `comm_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-
+    // ── 5. Persistir evento de comissão (idempotente + atômico) ─────
     const event: CommissionEvent = {
-      id:              commissionId,
+      id:              `comm_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       tenantId:        tenant.tenantId,
       network:         payload.network,
       trackingId:      payload.trackingId,
@@ -177,7 +214,26 @@ export async function handlePostback(
       receivedAt:      new Date().toISOString(),
     };
 
-    await persistCommission(event);
+    const { commissionId, alreadyProcessed } = await persistCommission(event);
+
+    if (alreadyProcessed) {
+      log.warn('Order já processada (idempotência).', { orderId: payload.orderId });
+      return { success: true, message: 'ALREADY_PROCESSED', commissionId };
+    }
+
+    // Non-blocking: aviso de crédito de comissão quando aprovado.
+    const commissionPoints =
+      event.status === 'approved' && event.commissionValue > 0
+        ? Math.round(event.commissionValue * 10)
+        : 0;
+    if (commissionPoints > 0) {
+      notifySystem({
+        tenantId: tenant.tenantId,
+        userId,
+        title: 'Comissão creditada',
+        message: `Sua comissão de ${payload.network} (pedido ${payload.orderId}) rendeu +${commissionPoints} pontos.`,
+      });
+    }
 
     log.info('Comissão registrada com sucesso.', {
       commissionId,
@@ -187,7 +243,7 @@ export async function handlePostback(
 
     return { success: true, message: 'OK', commissionId };
 
-  } catch (err: any) {
+  } catch (err: unknown) {
     // ── Tratamento cirúrgico de erros de domínio ────────────────────
     if (err instanceof TenantNotFoundError) {
       return { success: false, message: 'TENANT_NOT_FOUND' };
@@ -200,7 +256,7 @@ export async function handlePostback(
     // Erro genérico — nunca vaza stack trace para o chamador
     console.error(JSON.stringify({
       action: 'POSTBACK_UNHANDLED_ERROR',
-      error: err.message,
+      error: err instanceof Error ? err.message : String(err),
       timestamp: new Date().toISOString(),
     }));
     return { success: false, message: 'INTERNAL_ERROR' };

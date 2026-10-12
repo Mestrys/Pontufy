@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { timingSafeEqual } from 'crypto';
 import { prisma } from '@/backend/db';
+import { persistCommission } from '@/backend/postbackHandler';
+import type { CommissionEvent } from '@/backend/types';
 
 const WEBHOOK_SECRET = process.env.AFFILIATE_WEBHOOK_SECRET || '';
 
@@ -63,6 +65,8 @@ export async function POST(request: NextRequest) {
 
     const [tenantId, userId] = parts;
 
+    // Global email/user lookup is not needed here — validate that the user
+    // actually belongs to the tenant claimed in the trackingId (Zero Trust).
     const user = await prisma.user.findFirst({
       where: { id: userId, tenantId },
     });
@@ -71,41 +75,32 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'USER_NOT_FOUND' }, { status: 404 });
     }
 
-    // Idempotency: check if orderId already processed
-    const existing = await prisma.pointsLedger.findFirst({
-      where: {
-        userId,
-        tenantId,
-        description: { contains: payload.orderId },
-      },
-    });
+    const event: CommissionEvent = {
+      id: `comm_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      tenantId: tenantId as any,
+      network: (payload.network as any) || 'amazon',
+      trackingId: payload.trackingId,
+      userId,
+      orderId: payload.orderId,
+      orderValue: payload.orderValue || 0,
+      commissionValue: payload.commissionValue || 0,
+      currency: 'BRL',
+      status: payload.status,
+      receivedAt: new Date().toISOString(),
+    };
 
-    if (existing) {
+    const { commissionId, alreadyProcessed } = await persistCommission(event);
+
+    if (alreadyProcessed) {
       return NextResponse.json({ success: true, message: 'ALREADY_PROCESSED' });
     }
 
     if (payload.status === 'approved' && payload.commissionValue > 0) {
       const bonusPoints = Math.round(payload.commissionValue * 10);
-
-      await prisma.$transaction([
-        prisma.pointsLedger.create({
-          data: {
-            userId,
-            tenantId,
-            type: 'gain',
-            pointsAmount: bonusPoints,
-            description: `Comissão ${payload.network} - Pedido ${payload.orderId}`,
-          },
-        }),
-        prisma.user.update({
-          where: { id: userId },
-          data: { pointsBalance: { increment: bonusPoints } },
-        }),
-      ]);
-
       return NextResponse.json({
         success: true,
         message: 'COMMISSION_SETTLED',
+        commissionId,
         pointsAwarded: bonusPoints,
       });
     }
@@ -113,6 +108,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: `STATUS_${payload.status.toUpperCase()}`,
+      commissionId,
     });
   } catch (error) {
     console.error('POST /api/webhooks/affiliates:', error);

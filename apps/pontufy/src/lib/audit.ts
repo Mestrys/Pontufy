@@ -1,29 +1,43 @@
-import { prisma } from '@/backend/db';
+import { getTenantDb } from '@/backend/db';
+import type { Prisma } from '@prisma/client';
 
-interface AuditEntry {
+// Trilha de auditoria IMUTÁVEL (append-only): esta tabela aceita exclusivamente
+// inserções. É PROIBIDO implementar update/delete sobre AuditLog — a integridade
+// do registro é a base das obrigações SOC2 / LGPD / GDPR.
+//
+// Toda mutação sensível (admin_rh ou super_admin) DEVE registrar entity,
+// entityId e os valores antigo/novo (JSON) para reconstituição forense.
+
+export interface AuditEntry {
   tenantId: string;
   userId?: string;
   action: string;
+  entity: string;
+  entityId?: string;
+  oldValue?: unknown;
+  newValue?: unknown;
   ipAddress?: string | null;
   userAgent?: string | null;
-  previousValues?: any;
-  newValues?: any;
 }
 
 export async function logAudit(entry: AuditEntry): Promise<void> {
   try {
-    await prisma.auditLog.create({
+    const db = getTenantDb(entry.tenantId);
+    await db.auditLog.create({
       data: {
         tenantId: entry.tenantId,
         userId: entry.userId || null,
         action: entry.action,
+        entity: entry.entity,
+        entityId: entry.entityId || null,
+        oldValue: (entry.oldValue ?? undefined) as Prisma.InputJsonValue,
+        newValue: (entry.newValue ?? undefined) as Prisma.InputJsonValue,
         ipAddress: entry.ipAddress || null,
         userAgent: entry.userAgent || null,
-        previousValues: entry.previousValues ? JSON.stringify(entry.previousValues) : null,
-        newValues: entry.newValues ? JSON.stringify(entry.newValues) : null,
       },
     });
   } catch (error) {
+    // Auditoria nunca derruba a operação principal.
     console.error('[AUDIT] Failed to write audit log:', error);
   }
 }

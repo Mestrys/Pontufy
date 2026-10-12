@@ -3,11 +3,12 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Loader2, ShieldAlert } from 'lucide-react';
+import { Loader2, ShieldCheck, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 export default function SuperAdminLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -44,64 +45,90 @@ export default function SuperAdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-center py-12 px-6">
-      <div className="mx-auto w-full max-w-sm">
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <ShieldAlert className="text-emerald-400" size={28} />
-          <span className="text-xl font-black text-white tracking-tight">Pontufy Staff</span>
-        </div>
+    <main className="min-h-screen bg-md-surface-dim flex flex-col items-center justify-center px-4 relative">
+      <div
+        aria-hidden
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'radial-gradient(ellipse 60% 40% at 50% 0%, rgba(92,65,82,0.12) 0%, transparent 70%)',
+        }}
+      />
 
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8">
-          <h1 className="text-lg font-bold text-white mb-6">Acesso Restrito</h1>
+      <div className="w-full max-w-md">
+        <div className="md-card-outlined md-elevation-3 p-8">
+          <div className="flex items-center justify-center gap-3 mb-8">
+            <ShieldCheck className="text-md-primary" size={28} />
+            <span className="text-headline-sm font-black text-md-on-surface tracking-tight">Pontufy Staff</span>
+          </div>
+
+          <h1 className="text-title-lg font-semibold text-md-on-surface mb-6 text-center">Acesso Restrito</h1>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="bg-rose-950 border border-rose-800 text-rose-400 text-sm p-3 rounded-lg">
+              <div
+                role="alert"
+                className="bg-md-error/10 border border-md-error/30 text-md-error text-body-sm p-3 rounded-xl text-center font-medium"
+              >
                 {error}
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
+              <label htmlFor="email" className="text-label-lg text-md-on-surface-variant mb-1.5 block">
                 E-mail corporativo
               </label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="voce@pontufy.com"
-                className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2.5 text-sm placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-              />
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-variant/60 size-5 pointer-events-none" aria-hidden="true" />
+                <input
+                  id="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="voce@pontufy.com"
+                  className="w-full pl-12 pr-4 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-variant/50 focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
+                />
+              </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
+              <label htmlFor="password" className="text-label-lg text-md-on-surface-variant mb-1.5 block">
                 Senha
               </label>
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-              />
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-variant/60 size-5 pointer-events-none" aria-hidden="true" />
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-12 pr-14 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-variant/50 focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-md-on-surface-variant/60 hover:text-md-on-surface transition-colors"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex justify-center items-center py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-full text-sm transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="md-btn md-btn-filled w-full"
             >
-              {isLoading ? <Loader2 className="animate-spin" size={18} /> : 'Entrar'}
+              {isLoading ? <Loader2 className="animate-spin" size={20} /> : 'Entrar'}
             </button>
           </form>
-        </div>
 
-        <p className="text-center text-xs text-slate-600 mt-6">
-          Acesso exclusivo para colaboradores da Pontufy S/A
-        </p>
+          <p className="mt-6 text-center text-body-sm text-md-on-surface-variant/60">
+            Acesso exclusivo para colaboradores da Pontufy S/A
+          </p>
+        </div>
       </div>
-    </div>
+    </main>
   );
 }

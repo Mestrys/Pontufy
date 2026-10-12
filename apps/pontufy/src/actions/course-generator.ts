@@ -2,259 +2,139 @@
 
 import { z } from 'zod';
 import { generateObject } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
-import { createAnthropic } from '@ai-sdk/anthropic';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import type { LanguageModel } from 'ai';
 import { revalidatePath } from 'next/cache';
 import { randomUUID } from 'crypto';
 
 import { auth } from '@/auth';
 import { getTenantDb } from '@/backend/db';
 import { rateLimitCheck } from '@/lib/redis';
-
-import type { ContentType } from '@/lib/course-types';
+import { buildProviderChain } from '@/lib/ai-providers';
+import { sanitizeAiHtml, sanitizeAiText } from '@/lib/validations/security';
+import { logAudit } from '@/lib/audit';
+import { generatedCourseSchema, lessonSchema } from '@/schemas/course-schema';
+import type { GeneratedCourse } from '@/schemas/course-schema';
 import { CONTENT_TYPES, CONTENT_TYPE_LABELS } from '@/lib/course-types';
+import type { ContentType } from '@/lib/course-types';
 
-// ─── Base lesson schema (common to all types) ─────────────────────────────────
+export type { GeneratedCourse };
 
-const baseLessonSchema = z.object({
-  title: z.string().min(3).describe('Título claro e objetivo da aula.'),
-  pointsAwarded: z
-    .number()
-    .int()
-    .min(1)
-    .max(100)
-    .describe('Pontos inteiros concedidos pela conclusão da aula.'),
-});
-
-// ─── Type-specific lesson schemas ─────────────────────────────────────────────
-
-const textLessonSchema = baseLessonSchema.extend({
-  content: z
-    .string()
-    .min(200)
-    .describe(
-      'Conteúdo educacional COMPLETO em Markdown. ' +
-      'Mínimo 3 parágrafos substanciais (150+ palavras cada). ' +
-      'Inclua conceitos-chave, exemplos práticos, boas práticas. ' +
-      'Use ## para subtítulos, **negrito** para termos, - para listas.',
-    ),
-});
-
-const videoLessonSchema = baseLessonSchema.extend({
-  content: z
-    .string()
-    .min(200)
-    .describe(
-      'ROTEIRO DE VÍDEO completo em Markdown. ' +
-      'Estruture em cenas: ## Cena 1 — Abertura, ## Cena 2 — Desenvolvimento, etc. ' +
-      'Para cada cena inclua: **NARRAÇÃO:** (texto falado), **VISUAL:** (o que aparece na tela), **DURAÇÃO:** (estimativa em segundos). ' +
-      'Tom: didático, objetivo. Duração total estimada: 5-10 minutos. ' +
-      'Inclua chamada para ação no final.',
-    ),
-});
-
-const podcastLessonSchema = baseLessonSchema.extend({
-  content: z
-    .string()
-    .min(200)
-    .describe(
-      'ROTEIRO DE PODCAST em Markdown. ' +
-      'Formato: diálogo entre HOST e ESPECIALISTA ou monólogo do HOST. ' +
-      'Use **HOST:** e **ESPECIALISTA:** para cada fala. ' +
-      'Inclua: ## Abertura (apresentação do tema), ## Desenvolvimento (3-5 blocos temáticos), ## Encerramento (resumo + chamada). ' +
-      'Tom: conversacional, envolvente. Duração estimada: 8-15 minutos. ' +
-      'Inclua dicas de produção entre colchetes [PAUSA], [TRILHA SONORA], [EFEITO].',
-    ),
-});
-
-const slidesLessonSchema = baseLessonSchema.extend({
-  content: z
-    .string()
-    .min(200)
-    .describe(
-      'ESTRUTURA DE APRESENTAÇÃO em Markdown. ' +
-      'Cada slide começa com ## Slide N — Título. ' +
-      'Para cada slide inclua: **Conteúdo principal** (bullets ou texto curto), **Notas do apresentador** (contexto adicional), **Visual sugerido** (ícone, gráfico ou imagem). ' +
-      'Estrutura mínima: Slide 1 (capa), Slides 2-N (conteúdo), Slide final (resumo + próximos passos). ' +
-      'Máximo 7 bullets por slide. Linguagem direta e impactante.',
-    ),
-});
-
-const quizInterativoLessonSchema = baseLessonSchema.extend({
-  content: z
-    .string()
-    .min(200)
-    .describe(
-      'MÓDULO DE QUIZ INTERATIVO em Markdown. ' +
-      'Estruture como: ## Contexto (situação do mundo real) + bloco de perguntas com formato: ' +
-      '**Pergunta N:** [enunciado] | A) [opção] B) [opção] C) [opção] D) [opção] | **Resposta:** [letra] | **Explicação:** [por que esta é a correta e as outras erradas]. ' +
-      'Inclua pelo menos 5 perguntas com dificuldade progressiva. ' +
-      'Varie formatos: múltipla escolha, verdadeiro/falso, situação-problema.',
-    ),
-});
-
-const escritaExpressaLessonSchema = baseLessonSchema.extend({
-  content: z
-    .string()
-    .min(200)
-    .describe(
-      'EXERCÍCIO DE ESCRITA EXPRESSA em Markdown. ' +
-      'Estruture com: ## Contexto (cenário profissional real), ## Proposta de Escrita (tarefa clara com prazo e formato), ' +
-      '## Critérios de Avaliação (rubrica com 4-5 critérios pontuados), ## Exemplo de Resposta Excelente (modelo para referência), ' +
-      '## Dicas de Escrita (3-5 dicas práticas específicas para o tema). ' +
-      'Tom: desafiador mas encorajador. Foque em habilidades de comunicação profissional.',
-    ),
-});
-
-// ─── Quiz schema (avaliação final do curso) ───────────────────────────────────
-
-const quizQuestionSchema = z.object({
-  question: z.string().min(10).describe('Pergunta clara sobre o conteúdo do curso.'),
-  options: z
-    .array(z.string())
-    .min(3)
-    .max(5)
-    .describe('Opções de resposta. Apenas uma é correta.'),
-  correctIndex: z
-    .number()
-    .int()
-    .min(0)
-    .describe('Índice (0-based) da opção correta.'),
-}).refine((q) => q.correctIndex < q.options.length, {
-  message: 'correctIndex deve ser menor que o número de opções.',
-  path: ['correctIndex'],
-});
-
-// ─── Course schema factory ────────────────────────────────────────────────────
-
-function buildCourseSchema(contentType: ContentType) {
-  const lessonSchema = {
-    text: textLessonSchema,
-    video: videoLessonSchema,
-    podcast: podcastLessonSchema,
-    slides: slidesLessonSchema,
-    quiz_interativo: quizInterativoLessonSchema,
-    escrita_expressa: escritaExpressaLessonSchema,
-  }[contentType];
-
-  return z.object({
-    courseTitle: z.string().min(3),
-    courseDescription: z.string().min(20),
-    lessons: z.array(lessonSchema).min(3).max(8),
-    quiz: z.array(quizQuestionSchema).min(3).max(8),
-  });
+// Wrapper de server action — arquivos "use server" só podem exportar
+// funções async definidas no próprio módulo (re-export direto é rejeitado).
+import { checkAIProviders as checkAIProvidersImpl } from '@/lib/ai-providers';
+export async function checkAIProviders(): Promise<{
+  available: string[];
+  configured: boolean;
+  diagnostics: Record<string, string>;
+  chainOrder: string[];
+}> {
+  return checkAIProvidersImpl();
 }
 
-export type GeneratedCourse = {
-  courseTitle: string;
-  courseDescription: string;
-  lessons: Array<{
-    title: string;
-    content: string;
-    pointsAwarded: number;
-  }>;
-  quiz: Array<{
-    question: string;
-    options: string[];
-    correctIndex: number;
-  }>;
-};
+// ├────────────── Configuração do modelo de geração ───────────────────
 
-// ─── Provider chain ───────────────────────────────────────────────────────────
+/**
+ * Limite de tokens de saída. Convenção AI SDK v6: `maxOutputTokens`
+ * (NUNCA `maxTokens` — removido/quebrado no v6).
+ */
+const MAX_OUTPUT_TOKENS = Number(process.env.COURSE_MAX_OUTPUT_TOKENS || 8192);
 
-type ProviderAttempt = { name: string; build: () => LanguageModel };
-
-function buildProviderChain(): ProviderAttempt[] {
-  const chain: ProviderAttempt[] = [];
-
-  const googleKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
-  if (googleKey) {
-    const google = createGoogleGenerativeAI({ apiKey: googleKey });
-    const model = process.env.GOOGLE_COURSE_MODEL || 'gemini-2.5-flash-lite';
-    chain.push({ name: `google:${model}`, build: () => google(model) });
-  }
-
-  if (process.env.OPENAI_API_KEY) {
-    const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
-    const model = process.env.OPENAI_COURSE_MODEL || 'gpt-4o-mini';
-    chain.push({ name: `openai:${model}`, build: () => openai(model) });
-  }
-
-  if (process.env.ANTHROPIC_API_KEY) {
-    const anthropic = createAnthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-    const model = process.env.ANTHROPIC_COURSE_MODEL || 'claude-haiku-4-5';
-    chain.push({ name: `anthropic:${model}`, build: () => anthropic(model) });
-  }
-
-  return chain;
-}
-
-// ─── System prompts by content type ──────────────────────────────────────────
-
-const BASE_SYSTEM = `Você é o motor de IA da Pontufy, uma plataforma B2B de educação corporativa gamificada.
+const SYSTEM_PROMPT = `Você é o motor de IA da Pontufy, uma plataforma B2B de educação corporativa gamificada.
 Gere um curso de treinamento COMPLETO, prático e adaptado ao setor/vertical informado.
 
 Regras OBRIGATÓRIAS:
 1. FOCO SETORIAL — Adapte títulos, exemplos e vocabulário ao setor. Nada genérico.
-2. ESTRUTURA — Entregue de 3 a 8 módulos/aulas, em ordem didática (do fundamental ao avançado).
-3. PONTUAÇÃO — "pointsAwarded" é um inteiro: módulos introdutórios valem menos, avançados valem mais.
-4. QUIZ FINAL — Gere de 3 a 8 perguntas de múltipla escolha cobrindo TODO o conteúdo:
-   - Cada pergunta deve ter 4 opções, apenas uma correta.
+2. ESTRUTURA — Entregue de 3 a 8 aulas, em ordem didática (do fundamental ao avançado). Use o campo "order" para numerar (1, 2, 3...).
+3. CONTEÚDO COMPLETO — Cada aula DEVE ter conteúdo rico e completo no FORMATO indicado ao final:
+   - O "content" DEVE ter pelo menos 200 caracteres úteis.
+   - Explique conceitos-chave de forma clara e detalhada.
+   - Inclua exemplos práticos e reais do setor informado.
+   - Adicione boas práticas, dicas e alertas importantes.
+   - Use formatação Markdown: ## para subtítulos, **negrito** para termos-chave, - para listas.
+   - NUNCA use resumos curtos: o conteúdo deve ser completo e autossuficiente.
+4. PONTUAÇÃO — "pointsAwarded" é um inteiro entre 10 e 100: aulas introdutórias valem menos, avançadas valem mais.
+5. QUIZ — Gere de 2 a 8 perguntas de múltipla escolha cobrindo TODO o conteúdo do curso:
+   - Cada pergunta deve ter de 3 a 5 opções ("options") e o índice da correta em "correctIndex" (base 0).
    - Perguntas devem testar compreensão real, não memorização superficial.
    - Varie a dificuldade: fáceis, médias e difíceis.
-5. Se material de referência for fornecido, BASEIE o conteúdo nele.
-6. Responda exclusivamente no schema estruturado solicitado.`;
+6. META — Informe "category" (categoria do curso) e "estimatedDurationMinutes" (tempo estimado em minutos).
+7. Se material de referência for fornecido, BASEIE o conteúdo nele.
+8. Responda exclusivamente no schema estruturado solicitado.`;
 
-const SYSTEM_PROMPTS: Record<ContentType, string> = {
-  text:
-    BASE_SYSTEM +
-    '\n\nFORMATO: Artigos educacionais em Markdown. Cada aula é um texto completo e rico, mínimo 3 parágrafos substanciais.',
+// ├────────────── Formatos de conteúdo ────────────────────────────────
 
-  video:
-    BASE_SYSTEM +
-    '\n\nFORMATO: Roteiros de vídeo prontos para gravação. Cada aula é um roteiro detalhado com narração, visual e duração por cena. Foque em clareza e impacto visual.',
-
-  podcast:
-    BASE_SYSTEM +
-    '\n\nFORMATO: Roteiros de podcast profissional. Cada aula é um episódio com diálogos naturais, perguntas provocativas e dicas de produção. Tom conversacional e envolvente.',
-
-  slides:
-    BASE_SYSTEM +
-    '\n\nFORMATO: Estrutura de apresentações de slides. Cada aula é uma apresentação com conteúdo do slide + notas do apresentador. Linguagem direta, visual sugerido por slide.',
-
-  quiz_interativo:
-    BASE_SYSTEM +
-    '\n\nFORMATO: Módulos de quiz interativo situacional. Cada aula apresenta um cenário real e 5+ perguntas com explicação detalhada de cada resposta. Foque em aplicação prática.',
-
-  escrita_expressa:
-    BASE_SYSTEM +
-    '\n\nFORMATO: Exercícios de escrita profissional. Cada aula é um desafio de escrita contextualizado com rubrica de avaliação e exemplo de excelência. Estimule comunicação eficaz.',
+const FORMAT_PROMPTS: Record<ContentType, string> = {
+  text: 'FORMATO: Artigos educacionais em Markdown. Cada aula é um texto completo e rico, com no mínimo 3 parágrafos substanciais (150+ palavras cada).',
+  video: 'FORMATO: Roteiros de vídeo prontos para gravação. Cada aula é um roteiro detalhado com narração, visual e duração por cena. Foque em clareza e impacto visual.',
+  podcast: 'FORMATO: Roteiros de podcast profissional. Cada aula é um episódio com diálogos naturais, perguntas provocativas e dicas de produção. Tom conversacional e envolvente.',
+  slides: 'FORMATO: Estrutura de apresentações de slides. Cada aula é uma apresentação com conteúdo do slide + notas do apresentador. Linguagem direta, visual sugerido por slide.',
+  quiz_interativo: 'FORMATO: Módulos de quiz interativo situacional. Cada aula apresenta um cenário real e 5+ perguntas com explicação detalhada de cada resposta. Foque em aplicação prática.',
+  escrita_expressa: 'FORMATO: Exercícios de escrita profissional. Cada aula é um desafio de escrita contextualizado com rubrica de avaliação e exemplo de excelência. Estimule comunicação eficaz.',
 };
 
-// ─── DB lesson type mapping ───────────────────────────────────────────────────
+/** Orientação estrutural do campo "content" de cada aula, por formato. */
+const LESSON_CONTENT_DESCRIPTIONS: Record<ContentType, string> = {
+  text:
+    'Conteúdo educacional COMPLETO em Markdown. ' +
+    'Mínimo 3 parágrafos substanciais (150+ palavras cada). ' +
+    'Inclua conceitos-chave, exemplos práticos, boas práticas. ' +
+    'Use ## para subtítulos, **negrito** para termos, - para listas.',
+  video:
+    'ROTEIRO DE VÍDEO completo em Markdown. ' +
+    'Estruture em cenas: ## Cena 1 — Abertura, ## Cena 2 — Desenvolvimento, etc. ' +
+    'Para cada cena inclua: **NARRAÇÃO:** (texto falado), **VISUAL:** (o que aparece na tela), **DURAÇÃO:** (estimativa em segundos). ' +
+    'Tom: didático, objetivo. Duração total estimada: 5-10 minutos. ' +
+    'Inclua chamada para ação no final.',
+  podcast:
+    'ROTEIRO DE PODCAST em Markdown. ' +
+    'Formato: diálogo entre HOST e ESPECIALISTA ou monólogo do HOST. ' +
+    'Use **HOST:** e **ESPECIALISTA:** para cada fala. ' +
+    'Inclua: ## Abertura (apresentação do tema), ## Desenvolvimento (3-5 blocos temáticos), ## Encerramento (resumo + chamada). ' +
+    'Tom: conversacional, envolvente. Duração estimada: 8-15 minutos. ' +
+    'Inclua dicas de produção entre colchetes [PAUSA], [TRILHA SONORA], [EFEITO].',
+  slides:
+    'ESTRUTURA DE APRESENTAÇÃO em Markdown. ' +
+    'Cada slide começa com ## Slide N — Título. ' +
+    'Para cada slide inclua: **Conteúdo principal** (bullets ou texto curto), **Notas do apresentador** (contexto adicional), **Visual sugerido** (ícone, gráfico ou imagem). ' +
+    'Estrutura mínima: Slide 1 (capa), Slides 2-N (conteúdo), Slide final (resumo + próximos passos). ' +
+    'Máximo 7 bullets por slide. Linguagem direta e impactante.',
+  quiz_interativo:
+    'MÓDULO DE QUIZ INTERATIVO em Markdown. ' +
+    'Estruture como: ## Contexto (situação do mundo real) + bloco de perguntas com formato: ' +
+    '**Pergunta N:** [enunciado] | A) [opção] B) [opção] C) [opção] D) [opção] | **Resposta:** [letra] | **Explicação:** [por que esta é a correta e as outras erradas]. ' +
+    'Inclua pelo menos 5 perguntas com dificuldade progressiva. ' +
+    'Varie formatos: múltipla escolha, verdadeiro/falso, situação-problema.',
+  escrita_expressa:
+    'EXERCÍCIO DE ESCRITA EXPRESSA em Markdown. ' +
+    'Estruture com: ## Contexto (cenário profissional real), ## Proposta de Escrita (tarefa clara com prazo e formato), ' +
+    '## Critérios de Avaliação (rubrica com 4-5 critérios pontuados), ## Exemplo de Resposta Excelente (modelo para referência), ' +
+    '## Dicas de Escrita (3-5 dicas práticas específicas para o tema). ' +
+    'Tom: desafiador mas encorajador. Foque em habilidades de comunicação profissional.',
+};
 
-function toDbLessonType(contentType: ContentType): string {
-  const map: Record<ContentType, string> = {
-    text: 'text',
-    video: 'text',   // roteiro em texto; o player trata 'video' como URL de mídia
-    podcast: 'text', // stored as text (script), rendered as audio player when URL present
-    slides: 'text',  // stored as text (structure)
-    quiz_interativo: 'text',
-    escrita_expressa: 'text',
-  };
-  return map[contentType];
+/**
+ * Schema central com a orientação de "content" específica do formato e
+ * correctIndex validado contra o número real de opções de cada pergunta.
+ */
+function buildCourseSchema(contentType: ContentType) {
+  return generatedCourseSchema
+    .extend({
+      lessons: z
+        .array(
+          lessonSchema.extend({
+            content: lessonSchema.shape.content.describe(LESSON_CONTENT_DESCRIPTIONS[contentType]),
+          }),
+        )
+        .min(3, 'O curso deve conter pelo menos 3 aulas'),
+    })
+    .refine((course) => course.quiz.every((q) => q.correctIndex < q.options.length), {
+      message: 'correctIndex deve ser menor que o número de opções.',
+      path: ['quiz'],
+    });
 }
 
-// ─── Local fallback generator ─────────────────────────────────────────────────
+// ═══════════════════════ Fallback local determinístico ═══════════════
 
-function generateLocalFallback(
-  prompt: string,
-  sector: string,
-  contentType: ContentType,
-  referenceContent?: string,
-): GeneratedCourse {
+function generateLocalFallback(prompt: string, sector: string, referenceContent?: string): GeneratedCourse {
   const sectorName = sector || 'geral';
   const topic = prompt.slice(0, 80);
 
@@ -287,14 +167,17 @@ function generateLocalFallback(
         : `Conteúdo sobre ${topic} aplicado ao setor de ${sectorName}.`;
       return {
         title: titles[i] || `Módulo ${i + 1}`,
-        content: `## ${titles[i] || `Módulo ${i + 1}`}\n\n${chunkText}\n\n**Dica prática:** Aplique estes conceitos no seu dia a dia no setor de ${sectorName}.`,
-        pointsAwarded: 10 + i * 10,
+        content: `## ${titles[i] || `Módulo ${i + 1}`}\n\n${chunkText}\n\n**Dica prática:** Aplique estes conceitos no seu dia a dia no setor de ${sectorName} para obter melhores resultados.`,
+        pointsAwarded: Math.min(10 + i * 10, 100),
+        order: i + 1,
       };
     });
 
     return {
-      courseTitle: prompt.slice(0, 60),
-      courseDescription: `Curso baseado no material de referência fornecido sobre "${prompt.slice(0, 100)}" para o setor de ${sectorName}.`,
+      title: `Treinamento: ${prompt.slice(0, 60)}`,
+      description: `Curso baseado no material de referência fornecido sobre "${prompt.slice(0, 100)}" para o setor de ${sectorName}.`,
+      category: sectorName,
+      estimatedDurationMinutes: lessons.length * 15,
       lessons,
       quiz: [
         { question: `Qual é o principal objetivo deste treinamento sobre ${topic}?`, options: ['Desenvolvimento de habilidades práticas', 'Apenas teoria sem aplicação', 'Recreação corporativa', 'Redução de custos imediata'], correctIndex: 0 },
@@ -305,46 +188,82 @@ function generateLocalFallback(
   }
 
   return {
-    courseTitle: prompt.slice(0, 60),
-    courseDescription: `Curso sobre "${prompt.slice(0, 100)}" para o setor de ${sectorName}. Configure uma chave de IA (GEMINI_API_KEY) no Vercel para gerar conteúdo personalizado.`,
+    title: `Treinamento: ${prompt.slice(0, 60)}`,
+    description: `Curso sobre "${prompt.slice(0, 100)}" para o setor de ${sectorName}. Configure uma chave de IA (GEMINI_API_KEY) no Vercel para gerar conteúdo personalizado e inteligente.`,
+    category: sectorName,
+    estimatedDurationMinutes: 60,
     lessons: [
       {
         title: 'Introdução e Contexto',
-        content: `## Introdução ao Treinamento\n\nBem-vindo a este treinamento sobre **${topic}**, desenvolvido para profissionais do setor de **${sectorName}**. Nesta primeira aula, você vai entender por que este tema é fundamental para o seu desenvolvimento profissional.\n\n## Por que este tema é importante?\n\nNo setor de ${sectorName}, dominar **${topic}** pode ser o diferencial entre uma carreira estagnada e uma trajetória de crescimento. Empresas que investem nessa área observam melhorias em produtividade e qualidade.\n\n## Objetivos do Treinamento\n\nAo longo deste curso, você irá:\n\n- Compreender os **fundamentos essenciais** do tema\n- Conhecer as **melhores práticas** do mercado\n- Aplicar o conhecimento em **situações reais** do seu setor\n\n**Dica:** Aproveite cada aula para refletir sobre como aplicar o conteúdo na sua rotina.`,
+        content: `## Introdução ao Treinamento\n\nBem-vindo a este treinamento sobre **${topic}**, desenvolvido especificamente para profissionais do setor de **${sectorName}**. Nesta primeira aula, você vai entender por que este tema é fundamental para o seu desenvolvimento profissional e como ele se aplica ao seu dia a dia.\n\n## Por que este tema é importante?\n\nO mercado atual exige profissionais cada vez mais preparados e atualizados. No setor de ${sectorName}, dominar **${topic}** pode ser o diferencial entre uma carreira estagnada e uma trajetória de crescimento contínuo. Empresas que investem no desenvolvimento de seus colaboradores nesta área observam melhorias significativas em produtividade e qualidade.\n\n## Objetivos do Treinamento\n\nAo longo deste curso, você irá:\n\n- Compreender os **fundamentos essenciais** do tema\n- Conhecer as **melhores práticas** do mercado\n- Aplicar o conhecimento em **situações reais** do seu setor\n- Desenvolver habilidades práticas para o dia a dia\n\n**Dica:** Aproveite cada aula para refletir sobre como aplicar o conteúdo na sua rotina de trabalho.`,
         pointsAwarded: 10,
+        order: 1,
       },
       {
         title: 'Conceitos Essenciais e Boas Práticas',
-        content: `## Conceitos-Chave\n\nNesta aula, vamos aprofundar nos conceitos fundamentais de **${topic}** que todo profissional do setor de **${sectorName}** precisa dominar.\n\n## Princípios Fundamentais\n\n- **Planejamento estratégico**: Antes de qualquer ação, tenha um plano claro com objetivos mensuráveis\n- **Execução disciplinada**: Seguir processos bem definidos garante consistência nos resultados\n- **Melhoria contínua**: Avaliar resultados regularmente e ajustar conforme necessário\n- **Colaboração**: Trabalhar em equipe potencializa os resultados individuais\n\n## Boas Práticas do Mercado\n\n1. **Documentar processos** — Manter registros claros facilita a replicação de sucessos\n2. **Buscar feedback** — Ouvir colegas e gestores acelera o aprendizado\n3. **Atualizar-se constantemente** — O mercado evolui e quem não acompanha fica para trás\n\n**Importante:** Aplique pelo menos uma dessas práticas já na próxima semana.`,
+        content: `## Conceitos-Chave\n\nNesta aula, vamos aprofundar nos conceitos fundamentais de **${topic}** que todo profissional do setor de **${sectorName}** precisa dominar. Estes conceitos formam a base para todas as práticas avançadas que veremos adiante.\n\n## Princípios Fundamentais\n\nExistem alguns princípios que guiam as melhores práticas nesta área:\n\n- **Planejamento estratégico**: Antes de qualquer ação, é essencial ter um plano claro com objetivos mensuráveis\n- **Execução disciplinada**: Seguir processos bem definidos garante consistência nos resultados\n- **Melhoria contínua**: Avaliar resultados regularmente e ajustar a abordagem conforme necessário\n- **Colaboração**: Trabalhar em equipe potencializa os resultados individuais\n\n## Boas Práticas do Mercado\n\nProfissionais de destaque no setor de ${sectorName} seguem estas boas práticas:\n\n1. **Documentar processos** — Manter registros claros facilita a replicação de sucessos\n2. **Buscar feedback** — Ouvir colegas e gestores acelera o aprendizado\n3. **Atualizar-se constantemente** — O mercado evolui e quem não acompanha fica para trás\n4. **Compartilhar conhecimento** — Ensinar aos outros consolida o próprio aprendizado\n\n**Importante:** Aplique pelo menos uma destas práticas já na próxima semana de trabalho.`,
         pointsAwarded: 20,
+        order: 2,
       },
       {
-        title: 'Aplicação Prática e Próximos Passos',
-        content: `## Colocando em Prática\n\nAgora que você domina os conceitos, veja como eles se aplicam em **situações reais** do setor de **${sectorName}**.\n\n## Estudo de Caso\n\nImagine esta situação: você precisa aplicar os conceitos de **${topic}** para resolver um desafio do setor. O primeiro passo é **identificar o problema** claramente, depois **mapear as opções** e **implementar a solução** mais adequada.\n\nProfissionais que seguem esta abordagem estruturada conseguem resultados até **40% melhores** do que os que agem por impulso.\n\n## Próximos Passos\n\n- **Semana 1**: Identifique uma oportunidade de aplicar o aprendizado\n- **Semana 2**: Implemente a ação e registre os resultados\n- **Semana 3**: Avalie o impacto e compartilhe com sua equipe\n\n**Parabéns!** Você está no caminho certo para se destacar no setor de ${sectorName}.`,
+        title: 'Aplicação Prática e Estudos de Caso',
+        content: `## Colocando em Prática\n\nAgora que você domina os conceitos fundamentais, é hora de ver como eles se aplicam em **situações reais** do setor de **${sectorName}**. A prática é o que transforma conhecimento teórico em habilidade profissional.\n\n## Estudo de Caso: Aplicação no Dia a Dia\n\nImagine a seguinte situação no seu ambiente de trabalho: você precisa aplicar os conceitos de **${topic}** para resolver um desafio comum do setor. O primeiro passo é **identificar o problema** com clareza, depois **mapear as opções** disponíveis e, por fim, **implementar a solução** mais adequada ao contexto.\n\nProfissionais que seguem esta abordagem estruturada conseguem resultados até **40% melhores** do que aqueles que agem por impulso.\n\n## Exercício de Reflexão\n\nPense em uma situação recente no seu trabalho onde você poderia ter aplicado estes conceitos:\n\n- Qual era o **desafio** que você enfrentava?\n- Quais **opções** você tinha disponível?\n- O que você faria **diferente** agora com este conhecimento?\n\n## Próximos Passos\n\nDepois de concluir este treinamento:\n\n- **Semana 1**: Identifique uma oportunidade de aplicar o aprendizado\n- **Semana 2**: Implemente a ação e registre os resultados\n- **Semana 3**: Avalie o impacto e compartilhe com sua equipe\n\n**Parabéns!** Você está no caminho certo para se destacar no setor de ${sectorName}.`,
         pointsAwarded: 30,
+        order: 3,
+      },
+      {
+        title: 'Avaliação e Próximos Passos',
+        content: `## Revisão do Conteúdo\n\nParabéns por chegar à última aula deste treinamento sobre **${topic}**! Vamos revisar os principais pontos abordados e preparar você para continuar se desenvolvendo.\n\n## O que Aprendemos\n\nAo longo deste curso, você:\n\n- Compreendeu a **importância** de ${topic} no setor de ${sectorName}\n- Dominou os **conceitos essenciais** e boas práticas do mercado\n- Viu **exemplos práticos** de aplicação no dia a dia\n- Desenvolveu um **plano de ação** para implementar o aprendizado\n\n## Como Continuar Evoluindo\n\nO aprendizado não termina aqui. Para continuar se desenvolvendo:\n\n- **Pratique regularmente** — A repetição é a mãe do aprendizado\n- **Busque mentoria** — Encontre alguém mais experiente para guiá-lo\n- **Acompanhe tendências** — O setor de ${sectorName} está em constante evolução\n- **Compartilhe** — Ensine o que aprendeu para colegas e equipe\n\n## Certificação\n\nApós concluir todas as aulas e o quiz de avaliação, você poderá baixar seu **certificado de conclusão**. Este certificado valida sua dedicação ao desenvolvimento profissional e pode ser compartilhado com seu gestor.\n\n**Obrigado pela dedicação!** Continue investindo no seu crescimento profissional.`,
+        pointsAwarded: 40,
+        order: 4,
       },
     ],
     quiz: [
       {
-        question: `Qual é o primeiro passo ao aplicar os conceitos de ${topic} no ambiente de trabalho?`,
-        options: ['Agir por impulso para ganhar velocidade', 'Identificar o problema com clareza antes de agir', 'Esperar que o gestor tome a iniciativa', 'Delegar a tarefa para outro colega'],
+        question: `Qual é o primeiro passo recomendado ao aplicar os conceitos de ${topic} no ambiente de trabalho?`,
+        options: [
+          'Agir por impulso para ganhar velocidade',
+          'Identificar o problema com clareza antes de agir',
+          'Esperar que o gestor tome a iniciativa',
+          'Delegar a tarefa para outro colega',
+        ],
         correctIndex: 1,
       },
       {
         question: 'Qual das seguintes é uma boa prática recomendada neste treinamento?',
-        options: ['Trabalhar isoladamente para maior foco', 'Evitar documentar processos para economizar tempo', 'Buscar feedback de colegas e gestores regularmente', 'Aplicar o conhecimento apenas quando solicitado'],
+        options: [
+          'Trabalhar isoladamente para maior foco',
+          'Evitar documentar processos para economizar tempo',
+          'Buscar feedback de colegas e gestores regularmente',
+          'Aplicar o conhecimento apenas quando solicitado',
+        ],
         correctIndex: 2,
       },
       {
         question: `Por que a melhoria contínua é importante no setor de ${sectorName}?`,
-        options: ['Apenas para cumprir exigências da empresa', 'O mercado evolui e profissionais precisam se atualizar', 'É uma exigência legal obrigatória', 'Não é realmente importante'],
+        options: [
+          'Apenas para cumprir exigências da empresa',
+          'O mercado evolui e profissionais precisam se atualizar',
+          'É uma exigência legal obrigatória',
+          'Não é realmente importante',
+        ],
         correctIndex: 1,
+      },
+      {
+        question: 'Qual a recomendação para a primeira semana após concluir o treinamento?',
+        options: [
+          'Esquecer o conteúdo e voltar à rotina normal',
+          'Fazer outro treinamento imediatamente',
+          'Identificar uma oportunidade de aplicar o aprendizado',
+          'Aguardar instruções específicas do RH',
+        ],
+        correctIndex: 2,
       },
     ],
   };
 }
 
-// ─── Core generation with provider fallback ───────────────────────────────────
+// ═══════════════════════ Geração com fallback ═══════════════════════
 
 async function generateCourseWithFallback(
   prompt: string,
@@ -356,7 +275,7 @@ async function generateCourseWithFallback(
 
   if (chain.length === 0) {
     console.log('[course-generator] Nenhum provedor configurado, usando template local');
-    return { data: generateLocalFallback(prompt, sector, contentType, referenceContent), provider: 'local:template' };
+    return { data: generateLocalFallback(prompt, sector, referenceContent), provider: 'local:template' };
   }
 
   let userPrompt = `Setor/Vertical: ${sector || 'geral'}.
@@ -368,7 +287,7 @@ Objetivo do treinamento solicitado pelo RH: ${prompt}`;
   }
 
   const courseSchema = buildCourseSchema(contentType);
-  const systemPrompt = SYSTEM_PROMPTS[contentType];
+  const systemPrompt = `${SYSTEM_PROMPT}\n\n${FORMAT_PROMPTS[contentType]}`;
 
   const errors: string[] = [];
   for (const attempt of chain) {
@@ -381,9 +300,10 @@ Objetivo do treinamento solicitado pelo RH: ${prompt}`;
         prompt: userPrompt,
         temperature: 0.6,
         maxRetries: 1,
+        maxOutputTokens: MAX_OUTPUT_TOKENS,
       });
       console.log(`[course-generator] Sucesso com ${attempt.name}`);
-      return { data: object as GeneratedCourse, provider: attempt.name };
+      return { data: object, provider: attempt.name };
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       console.error(`[course-generator] Falha em ${attempt.name}:`, msg);
@@ -392,45 +312,10 @@ Objetivo do treinamento solicitado pelo RH: ${prompt}`;
   }
 
   console.warn('[course-generator] Todos os provedores falharam, usando template local:', errors.join(' | '));
-  return { data: generateLocalFallback(prompt, sector, contentType, referenceContent), provider: 'local:fallback', errors };
+  return { data: generateLocalFallback(prompt, sector, referenceContent), provider: 'local:fallback', errors };
 }
 
-// ─── Public helpers ───────────────────────────────────────────────────────────
-
-export async function checkAIProviders(): Promise<{
-  available: string[];
-  configured: boolean;
-  diagnostics?: Record<string, string>;
-}> {
-  const available: string[] = [];
-  const diagnostics: Record<string, string> = {};
-
-  const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
-  if (geminiKey) {
-    available.push('Google Gemini');
-    diagnostics.gemini = `Configurado (${geminiKey.slice(0, 6)}...)`;
-  } else {
-    diagnostics.gemini = 'GEMINI_API_KEY não encontrada no ambiente';
-  }
-
-  if (process.env.OPENAI_API_KEY) {
-    available.push('OpenAI');
-    diagnostics.openai = 'Configurado';
-  } else {
-    diagnostics.openai = 'Não configurada';
-  }
-
-  if (process.env.ANTHROPIC_API_KEY) {
-    available.push('Anthropic Claude');
-    diagnostics.anthropic = 'Configurado';
-  } else {
-    diagnostics.anthropic = 'Não configurada';
-  }
-
-  return { available, configured: available.length > 0, diagnostics };
-}
-
-// ─── Input / output types ─────────────────────────────────────────────────────
+// ═══════════════════════ Validação de entrada ═══════════════════════
 
 const inputSchema = z.object({
   prompt: z
@@ -452,6 +337,8 @@ export interface CoursePayload {
   createdAt: string;
   quizJson: string | null;
   contentType: ContentType;
+  category?: string;
+  estimatedDurationMinutes?: number;
   lessons: Array<{
     id: string;
     title: string;
@@ -474,7 +361,7 @@ export type GenerateTrainingResult =
     }
   | { success: false; error: string };
 
-// ─── Main server action ───────────────────────────────────────────────────────
+// ═══════════════════════ Motor central (débito atômico) ═════════════
 
 export async function generateTrainingCourse(
   input: GenerateTrainingInput,
@@ -540,28 +427,33 @@ export async function generateTrainingCourse(
     };
   }
 
-  const dbLessonType = toDbLessonType(contentType);
   // Sem coluna própria para o formato: registra-o na descrição (omitido no fallback local, que gera texto genérico).
   const isLocal = generated.provider.startsWith('local:');
   const courseDescription =
     contentType !== 'text' && !isLocal
-      ? `${generated.data.courseDescription} (Formato: ${CONTENT_TYPE_LABELS[contentType]})`
-      : generated.data.courseDescription;
+      ? `${generated.data.description} (Formato: ${CONTENT_TYPE_LABELS[contentType]})`
+      : generated.data.description;
   const now = new Date();
-  const lessonsToCreate = generated.data.lessons.map((lesson) => ({
-    title: lesson.title,
-    type: dbLessonType,
-    pointsAssigned: Math.max(1, Math.round(lesson.pointsAwarded)),
-    contentUrl: lesson.content,
+  // Ordena pelas aulas pela ordem didática definida pelo gerador.
+  const orderedLessons = [...generated.data.lessons].sort((a, b) => a.order - b.order);
+  // 8.2 — Sanitização de conteúdo gerado por IA antes da persistência:
+  // títulos/aulas/quiz não podem carregar HTML perigoso para os colaboradores.
+  const lessonsToCreate = orderedLessons.map((lesson) => ({
+    title: sanitizeAiText(lesson.title).slice(0, 160),
+    // Todos os formatos são roteiros/estruturas em Markdown; o player trata 'video' como URL de mídia.
+    type: 'text' as const,
+    pointsAssigned: Math.max(10, Math.min(100, Math.round(lesson.pointsAwarded))),
+    contentUrl: sanitizeAiHtml(lesson.content),
   }));
 
   const quizJson = generated.data.quiz && generated.data.quiz.length > 0
     ? JSON.stringify([{
         module: 'Avaliação do Curso',
         questions: generated.data.quiz.map((q) => ({
-          question: q.question,
-          options: q.options.map((o) => ({ text: o })),
+          question: sanitizeAiText(q.question).slice(0, 500),
+          options: q.options.map((o) => ({ text: sanitizeAiText(o).slice(0, 200) })),
           correctIndex: q.correctIndex,
+          explanation: sanitizeAiText(q.explanation ?? '').slice(0, 500),
         })),
       }])
     : null;
@@ -572,7 +464,9 @@ export async function generateTrainingCourse(
   let persisted = false;
 
   try {
-    const result = await db.$transaction(async (tx: any) => {
+    const result = await db.$transaction(async (tx) => {
+      // Débito atômico de crédito — instrução única e segura contra race condition.
+      // Se a query afetar 0 registos, o tenant não tem crédito → aborta.
       const debit = await tx.tenant.updateMany({
         where: { id: tenantId, aiCredits: { gte: 1 } },
         data: { aiCredits: { decrement: 1 } },
@@ -584,7 +478,7 @@ export async function generateTrainingCourse(
       const course = await tx.course.create({
         data: {
           tenantId,
-          title: generated.data.courseTitle,
+          title: generated.data.title,
           description: courseDescription,
           status: 'published',
           aiCreditsSpent: 1,
@@ -612,9 +506,24 @@ export async function generateTrainingCourse(
     creditsRemaining = result.creditsRemaining;
     persisted = true;
     console.log('[course-generator] Curso persistido no DB:', courseId);
+
+    // 9.1 — Auditoria de geração de curso (custo de crédito de IA).
+    await logAudit({
+      tenantId,
+      userId: session.user.id,
+      action: 'COURSE_GENERATED',
+      entity: 'Course',
+      entityId: courseId,
+      newValue: {
+        provider: generated.provider,
+        contentType,
+        lessonsCount: lessonRecords.length,
+        creditsSpent: 1,
+      },
+    });
   } catch (err) {
     if (err instanceof Error && err.message === 'INSUFFICIENT_CREDITS') {
-      return { success: false, error: `Créditos de IA insuficientes (concorrência).` };
+      return { success: false, error: 'Créditos de IA insuficientes para este tenant (concorrência).' };
     }
     console.error('[course-generator] Persistência falhou, retornando dados gerados:', err);
     courseId = randomUUID();
@@ -639,12 +548,14 @@ export async function generateTrainingCourse(
     aiErrors: generated.errors,
     course: {
       id: courseId,
-      title: generated.data.courseTitle,
+      title: generated.data.title,
       description: courseDescription,
       status: 'published',
       createdAt: now.toISOString(),
       quizJson,
       contentType,
+      category: generated.data.category,
+      estimatedDurationMinutes: generated.data.estimatedDurationMinutes,
       lessons: lessonRecords,
     },
   };

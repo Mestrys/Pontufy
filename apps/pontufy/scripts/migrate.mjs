@@ -12,18 +12,44 @@
 //     endpoint) or runs `npm run db:migrate` once.
 import { execSync } from 'node:child_process';
 
-const databaseUrl = process.env.DATABASE_URL;
+// Vercel / Supabase may inject the connection strings under different names
+// depending on how the integration is configured — resolve with fallbacks.
+const databaseUrl =
+  process.env.DATABASE_URL ||
+  process.env.POSTGRES_PRISMA_URL ||
+  process.env.SUPABASE_DATABASE_URL;
+
+const directUrl =
+  process.env.DIRECT_URL ||
+  process.env.POSTGRES_URL_NON_POOLING ||
+  process.env.SUPABASE_DIRECT_URL;
 
 if (!databaseUrl) {
   console.warn(
-    '\n🟠 DATABASE_URL is not set — skipping migrations. Set it (PostgreSQL) to ' +
-      'apply the schema.\n',
+    '\n🟠 No PostgreSQL connection string is set — skipping migrations. Set ' +
+      'DATABASE_URL, POSTGRES_PRISMA_URL or SUPABASE_DATABASE_URL to apply ' +
+      'the schema.\n',
   );
   process.exit(0);
 }
 
-// Prisma migrate uses directUrl; fall back to the main URL when unset.
-const env = { ...process.env, DIRECT_URL: process.env.DIRECT_URL || databaseUrl };
+// Log only the variable NAMES that resolved — never the values (secrets).
+const urlSource = process.env.DATABASE_URL
+  ? 'DATABASE_URL'
+  : process.env.POSTGRES_PRISMA_URL
+    ? 'POSTGRES_PRISMA_URL'
+    : 'SUPABASE_DATABASE_URL';
+const directSource = process.env.DIRECT_URL
+  ? 'DIRECT_URL'
+  : process.env.POSTGRES_URL_NON_POOLING
+    ? 'POSTGRES_URL_NON_POOLING'
+    : 'SUPABASE_DIRECT_URL';
+console.log(`🔌 migrate: DATABASE_URL <- \`${urlSource}\` | DIRECT_URL <- \`${directSource}\``);
+
+// Prisma migrate uses directUrl; fall back to the main URL when unset. Resolved
+// values are passed explicitly so `prisma migrate deploy` picks them up no
+// matter which variable names the platform provides.
+const env = { ...process.env, DATABASE_URL: databaseUrl, DIRECT_URL: directUrl || databaseUrl };
 
 try {
   execSync('npx prisma migrate deploy', { stdio: 'inherit', env });
@@ -35,6 +61,17 @@ try {
       'Neon -pooler), migrations cannot run through it. Set DIRECT_URL to the direct ' +
       '(:5432) endpoint and redeploy, or run `npm run db:migrate` against the direct URL.\n',
   );
-  // Intentionally exit 0: never block the deploy on a migration error.
-  process.exit(0);
+}
+
+// Bootstrap idempotente: o pipeline de deploy NÃO roda o seed — se o banco está
+// vazio (sem usuários), nenhum login é possível ("Email ou senha incorretos").
+// scripts/check-and-seed.ts roda SEMPRE (idempotente): valida conectividade,
+// faz upsert do tenant + utilizadores de teste (scrypt canónico, senha 123456)
+// e verifica cada hash com PASSED/FAILED. Nunca bloqueia o deploy em caso de
+// falha — apenas alerta, para que o `next build` prossiga.
+try {
+  execSync('npx tsx scripts/check-and-seed.ts', { stdio: 'inherit', env });
+} catch (err) {
+  // Intentionally non-fatal: never block the deploy on a seed problem.
+  console.warn(`🟠 Auto-seed falhou (deploy continua): ${err?.message ?? err}`);
 }

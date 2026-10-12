@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSessionContext } from '@/backend/session';
-import { prisma, getTenantDb } from '@/backend/db';
+import { getTenantDb } from '@/backend/db';
 import { GoogleGenAI, Type, Schema } from '@google/genai';
 
 export async function POST(request: Request) {
@@ -9,7 +9,7 @@ export async function POST(request: Request) {
     const { userId, tenantId } = await getSessionContext();
     const db = getTenantDb(tenantId);
 
-    const recentGains = await prisma.pointsLedger.findMany({
+    const recentGains = await db.pointsLedger.findMany({
       where: { userId, type: 'gain' },
       orderBy: { timestamp: 'desc' },
       take: 3,

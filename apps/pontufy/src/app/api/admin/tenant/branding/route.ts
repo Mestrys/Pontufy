@@ -9,7 +9,7 @@ export async function GET() {
 
     const tenant = await db.tenant.findUnique({
       where: { id: tenantId },
-      select: { name: true, customLogoUrl: true },
+      select: { name: true, logoUrl: true },
     });
 
     if (!tenant) {
@@ -17,8 +17,8 @@ export async function GET() {
     }
 
     return NextResponse.json(tenant);
-  } catch (error: any) {
-    if (error.message === 'Não autenticado.') {
+  } catch (error) {
+    if (error instanceof Error && error.message === 'Não autenticado.') {
       return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 });
     }
     return NextResponse.json({ error: 'Erro interno.' }, { status: 500 });
@@ -33,26 +33,26 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: 'Acesso restrito a administradores.' }, { status: 403 });
     }
 
-    const { customLogoUrl } = await request.json();
+    const { logoUrl } = await request.json();
 
-    if (customLogoUrl !== null && typeof customLogoUrl !== 'string') {
+    if (logoUrl !== null && typeof logoUrl !== 'string') {
       return NextResponse.json({ error: 'URL do logo inválida.' }, { status: 400 });
     }
 
-    if (customLogoUrl && customLogoUrl.length > 500) {
+    if (logoUrl && logoUrl.length > 500) {
       return NextResponse.json({ error: 'URL do logo muito longa.' }, { status: 400 });
     }
 
     const db = getTenantDb(tenantId);
     const tenant = await db.tenant.update({
       where: { id: tenantId },
-      data: { customLogoUrl: customLogoUrl || null },
-      select: { name: true, customLogoUrl: true },
+      data: { logoUrl: logoUrl || null },
+      select: { name: true, logoUrl: true },
     });
 
     return NextResponse.json({ success: true, tenant });
-  } catch (error: any) {
-    if (error.message === 'Não autenticado.') {
+  } catch (error) {
+    if (error instanceof Error && error.message === 'Não autenticado.') {
       return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 });
     }
     console.error('PATCH /api/admin/tenant/branding:', error);

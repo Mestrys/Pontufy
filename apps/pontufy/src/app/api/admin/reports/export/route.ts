@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSessionContext } from '@/backend/session';
-import { getTenantDb, prisma } from '@/backend/db';
+import { getTenantDb } from '@/backend/db';
 
 export async function GET() {
   try {
@@ -21,7 +21,7 @@ export async function GET() {
 
     const allLessonIds = courses.flatMap((c: any) => c.lessons.map((l: any) => l.id));
 
-    const completions = await prisma.lessonCompletion.findMany({
+    const completions = await db.lessonCompletion.findMany({
       where: { lessonId: { in: allLessonIds } },
       select: { lessonId: true, userId: true },
     });
@@ -40,7 +40,7 @@ export async function GET() {
     });
     const totalEmployees = users.length || 1;
 
-    const redemptions = await prisma.pointsLedger.findMany({
+    const redemptions = await db.pointsLedger.findMany({
       where: { tenantId, type: 'loss' },
       select: { pointsAmount: true },
     });
