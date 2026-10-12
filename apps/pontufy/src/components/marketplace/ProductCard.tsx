@@ -1,4 +1,5 @@
 import { Coins, CheckCircle2, Lock, TicketPercent, ExternalLink } from 'lucide-react';
+import { partnerDisplayName } from '@/lib/partner-name';
 
 interface ProductCardProps {
   product: {
@@ -19,7 +20,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, userPoints, onRedeem }: ProductCardProps) {
   const price = product.pricePoints ?? product.pointsRequired ?? 0;
-  const partner = product.partnerStore ?? product.partner ?? 'Parceiro';
+  const partner = partnerDisplayName(product);
   const canRedeem = userPoints >= price;
   const progress = Math.min((userPoints / price) * 100, 100);
   const pointsMissing = price - userPoints;
@@ -29,29 +30,31 @@ export default function ProductCard({ product, userPoints, onRedeem }: ProductCa
   return (
     <div className="bg-md-surface border border-md-outline rounded-xl overflow-hidden flex flex-col hover:border-md-primary/40 transition-all duration-200 group">
       {/* Partner Logo / Product Image - Grid Style */}
-      <div className="relative h-44 bg-white flex items-center justify-center p-6">
+      {/* Fundo neutro elevado (não branco puro): logos e fotos se leem sem
+          ofuscar no tema escuro. */}
+      <div className="relative h-44 bg-md-surface-container-high flex items-center justify-center p-6">
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
-            alt={`Logo ${partner}`}
+            alt=""
             className="max-h-full max-w-full object-contain"
             loading="lazy"
           />
         ) : (
           <div className="flex flex-col items-center gap-2 text-gray-400">
-            <Coins size={32} />
+            <Coins size={32} aria-hidden="true" />
             <span className="text-xs font-semibold">{partner}</span>
           </div>
         )}
 
         {/* Coupon Badge - Top Left */}
         <div className="absolute top-3 left-3 bg-md-primary text-md-on-primary px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1">
-          <TicketPercent size={12} />
+          <TicketPercent size={12} aria-hidden="true" />
           {isLomadee ? 'Cupom' : 'Benefício'}
         </div>
 
         {/* Partner Name Badge - Top Right */}
-        <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm px-2 py-0.5 rounded text-xs font-bold text-white uppercase tracking-wider">
+        <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm px-2 py-0.5 rounded text-xs font-bold text-white">
           {partner}
         </div>
       </div>
@@ -64,7 +67,7 @@ export default function ProductCard({ product, userPoints, onRedeem }: ProductCa
 
         <div className="flex items-center justify-between gap-2 mb-4">
           <div className="flex items-center gap-1.5 text-md-tertiary font-black text-base">
-            <Coins size={16} />
+            <Coins size={16} aria-hidden="true" />
             {price.toLocaleString('pt-BR')} pts
           </div>
           
@@ -73,28 +76,30 @@ export default function ProductCard({ product, userPoints, onRedeem }: ProductCa
               href={product.originalUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-1.5 text-md-on-surface-muted hover:text-md-primary-text hover:bg-md-surface-container-high rounded transition-colors"
-              title="Ver oferta original"
+              className="-mr-2 size-11 flex items-center justify-center text-md-on-surface-muted hover:text-md-primary-text hover:bg-md-surface-container-high rounded-lg transition-colors"
+              aria-label={`Ver a oferta no site de ${partner} (abre em nova aba)`}
             >
-              <ExternalLink size={14} />
+              <ExternalLink size={16} aria-hidden="true" />
             </a>
           )}
         </div>
 
         {canRedeem ? (
           <button
+            type="button"
             onClick={() => onRedeem(product)}
-            className="w-full bg-md-primary hover:bg-md-primary-container text-md-on-primary font-bold py-2.5 rounded-full transition-colors flex items-center justify-center gap-2 text-sm"
+            className="w-full h-11 bg-md-primary hover:bg-md-primary-container text-md-on-primary font-bold rounded-full transition-colors flex items-center justify-center gap-2 text-sm"
           >
-            <CheckCircle2 size={16} /> Resgatar
+            <CheckCircle2 size={16} aria-hidden="true" /> Resgatar
           </button>
         ) : (
           <div className="w-full flex flex-col gap-2">
             <button
+              type="button"
               disabled
-              className="w-full bg-md-surface-container text-md-on-surface-muted font-bold py-2.5 rounded-lg cursor-not-allowed flex items-center justify-center gap-2 text-sm border border-md-outline"
+              className="w-full h-11 bg-md-surface-container text-md-on-surface-muted font-bold rounded-lg cursor-not-allowed flex items-center justify-center gap-2 text-sm border border-md-outline"
             >
-              <Lock size={14} /> Resgatar
+              <Lock size={14} aria-hidden="true" /> Resgatar
             </button>
             <div className="flex flex-col gap-1">
               <div className="w-full h-1 bg-md-outline rounded-full overflow-hidden">

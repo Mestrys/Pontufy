@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useStore } from '@/store/useStore';
 import { useUserStore } from '@/store/useUserStore';
 import { isSoundEnabled, setSoundEnabled } from '@/lib/feedback';
 import AchievementsCard from '@/components/profile/AchievementsCard';
+import { AlertDialog } from '@/components/ui/AlertDialog';
 import { Loader2, User, Coins, Save, ShieldCheck, Building2, Volume2, VolumeX, LogOut } from 'lucide-react';
 
 export default function ProfilePage() {
@@ -25,6 +26,17 @@ export default function ProfilePage() {
 
   const roleLabel =
     currentUser?.role === 'admin_rh' ? 'Administrador RH' : 'Colaborador';
+
+  const [confirmRevoke, setConfirmRevoke] = useState(false);
+
+  const handleRevokeAll = async () => {
+    const res = await fetch('/api/auth/revoke-all', { method: 'POST' }).catch(() => null);
+    if (res?.ok) {
+      await signOut({ callbackUrl: '/login' });
+    } else {
+      setMessage({ type: 'error', text: 'Não foi possível encerrar as sessões. Tente de novo em instantes.' });
+    }
+  };
 
   const handleSaveName = async () => {
     if (!name.trim() || name.trim().length < 2) {
@@ -179,20 +191,23 @@ export default function ProfilePage() {
             </p>
             <button
               type="button"
-              onClick={async () => {
-                const res = await fetch('/api/auth/revoke-all', { method: 'POST' });
-                if (res.ok) {
-                  setMessage({ type: 'success', text: 'Todas as sessões foram encerradas.' });
-                } else {
-                  setMessage({ type: 'error', text: 'Erro ao encerrar sessões.' });
-                }
-              }}
+              onClick={() => setConfirmRevoke(true)}
               className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 transition-colors text-sm"
             >
               <LogOut size={15} />
               Encerrar sessões em todos os dispositivos
             </button>
           </section>
+
+          <AlertDialog
+            open={confirmRevoke}
+            onClose={() => setConfirmRevoke(false)}
+            onConfirm={handleRevokeAll}
+            title="Encerrar todas as sessões?"
+            description="Você sai da conta em todos os dispositivos, inclusive neste. Para continuar usando o Pontufy, será preciso entrar de novo."
+            confirmLabel="Encerrar sessões"
+            destructive
+          />
 
           <div className="text-center">
             <Link href="/wallet" className="text-sm text-gray-400 hover:text-white transition-colors font-medium">
