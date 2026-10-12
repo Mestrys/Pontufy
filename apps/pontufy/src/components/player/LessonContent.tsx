@@ -1,7 +1,7 @@
 'use client';
 
-import { type ReactNode } from 'react';
 import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, BookOpen } from 'lucide-react';
+import LessonMarkdown from './LessonMarkdown';
 
 // Renderiza EXCLUSIVAMENTE o markdown da aula ativa (prop `content`) — nunca a
 // descrição global do curso. Aula de vídeo usa VideoPlayer + este mesmo
@@ -22,104 +22,6 @@ interface LessonContentProps {
   preview?: boolean;
   /** Motivo da última falha ao concluir, exibido junto ao botão. */
   completionError?: string;
-}
-
-function formatInline(text: string): ReactNode[] {
-  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
-  return parts.map((part, i) => {
-    if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={i} className="font-semibold text-white">{part.slice(2, -2)}</strong>;
-    }
-    if (part.startsWith('*') && part.endsWith('*') && !part.startsWith('**')) {
-      return <em key={i} className="italic">{part.slice(1, -1)}</em>;
-    }
-    return <span key={i}>{part}</span>;
-  });
-}
-
-function MarkdownContent({ content }: { content: string }) {
-  const lines = content.split('\n');
-  const elements: ReactNode[] = [];
-  let currentParagraph: string[] = [];
-  let currentList: { type: 'ul' | 'ol'; items: string[] } | null = null;
-  let key = 0;
-
-  const flush = () => {
-    if (currentList) {
-      const items = currentList.items;
-      if (currentList.type === 'ul') {
-        elements.push(
-          <ul key={key++} className="list-disc ml-5 space-y-1.5 mb-5 text-gray-300">
-            {items.map((item, i) => (
-              <li key={i} className="leading-relaxed">{formatInline(item)}</li>
-            ))}
-          </ul>,
-        );
-      } else {
-        elements.push(
-          <ol key={key++} className="list-decimal ml-5 space-y-1.5 mb-5 text-gray-300">
-            {items.map((item, i) => (
-              <li key={i} className="leading-relaxed">{formatInline(item)}</li>
-            ))}
-          </ol>,
-        );
-      }
-      currentList = null;
-    }
-    if (currentParagraph.length > 0) {
-      const text = currentParagraph.join(' ');
-      if (text.trim()) {
-        elements.push(
-          <p key={key++} className="mb-5 leading-relaxed text-gray-300">
-            {formatInline(text)}
-          </p>,
-        );
-      }
-      currentParagraph = [];
-    }
-  };
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-
-    if (trimmed.startsWith('## ')) {
-      flush();
-      elements.push(
-        <h2 key={key++} className="text-xl font-bold text-white mt-8 mb-3 first:mt-0 border-b border-md-outline pb-2">
-          {formatInline(trimmed.slice(3))}
-        </h2>,
-      );
-    } else if (trimmed.startsWith('### ')) {
-      flush();
-      elements.push(
-        <h3 key={key++} className="text-base font-bold text-white mt-6 mb-2">
-          {formatInline(trimmed.slice(4))}
-        </h3>,
-      );
-    } else if (/^[-*]\s/.test(trimmed)) {
-      if (currentParagraph.length > 0) flush();
-      if (!currentList || currentList.type !== 'ul') {
-        if (currentList) flush();
-        currentList = { type: 'ul', items: [] };
-      }
-      currentList.items.push(trimmed.replace(/^[-*]\s/, ''));
-    } else if (/^\d+\.\s/.test(trimmed)) {
-      if (currentParagraph.length > 0) flush();
-      if (!currentList || currentList.type !== 'ol') {
-        if (currentList) flush();
-        currentList = { type: 'ol', items: [] };
-      }
-      currentList.items.push(trimmed.replace(/^\d+\.\s/, ''));
-    } else if (trimmed === '') {
-      flush();
-    } else {
-      if (currentList) flush();
-      currentParagraph.push(trimmed);
-    }
-  }
-  flush();
-
-  return <div className="lesson-content text-sm sm:text-base leading-relaxed">{elements}</div>;
 }
 
 export default function LessonContent({
@@ -146,13 +48,13 @@ export default function LessonContent({
             <BookOpen size={13} />
             <span>Aula {lessonIndex} de {totalLessons}</span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-black text-white">{lessonTitle}</h2>
+          <h2 className="max-w-[34ch] text-2xl sm:text-3xl font-black text-white text-balance">{lessonTitle}</h2>
         </div>
 
         {/* Conteúdo markdown DA AULA ATIVA */}
-        <div className="px-6 sm:px-10 py-8 max-w-4xl">
+        <div className="px-5 sm:px-10 py-8">
           {content ? (
-            <MarkdownContent content={content} />
+            <LessonMarkdown content={content} />
           ) : (
             <div className="text-center py-16">
               <BookOpen size={40} className="mx-auto text-md-on-surface-muted mb-4" />
