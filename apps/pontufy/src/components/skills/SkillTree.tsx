@@ -155,9 +155,16 @@ function SkillBranch({
               <g
                 key={node.id}
                 onClick={() => onSelect(node)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onSelect(node);
+                  }
+                }}
+                tabIndex={0}
                 className="cursor-pointer"
                 role="button"
-                aria-label={`${node.title} — ${node.status}`}
+                aria-label={`${node.title} — ${NODE_STATUS_LABEL[node.status]}`}
               >
                 <circle cx={cx} cy={cy} r={NODE_RADIUS} fill={c.fill} stroke={c.stroke} strokeWidth={node.pdiTarget ? 3 : 1.5} />
                 {node.status === 'completed' ? (
@@ -186,6 +193,13 @@ function SkillBranch({
     </section>
   );
 }
+
+const NODE_STATUS_LABEL: Record<SkillNodeView['status'], string> = {
+  locked: 'bloqueado',
+  available: 'disponível',
+  in_progress: 'em progresso',
+  completed: 'concluído',
+};
 
 function NodeDetail({ node, onClose }: { node: SkillNodeView; onClose: () => void }) {
   const titleId = useId();

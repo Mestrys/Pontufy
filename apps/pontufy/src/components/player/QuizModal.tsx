@@ -70,6 +70,9 @@ export default function QuizModal({
   const [confirmed, setConfirmed] = useState(false);
   const [answers, setAnswers] = useState<(number | null)[]>(() => questions.map(() => null));
   const [submitting, setSubmitting] = useState(false);
+  // Congela o estado de abertura: ao aprovar agora, o player passa
+  // alreadyPassed=true e a tela de resultado não pode virar "Já aprovado".
+  const [openedAlreadyPassed] = useState(alreadyPassed);
   const [submitError, setSubmitError] = useState('');
   const [confirmLeave, setConfirmLeave] = useState(false);
   const titleId = useId();
@@ -182,11 +185,11 @@ export default function QuizModal({
                 <Trophy size={32} className="text-md-tertiary" />
               </div>
               <h2 id={titleId} className="text-2xl font-black text-white mb-1">
-                {alreadyPassed ? 'Quiz Já Aprovado' : 'Quiz Aprovado!'}
+                {openedAlreadyPassed ? 'Quiz Já Aprovado' : 'Quiz Aprovado!'}
               </h2>
               <p className="text-gray-400 text-sm mb-2">{courseTitle}</p>
 
-              {alreadyPassed ? (
+              {openedAlreadyPassed ? (
                 <p className="text-sm text-gray-400 mb-6">
                   Você já havia aprovado o quiz final deste curso.
                 </p>
