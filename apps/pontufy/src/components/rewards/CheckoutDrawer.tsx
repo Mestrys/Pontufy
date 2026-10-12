@@ -112,6 +112,8 @@ export function CheckoutDrawer({ isOpen, onClose, reward }: CheckoutDrawerProps)
           <div className="flex items-center justify-between p-4 border-b border-md-outline">
             <h2 className="text-lg font-bold text-white">Resgatar Recompensa</h2>
             <button
+              type="button"
+              aria-label="Fechar"
               onClick={onClose}
               disabled={step === 'processing'}
               className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"

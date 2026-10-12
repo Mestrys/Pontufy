@@ -16,7 +16,9 @@ import type { GeneratedCourse } from '@/schemas/course-schema';
 import { CONTENT_TYPES, CONTENT_TYPE_LABELS } from '@/lib/course-types';
 import type { ContentType } from '@/lib/course-types';
 
-export type { GeneratedCourse };
+// Não re-exportar tipos daqui: em módulos 'use server' o loader de server
+// actions do Next 16 avalia `export type { X }` como valor e quebra o módulo
+// inteiro ("GeneratedCourse is not defined"). Importe de '@/schemas/course-schema'.
 
 // Wrapper de server action — arquivos "use server" só podem exportar
 // funções async definidas no próprio módulo (re-export direto é rejeitado).
@@ -480,7 +482,9 @@ export async function generateTrainingCourse(
           tenantId,
           title: generated.data.title,
           description: courseDescription,
-          status: 'published',
+          // Curso gerado por IA nasce como rascunho: o RH revisa e publica
+          // (setCourseStatus) antes de chegar aos colaboradores.
+          status: 'draft',
           aiCreditsSpent: 1,
           quizJson,
           lessons: { create: lessonsToCreate },
@@ -550,7 +554,7 @@ export async function generateTrainingCourse(
       id: courseId,
       title: generated.data.title,
       description: courseDescription,
-      status: 'published',
+      status: persisted ? 'draft' : 'local',
       createdAt: now.toISOString(),
       quizJson,
       contentType,
@@ -559,4 +563,69 @@ export async function generateTrainingCourse(
       lessons: lessonRecords,
     },
   };
+}
+
+// ═══════════════════════ Publicação (revisão humana) ═════════════════
+
+const courseStatusSchema = z.object({
+  courseId: z.string().min(1).max(100),
+  status: z.enum(['published', 'draft']),
+});
+
+export type SetCourseStatusResult =
+  | { success: true; status: 'published' | 'draft' }
+  | { success: false; error: string };
+
+/**
+ * Publica ou volta para rascunho um curso do próprio tenant. Só o RH pode;
+ * a mudança fica na auditoria.
+ */
+export async function setCourseStatus(input: {
+  courseId: string;
+  status: 'published' | 'draft';
+}): Promise<SetCourseStatusResult> {
+  const session = await auth();
+  if (!session?.user) {
+    return { success: false, error: 'Sessão expirada. Entre novamente.' };
+  }
+  if (session.user.role !== 'admin_rh') {
+    return { success: false, error: 'Apenas a gestão de RH pode publicar cursos.' };
+  }
+
+  const parsed = courseStatusSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, error: 'Curso inválido.' };
+  }
+  const { courseId, status } = parsed.data;
+  const tenantId = session.user.tenantId;
+  const db = getTenantDb(tenantId);
+
+  const course = await db.course.findFirst({
+    where: { id: courseId },
+    select: { id: true, status: true },
+  });
+  if (!course) {
+    return { success: false, error: 'Curso não encontrado.' };
+  }
+
+  if (course.status !== status) {
+    await db.course.updateMany({ where: { id: courseId }, data: { status } });
+    await logAudit({
+      tenantId,
+      userId: session.user.id,
+      action: status === 'published' ? 'COURSE_PUBLISHED' : 'COURSE_UNPUBLISHED',
+      entity: 'Course',
+      entityId: courseId,
+      oldValue: { status: course.status },
+      newValue: { status },
+    });
+  }
+
+  try {
+    revalidatePath('/admin', 'page');
+    revalidatePath('/dashboard', 'page');
+    revalidatePath('/cursos', 'page');
+  } catch {}
+
+  return { success: true, status };
 }

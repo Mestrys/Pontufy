@@ -124,10 +124,11 @@ export default function AuditLogsClient() {
         <section className="bg-[#141414] border border-[#2a2a2a] rounded-2xl p-4">
           <div className="grid sm:grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
+              <label htmlFor="audit-action" className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
                 Ação
               </label>
               <select
+                id="audit-action"
                 value={action}
                 onChange={(e) => {
                   setAction(e.target.value);
@@ -145,10 +146,11 @@ export default function AuditLogsClient() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
+              <label htmlFor="audit-from" className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
                 De
               </label>
               <input
+                id="audit-from"
                 type="date"
                 value={from}
                 onChange={(e) => {
@@ -160,10 +162,11 @@ export default function AuditLogsClient() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
+              <label htmlFor="audit-to" className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
                 Até
               </label>
               <input
+                id="audit-to"
                 type="date"
                 value={to}
                 onChange={(e) => {
@@ -198,7 +201,7 @@ export default function AuditLogsClient() {
               <p className="text-sm">Nenhum evento encontrado para os filtros.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Registros de auditoria">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="text-left text-xs text-gray-500 uppercase tracking-wide border-b border-[#2a2a2a]">

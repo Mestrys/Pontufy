@@ -7,12 +7,13 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const { tenantId, userId } = await getSessionContext();
+    const { tenantId, userId, role } = await getSessionContext();
     const { id } = await params;
     const db = getTenantDb(tenantId);
 
+    // O RH pode abrir rascunhos (pré-visualização antes de publicar).
     const course = await db.course.findFirst({
-      where: { id, status: 'published' },
+      where: role === 'admin_rh' ? { id } : { id, status: 'published' },
       include: {
         lessons: { orderBy: { createdAt: 'asc' } },
       },
@@ -60,6 +61,7 @@ export async function GET(
       id: course.id,
       title: course.title,
       description: course.description,
+      status: course.status,
       lessons,
       quiz,
       quizPassed,

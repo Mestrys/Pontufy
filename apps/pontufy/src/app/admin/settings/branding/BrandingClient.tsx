@@ -148,10 +148,11 @@ export default function BrandingClient() {
 
           <div className="space-y-5">
             <div>
-              <label className="text-label-lg text-md-on-surface-variant mb-2 block">
+              <label htmlFor="brand-logo-url" className="text-label-lg text-md-on-surface-variant mb-2 block">
                 URL do logo
               </label>
               <input
+                id="brand-logo-url"
                 type="text"
                 value={logoUrl}
                 onChange={(e) => setLogoUrl(e.target.value)}
@@ -161,10 +162,11 @@ export default function BrandingClient() {
             </div>
 
             <div>
-              <label className="text-label-lg text-md-on-surface-variant mb-2 block">
+              <label htmlFor="brand-favicon-url" className="text-label-lg text-md-on-surface-variant mb-2 block">
                 URL do favicon
               </label>
               <input
+                id="brand-favicon-url"
                 type="text"
                 value={faviconUrl}
                 onChange={(e) => setFaviconUrl(e.target.value)}
@@ -196,17 +198,19 @@ export default function BrandingClient() {
 
           <div className="grid sm:grid-cols-2 gap-6 mb-6">
             <div>
-              <label className="text-label-lg text-md-on-surface-variant mb-2 block">
+              <label htmlFor="brand-primary-hex" className="text-label-lg text-md-on-surface-variant mb-2 block">
                 Cor primária
               </label>
               <div className="flex items-center gap-3">
                 <input
                   type="color"
+                  aria-label="Escolher cor primária"
                   value={primaryHex}
                   onChange={(e) => setPrimaryColor(e.target.value)}
                   className="h-11 w-14 rounded-xl border border-md-outline bg-transparent cursor-pointer"
                 />
                 <input
+                  id="brand-primary-hex"
                   type="text"
                   value={primaryColor}
                   onChange={(e) => setPrimaryColor(e.target.value)}
@@ -216,17 +220,19 @@ export default function BrandingClient() {
             </div>
 
             <div>
-              <label className="text-label-lg text-md-on-surface-variant mb-2 block">
+              <label htmlFor="brand-accent-hex" className="text-label-lg text-md-on-surface-variant mb-2 block">
                 Cor de destaque
               </label>
               <div className="flex items-center gap-3">
                 <input
                   type="color"
+                  aria-label="Escolher cor de destaque"
                   value={accentHex}
                   onChange={(e) => setAccentColor(e.target.value)}
                   className="h-11 w-14 rounded-xl border border-md-outline bg-transparent cursor-pointer"
                 />
                 <input
+                  id="brand-accent-hex"
                   type="text"
                   value={accentColor}
                   onChange={(e) => setAccentColor(e.target.value)}

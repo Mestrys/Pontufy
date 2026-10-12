@@ -4,19 +4,21 @@ import { getTenantDb } from '@/backend/db';
 
 export async function GET() {
   try {
-    const { tenantId } = await getSessionContext();
+    const { tenantId, role } = await getSessionContext();
     const db = getTenantDb(tenantId);
 
     const tenant = await db.tenant.findUnique({
       where: { id: tenantId },
-      select: { name: true, logoUrl: true },
+      select: { name: true, logoUrl: true, aiCredits: true },
     });
 
     if (!tenant) {
       return NextResponse.json({ error: 'Tenant não encontrado.' }, { status: 404 });
     }
 
-    return NextResponse.json(tenant);
+    // Saldo de créditos de IA é informação de gestão: só o RH recebe.
+    const { aiCredits, ...publicBranding } = tenant;
+    return NextResponse.json(role === 'admin_rh' ? { ...publicBranding, aiCredits } : publicBranding);
   } catch (error) {
     if (error instanceof Error && error.message === 'Não autenticado.') {
       return NextResponse.json({ error: 'Não autenticado.' }, { status: 401 });

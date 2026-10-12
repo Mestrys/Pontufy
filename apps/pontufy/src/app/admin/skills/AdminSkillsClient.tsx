@@ -175,12 +175,14 @@ export default function AdminSkillsClient() {
             </h2>
             <div className="grid sm:grid-cols-4 gap-3 mb-4">
               <input
+                aria-label="Nome da competência"
                 value={skillName}
                 onChange={(e) => setSkillName(e.target.value)}
                 placeholder="Ex.: Liderança"
                 className="sm:col-span-2 px-4 py-3 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-variant/50 focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
               />
               <select
+                aria-label="Categoria"
                 value={skillCategory}
                 onChange={(e) => setSkillCategory(e.target.value)}
                 className="px-4 py-3 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
@@ -194,6 +196,7 @@ export default function AdminSkillsClient() {
                 <option value="general">Geral</option>
               </select>
               <select
+                aria-label="Nível-alvo"
                 value={targetLevel}
                 onChange={(e) => setTargetLevel(Number(e.target.value))}
                 className="px-4 py-3 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
@@ -263,6 +266,7 @@ export default function AdminSkillsClient() {
             </h2>
             <div className="grid sm:grid-cols-3 gap-3 mb-4">
               <select
+                aria-label="Colaborador"
                 value={pdiUserId}
                 onChange={(e) => setPdiUserId(e.target.value)}
                 className="px-4 py-3 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
@@ -275,6 +279,7 @@ export default function AdminSkillsClient() {
                 ))}
               </select>
               <select
+                aria-label="Nó da árvore de habilidades"
                 value={pdiNodeId}
                 onChange={(e) => setPdiNodeId(e.target.value)}
                 className="px-4 py-3 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"

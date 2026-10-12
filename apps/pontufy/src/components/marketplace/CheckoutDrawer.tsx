@@ -33,8 +33,12 @@ export default function CheckoutDrawer({
   onSuccess,
 }: CheckoutDrawerProps) {
   const [step, setStep] = useState<CheckoutStep>("confirm");
-  const [voucherCode, setVoucherCode] = useState<string>("");
+  // Protocolo = id real do resgate devolvido pelo servidor. Nunca exibir um
+  // código gerado no navegador: o parceiro não o reconheceria.
+  const [protocol, setProtocol] = useState<string>("");
   const [affiliateUrl, setAffiliateUrl] = useState<string>("");
+  const [redeemError, setRedeemError] = useState<string>("");
+  const [copied, setCopied] = useState(false);
   const [lastIsOpen, setLastIsOpen] = useState(isOpen);
 
   const price = reward?.pointsRequired || reward?.pricePoints || 0;
@@ -46,43 +50,51 @@ export default function CheckoutDrawer({
     setLastIsOpen(isOpen);
     if (isOpen) {
       setStep("confirm");
-      setVoucherCode("");
+      setProtocol("");
       setAffiliateUrl("");
+      setRedeemError("");
+      setCopied(false);
     }
   }
 
   const handleRedeem = async () => {
+    if (!reward?.id) return;
     setStep("loading");
+    setRedeemError("");
     try {
-      const response = await triggerRewardRedemption(reward?.id || "mock-reward-id");
+      const response = await triggerRewardRedemption(reward.id);
 
       if (!response.success) {
-        throw new Error(response.error || "Falha no resgate");
+        // Mostra o motivo real devolvido pela API (saldo, bloqueio, indisponível).
+        setRedeemError(response.error || "Não foi possível concluir o resgate. Tente de novo.");
+        setStep("confirm");
+        return;
       }
 
-      const mockCode = `PONTUFY-${partner.substring(0, 4).toUpperCase()}-${Math.floor(
-        1000 + Math.random() * 9000
-      )}`;
-      setVoucherCode(mockCode);
+      setProtocol(response.redemptionId ? response.redemptionId.slice(0, 8).toUpperCase() : "");
       if (response.affiliateUrl) {
         setAffiliateUrl(response.affiliateUrl);
       }
 
       setStep("success");
-      
+
       if (onSuccess) {
         onSuccess(response.newBalance ?? (userBalance - price));
       }
     } catch (error) {
       console.error(error);
-      alert("Erro ao realizar o resgate. Verifique seu saldo.");
+      setRedeemError("Sem conexão com o servidor. Seus pontos não foram debitados; tente de novo.");
       setStep("confirm");
     }
   };
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(voucherCode);
-    alert("Código copiado com sucesso!");
+  const copyProtocol = async () => {
+    try {
+      await navigator.clipboard.writeText(protocol);
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
   };
 
   // If Drawer is closed or no reward is selected, don't render content
@@ -114,6 +126,8 @@ export default function CheckoutDrawer({
               {step === "success" ? "Resgate Concluído" : "Confirmar Resgate"}
             </h2>
             <button
+              type="button"
+              aria-label="Fechar"
               onClick={onClose}
               disabled={step === "loading"}
               className="p-2 text-gray-400 hover:text-md-on-surface transition-colors disabled:opacity-50"
@@ -174,8 +188,15 @@ export default function CheckoutDrawer({
                   </div>
                 </div>
 
+                {redeemError && (
+                  <p role="alert" className="text-sm text-md-error bg-md-error/10 border border-md-error/30 rounded-xl px-4 py-3">
+                    {redeemError}
+                  </p>
+                )}
+
                 <div className="mt-auto pt-8">
                   <button
+                    type="button"
                     onClick={handleRedeem}
                     className="w-full py-4 rounded-xl font-bold text-md-on-primary shadow-lg bg-md-primary hover:bg-md-primary-container hover:shadow-xl transition-all hover:scale-[1.02] flex items-center justify-center gap-2"
                   >
@@ -223,28 +244,36 @@ export default function CheckoutDrawer({
                     <CheckCircle2 size={40} />
                   </div>
                   <h3 className="text-2xl font-black text-md-on-surface mb-2">
-                    Tudo Certo!
+                    Resgate registrado
                   </h3>
-                  <p className="text-gray-500">
-                    O resgate de <strong className="text-md-tertiary">{price} pts</strong> foi concluído.
+                  <p className="text-md-on-surface-variant" role="status">
+                    <strong className="text-md-tertiary">{price} pts</strong> foram debitados do seu saldo.
+                    {affiliateUrl
+                      ? ` Para usar o benefício, acesse a oferta de ${partner} pelo botão abaixo.`
+                      : " Você receberá as instruções do benefício nas notificações."}
                   </p>
                 </div>
 
-                <div className="bg-md-surface-container border border-md-outline border-dashed rounded-xl p-6 text-center mb-8 relative overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-md-primary to-md-primary-container"></div>
-                  <p className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-3">
-                    Seu Código de Resgate
-                  </p>
-                  <div className="font-mono text-2xl font-black text-md-primary tracking-widest mb-4">
-                    {voucherCode}
+                {protocol && (
+                  <div className="bg-md-surface-container border border-md-outline rounded-xl p-5 text-center mb-8">
+                    <p className="text-xs text-md-on-surface-variant font-bold uppercase tracking-wider mb-2">
+                      Protocolo do resgate
+                    </p>
+                    <p className="font-mono text-xl font-black text-md-on-surface tracking-widest mb-1">
+                      {protocol}
+                    </p>
+                    <p className="text-xs text-md-on-surface-variant mb-3">
+                      Use este número se precisar falar com o RH sobre o resgate.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={copyProtocol}
+                      className="mx-auto h-11 flex items-center justify-center gap-2 px-4 bg-md-surface border border-md-outline rounded-lg text-sm font-medium text-md-on-surface hover:bg-md-surface-container transition-colors"
+                    >
+                      <Copy size={16} aria-hidden="true" /> {copied ? "Protocolo copiado" : "Copiar protocolo"}
+                    </button>
                   </div>
-                  <button
-                    onClick={copyToClipboard}
-                    className="mx-auto flex items-center justify-center gap-2 px-4 py-2 bg-md-surface border border-md-outline rounded-lg text-sm font-medium text-md-on-surface hover:bg-md-surface-container transition-colors shadow-sm"
-                  >
-                    <Copy size={16} /> Copiar Código
-                  </button>
-                </div>
+                )}
 
                 <div className="mt-auto flex flex-col gap-3">
                   {affiliateUrl ? (

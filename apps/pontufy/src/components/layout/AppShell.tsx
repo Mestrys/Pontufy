@@ -5,7 +5,10 @@ import { motion, useReducedMotion } from 'framer-motion';
 import Navbar from './Navbar';
 import Footer from './Footer';
 
+// Rotas sem navbar/rodapé globais. O player tem barra própria e precisa da
+// altura inteira da tela para a aula e para a ação "Concluir".
 const NO_SHELL_ROUTES = [
+  '/player',
   '/login',
   '/register',
   '/forgot-password',

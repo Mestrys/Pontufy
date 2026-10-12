@@ -18,6 +18,8 @@ interface LessonContentProps {
   onComplete: () => void;
   onPrevious: (() => void) | null;
   onNext: (() => void) | null;
+  /** Pré-visualização de rascunho (RH): só navega, não conclui nem pontua. */
+  preview?: boolean;
 }
 
 function formatInline(text: string): ReactNode[] {
@@ -129,10 +131,12 @@ export default function LessonContent({
   onComplete,
   onPrevious,
   onNext,
+  preview = false,
 }: LessonContentProps) {
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      <div className="flex-1 overflow-y-auto">
+      {/* Região rolável focável: permite rolar a aula pelo teclado. */}
+      <div className="flex-1 overflow-y-auto" tabIndex={0} role="region" aria-label="Conteúdo da aula">
         {/* Cabeçalho da aula */}
         <div className="bg-md-surface border-b border-md-outline px-6 sm:px-10 py-6">
           <div className="flex items-center gap-2 text-gray-600 text-xs mb-2">
@@ -155,54 +159,73 @@ export default function LessonContent({
         </div>
       </div>
 
-      {/* Barra de navegação inferior */}
-      <div className="flex-shrink-0 px-6 sm:px-10 py-5 bg-md-surface border-t border-md-outline">
-        <div className="flex flex-wrap items-center justify-between gap-3 max-w-4xl">
+      {/* Barra de ações inferior: uma única ação primária por estado.
+          - aula pendente → "Concluir e avançar" (ou "Concluir aula" na última)
+          - aula concluída → "Próxima aula" (ou status "Aula concluída" na última)
+          O acesso é sequencial (o sumário bloqueia as aulas seguintes), então
+          não há botão para pular a aula sem concluí-la. */}
+      <div className="flex-shrink-0 px-4 sm:px-10 py-3 sm:py-4 bg-md-surface border-t border-md-outline">
+        <div className="flex items-center gap-2 sm:gap-3 max-w-4xl">
           <button
+            type="button"
             onClick={() => onPrevious?.()}
             disabled={!onPrevious}
-            className={`px-4 py-3 rounded-lg font-bold transition-all text-sm flex items-center gap-2 border ${
-              onPrevious
-                ? 'border-md-outline text-gray-300 hover:border-md-outline-variant hover:text-white'
-                : 'border-md-outline text-gray-700 cursor-not-allowed'
-            }`}
+            aria-label="Aula anterior"
+            className="h-11 min-w-11 px-3 sm:px-4 rounded-lg font-bold transition-colors text-sm flex items-center justify-center gap-2 border border-md-outline text-gray-300 hover:border-md-outline-variant hover:text-white disabled:text-gray-600 disabled:cursor-not-allowed disabled:hover:border-md-outline"
           >
-            <ArrowLeft size={15} /> Aula Anterior
+            <ArrowLeft size={16} aria-hidden="true" />
+            <span className="hidden sm:inline">Anterior</span>
           </button>
 
-          <button
-            onClick={onComplete}
-            disabled={completed || isCompleting}
-            className={`px-6 py-3 rounded-lg font-bold transition-all text-sm flex items-center gap-2 ${
-              completed
-                ? 'bg-md-surface-container text-gray-600 cursor-not-allowed border border-md-outline'
-                : 'bg-md-primary text-md-on-primary hover:bg-md-primary-container'
-            }`}
-          >
-            {completed ? (
-              <>
-                <CheckCircle2 size={16} /> Aula Concluída
-              </>
-            ) : isCompleting ? (
-              <>
-                <Loader2 size={16} className="animate-spin" /> Concluindo...
-              </>
+          {preview ? (
+            onNext ? (
+              <button
+                type="button"
+                onClick={() => onNext()}
+                className="flex-1 h-11 px-4 rounded-lg font-bold transition-colors text-sm flex items-center justify-center gap-2 bg-md-primary text-md-on-primary hover:bg-md-primary-container"
+              >
+                Próxima aula <ArrowRight size={16} aria-hidden="true" />
+              </button>
             ) : (
-              <>Concluir Aula (+{points} pts)</>
-            )}
-          </button>
-
-          <button
-            onClick={() => onNext?.()}
-            disabled={!onNext}
-            className={`px-4 py-3 rounded-lg font-bold transition-all text-sm flex items-center gap-2 ${
-              onNext
-                ? 'bg-md-secondary text-md-on-secondary hover:bg-md-secondary/90'
-                : 'bg-md-surface-container text-gray-700 cursor-not-allowed border border-md-outline'
-            }`}
-          >
-            Próxima Aula <ArrowRight size={15} />
-          </button>
+              <p className="flex-1 h-11 px-4 rounded-lg font-bold text-sm flex items-center justify-center bg-md-surface-container text-md-on-surface-variant border border-md-outline">
+                Fim da pré-visualização
+              </p>
+            )
+          ) : !completed ? (
+            <button
+              type="button"
+              onClick={onComplete}
+              disabled={isCompleting}
+              className="flex-1 h-11 px-4 rounded-lg font-bold transition-colors text-sm flex items-center justify-center gap-2 bg-md-primary text-md-on-primary hover:bg-md-primary-container disabled:opacity-70 disabled:cursor-wait"
+            >
+              {isCompleting ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" aria-hidden="true" /> Concluindo…
+                </>
+              ) : (
+                <>
+                  {onNext ? 'Concluir e avançar' : 'Concluir aula'}
+                  <span className="font-semibold opacity-90">(+{points} pts)</span>
+                  {onNext && <ArrowRight size={16} aria-hidden="true" />}
+                </>
+              )}
+            </button>
+          ) : onNext ? (
+            <button
+              type="button"
+              onClick={() => onNext()}
+              className="flex-1 h-11 px-4 rounded-lg font-bold transition-colors text-sm flex items-center justify-center gap-2 bg-md-primary text-md-on-primary hover:bg-md-primary-container"
+            >
+              Próxima aula <ArrowRight size={16} aria-hidden="true" />
+            </button>
+          ) : (
+            <p
+              role="status"
+              className="flex-1 h-11 px-4 rounded-lg font-bold text-sm flex items-center justify-center gap-2 bg-md-surface-container text-md-tertiary border border-md-outline"
+            >
+              <CheckCircle2 size={16} aria-hidden="true" /> Aula concluída
+            </p>
+          )}
         </div>
       </div>
     </div>

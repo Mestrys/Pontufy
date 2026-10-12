@@ -180,6 +180,7 @@ export default function TeamClient() {
               <input
                 type="email"
                 required
+                aria-label="E-mail do colaborador"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="email@empresa.com"
@@ -187,6 +188,7 @@ export default function TeamClient() {
               />
             </div>
             <select
+              aria-label="Perfil de acesso"
               value={inviteRole}
               onChange={(e) => setInviteRole(e.target.value)}
               className="px-4 py-3 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm transition-colors"
@@ -300,7 +302,7 @@ export default function TeamClient() {
               Nenhum membro cadastrado.
             </p>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Membros da equipe">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="text-left text-xs text-gray-500 uppercase tracking-wide border-b border-[#2a2a2a]">

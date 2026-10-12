@@ -1,15 +1,49 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
-import { Sparkles, Users, Edit, Eye, Trash2, MoreVertical } from 'lucide-react';
+import { Sparkles, Users, Eye, Loader2 } from 'lucide-react';
+import { setCourseStatus } from '@/actions/course-generator';
 
 interface CourseRow {
   id: string;
   title: string;
-  status: 'Publicado' | 'Rascunho';
+  status: 'Publicado' | 'Rascunho' | 'Só neste navegador';
   enrolled: number;
   date: string;
 }
 
-export default function AISelectionTable({ courses }: { courses: CourseRow[] }) {
+export default function AISelectionTable({
+  courses,
+  onChanged,
+}: {
+  courses: CourseRow[];
+  onChanged?: () => void;
+}) {
+  const [pendingId, setPendingId] = useState<string | null>(null);
+  const [error, setError] = useState('');
+
+  // Publicar = revisão humana concluída; Ocultar = volta a rascunho.
+  const toggleStatus = async (course: CourseRow) => {
+    setPendingId(course.id);
+    setError('');
+    try {
+      const res = await setCourseStatus({
+        courseId: course.id,
+        status: course.status === 'Publicado' ? 'draft' : 'published',
+      });
+      if (!res.success) {
+        setError(res.error);
+        return;
+      }
+      onChanged?.();
+    } catch {
+      setError('Não foi possível alterar o curso agora. Tente de novo.');
+    } finally {
+      setPendingId(null);
+    }
+  };
+
   if (courses.length === 0) {
     return (
       <div className="p-8 text-center">
@@ -26,6 +60,11 @@ export default function AISelectionTable({ courses }: { courses: CourseRow[] }) 
 
   return (
     <div className="md-card-outlined md-elevation-1 overflow-hidden">
+      {error && (
+        <p role="alert" className="px-4 sm:px-6 py-3 text-body-sm text-md-error border-b border-md-outline">
+          {error}
+        </p>
+      )}
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse min-w-[600px]">
           <thead>
@@ -59,27 +98,34 @@ export default function AISelectionTable({ courses }: { courses: CourseRow[] }) 
                 <td className="px-3 sm:px-6 py-4 text-right text-md-on-surface-variant text-body-sm whitespace-nowrap">{course.date}</td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex items-center justify-end gap-1">
-                    <Link
-                      href={`/admin/wizard?edit=${course.id}`}
-                      className="p-2 rounded-xl text-md-on-surface-variant hover:bg-md-surface-container-high hover:text-md-primary transition-colors"
-                      title="Editar"
-                    >
-                      <Edit size={18} />
-                    </Link>
-                    <button
-                      type="button"
-                      className="p-2 rounded-xl text-md-on-surface-variant hover:bg-md-surface-container-high hover:text-md-secondary transition-colors"
-                      title="Visualizar"
-                    >
-                      <Eye size={18} />
-                    </button>
-                    <button
-                      type="button"
-                      className="p-2 rounded-xl text-md-on-surface-variant hover:bg-md-error/10 hover:text-md-error transition-colors"
-                      title="Excluir"
-                    >
-                      <Trash2 size={18} />
-                    </button>
+                    {course.status !== 'Só neste navegador' && (
+                      <>
+                        <Link
+                          href={`/player/${course.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="size-11 flex items-center justify-center rounded-xl text-md-on-surface-variant hover:bg-md-surface-container-high hover:text-md-secondary transition-colors"
+                          title="Pré-visualizar"
+                          aria-label={`Pré-visualizar ${course.title}`}
+                        >
+                          <Eye size={18} aria-hidden="true" />
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => toggleStatus(course)}
+                          disabled={pendingId === course.id}
+                          className={`md-btn text-sm ${course.status === 'Publicado' ? 'md-btn-text' : 'md-btn-filled'}`}
+                        >
+                          {pendingId === course.id ? (
+                            <Loader2 size={16} className="animate-spin" aria-label="Salvando" />
+                          ) : course.status === 'Publicado' ? (
+                            'Ocultar'
+                          ) : (
+                            'Publicar'
+                          )}
+                        </button>
+                      </>
+                    )}
                   </div>
                 </td>
               </tr>

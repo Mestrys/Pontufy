@@ -13,7 +13,7 @@ import { useCourse, triggerLessonCompletion } from '@/hooks/useApi';
 import { useStore } from '@/store/useStore';
 import { getCachedCourses } from '@/lib/local-courses';
 import { downloadCertificate } from '@/lib/download-certificate';
-import { getUserTier } from '@/lib/gamification';
+import { getUserTier, TIERS } from '@/lib/gamification';
 import { Loader2, BookOpen, ArrowLeft, Award, Trophy, Crown, Medal, LoaderCircle } from 'lucide-react';
 
 interface LessonItem {
@@ -88,17 +88,21 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
 
   // Level-up celebration state
   const [showLevelUp, setShowLevelUp] = useState(false);
-  const [levelUpData, setLevelUpData] = useState<{
+  type LevelUpData = {
     previousTier: string;
-    newTier: { name: string; color: string; icon: typeof Trophy | typeof Crown | typeof Medal };
+    newTier: { name: string; color: string; icon: typeof Trophy | typeof Crown | typeof Medal; maxPoints?: number };
     points: number;
-  } | null>(null);
+  };
+  const [levelUpData, setLevelUpData] = useState<LevelUpData | null>(null);
+  // Subida de nível espera a celebração de pontos terminar: nunca dois
+  // overlays ao mesmo tempo.
+  const [pendingLevelUp, setPendingLevelUp] = useState<LevelUpData | null>(null);
 
   const course = apiCourse && !apiCourse.error ? apiCourse : localCourse;
 
   if (isLoading && !localCourse) {
     return (
-      <div className="flex items-center justify-center h-screen bg-md-surface-dim">
+      <div className="flex items-center justify-center h-dvh bg-md-surface-dim">
         <Loader2 className="animate-spin text-md-primary" size={36} />
       </div>
     );
@@ -106,7 +110,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
 
   if (!course) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-md-surface-dim gap-4">
+      <div className="flex flex-col items-center justify-center h-dvh bg-md-surface-dim gap-4">
         <BookOpen size={48} className="text-gray-700" />
         <p className="text-white text-lg font-bold">Curso não encontrado.</p>
         <Link href="/dashboard" className="text-md-primary-container font-bold hover:text-md-secondary transition-colors">
@@ -136,11 +140,13 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
   const completedCount = lessons.filter((l) => completedMap.has(l.id)).length;
   const allCompleted = lessons.length > 0 && completedCount === lessons.length;
   const modules: QuizModuleData[] = course.quiz ?? [];
+  // Rascunho de IA aberto pelo RH: pré-visualização sem pontos nem quiz.
+  const isPreview = (course as { status?: string }).status === 'draft';
   const passed = quizPassed || !!course.quizPassed;
 
   if (!activeLesson) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-md-surface-dim gap-4">
+      <div className="flex flex-col items-center justify-center h-dvh bg-md-surface-dim gap-4">
         <p className="text-white text-lg font-bold">Este curso não possui aulas.</p>
         <Link href="/dashboard" className="text-md-primary-container font-bold hover:text-md-secondary transition-colors">
           ← Voltar ao Início
@@ -160,15 +166,17 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
     setShowCelebration(true);
   };
 
-  // Verifica subida de nível após ganho de pontos
+  // Verifica subida de nível. Chamado só DEPOIS que o servidor confirmou a
+  // conclusão (ou a enfileirou offline): nunca celebrar uma ação que falhou.
   const checkLevelUp = (previousPoints: number, newPoints: number) => {
     const previousTier = getUserTier(previousPoints);
     const newTier = getUserTier(newPoints);
-    
+
     if (previousTier.name !== newTier.name) {
-      const TierIcon = previousTier.name === 'Mestre' ? Trophy : 
+      const TierIcon = previousTier.name === 'Mestre' ? Trophy :
         previousTier.name === 'Especialista' ? Crown : Trophy;
-      setLevelUpData({
+      const nextTier = TIERS.find((t) => t.minPoints > newPoints);
+      setPendingLevelUp({
         previousTier: previousTier.name,
         newTier: {
           name: newTier.name,
@@ -177,9 +185,18 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
             newTier.name === 'Analista Sénior' ? 'text-blue-400' :
             newTier.name === 'Analista' ? 'text-emerald-400' : 'text-gray-400',
           icon: TierIcon,
+          maxPoints: nextTier?.minPoints,
         },
         points: newPoints,
       });
+    }
+  };
+
+  const handlePointsCelebrationComplete = () => {
+    setShowCelebration(false);
+    if (pendingLevelUp) {
+      setLevelUpData(pendingLevelUp);
+      setPendingLevelUp(null);
       setShowLevelUp(true);
     }
   };
@@ -188,11 +205,11 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
     if (completedMap.has(activeLesson.id) || isCompleting) return;
 
     const previousPoints = useStore.getState().currentPointsBalance;
+    const lessonPoints = activeLesson.points;
     setIsCompleting(true);
     // Otimista: reflete os pontos imediatamente no store global (Navbar reativa).
-    addPoints(activeLesson.points);
-    const newPoints = useStore.getState().currentPointsBalance;
-    checkLevelUp(previousPoints, newPoints);
+    // A celebração e a subida de nível só acontecem após a confirmação.
+    addPoints(lessonPoints);
     try {
       const res = await triggerLessonCompletion(activeLesson.id, {
         courseId: course.id,
@@ -207,14 +224,16 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
         })),
       });
 
-      if (res.success) {
+      if (res.success || res.queued) {
         setCompletedOverrides((prev) => new Set(prev).add(activeLesson.id));
-        celebrate(activeLesson.points, 'Você acaba de ganhar');
-        mutate();
-      } else if (res.queued) {
-        // Offline: salvo na fila local; será sincronizado automaticamente.
-        setCompletedOverrides((prev) => new Set(prev).add(activeLesson.id));
-        celebrate(activeLesson.points, 'Aula salva offline — sincronização automática');
+        checkLevelUp(previousPoints, previousPoints + lessonPoints);
+        celebrate(
+          lessonPoints,
+          res.success ? 'Você acaba de ganhar' : 'Aula salva offline — sincronização automática',
+        );
+        if (res.success) mutate();
+        // "Concluir e avançar": segue para a próxima aula após confirmar.
+        if (nextLesson) setActiveLessonId(nextLesson.id);
       } else {
         // Rollback do saldo otimista em caso de falha.
         deductPoints(activeLesson.points);
@@ -261,15 +280,16 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
     onComplete: handleLessonComplete,
     onPrevious: prevLesson ? () => setActiveLessonId(prevLesson.id) : null,
     onNext: nextLesson ? () => setActiveLessonId(nextLesson.id) : null,
+    preview: isPreview,
   };
 
   return (
-    <div className="flex flex-col h-screen bg-md-surface-dim overflow-hidden">
+    <div className="flex flex-col h-dvh bg-md-surface-dim overflow-hidden">
       <PointsCelebration
         points={celebrationPoints}
         isVisible={showCelebration}
         message={celebrationMessage}
-        onComplete={() => setShowCelebration(false)}
+        onComplete={handlePointsCelebrationComplete}
       />
       <CelebrationModal
         isVisible={showLevelUp}
@@ -289,10 +309,11 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
       <div className="h-14 flex-shrink-0 bg-md-surface border-b border-md-outline flex items-center px-4 gap-4 z-40">
         <Link
           href="/dashboard"
-          className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm font-medium"
+          className="-ml-2 h-11 min-w-11 px-2 flex items-center justify-center gap-2 rounded-lg text-gray-400 hover:text-white transition-colors text-sm font-medium"
         >
-          <ArrowLeft size={18} />
-          <span className="hidden sm:inline">Voltar</span>
+          <ArrowLeft size={18} aria-hidden="true" />
+          {/* sr-only no celular mantém o nome acessível do link. */}
+          <span className="sr-only sm:not-sr-only">Voltar ao início</span>
         </Link>
         <div className="h-5 w-px bg-md-outline" />
         <h1 className="text-sm font-bold text-white truncate flex-1">{course.title}</h1>
@@ -300,6 +321,15 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
           {completedCount}/{lessons.length} aulas
         </div>
       </div>
+
+      {isPreview && (
+        <p
+          role="note"
+          className="flex-shrink-0 px-4 sm:px-10 py-2.5 text-body-sm bg-md-highlight/10 text-md-highlight border-b border-md-highlight/30"
+        >
+          Pré-visualização de rascunho: os colaboradores ainda não veem este curso. Publique pelo painel de RH quando o conteúdo estiver correto.
+        </p>
+      )}
 
       {/* Main content */}
       <div className="flex flex-1 overflow-hidden">
@@ -311,15 +341,15 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
                 <VideoPlayer lesson={{ id: activeLesson.id, title: activeLesson.title, videoUrl: activeLesson.contentUrl ?? undefined }} />
               </div>
               <div className="flex-1 min-h-0 flex flex-col">
-                <LessonContent content={activeLesson.content} {...lessonNavProps} />
+                <LessonContent key={activeLesson.id} content={activeLesson.content} {...lessonNavProps} />
               </div>
             </>
           ) : (
-            <LessonContent content={activeLesson.content} {...lessonNavProps} />
+            <LessonContent key={activeLesson.id} content={activeLesson.content} {...lessonNavProps} />
           )}
 
           {/* CTA do Quiz / Certificado (rodapé do conteúdo) */}
-          {allCompleted && (
+          {allCompleted && !isPreview && (
             <div className="flex-shrink-0 px-6 sm:px-10 py-6 border-t border-md-outline bg-md-surface-dim">
               {!passed ? (
                 <div className="max-w-4xl flex flex-wrap items-center justify-between gap-4">
@@ -391,13 +421,17 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
             allCompleted={allCompleted}
             quizPassed={passed}
             onOpenQuiz={() => setQuizOpen(true)}
+            preview={isPreview}
           />
         </div>
       </div>
 
       {/* Sidebar (mobile bottom sheet) */}
-      <div className="lg:hidden border-t border-md-outline bg-md-surface max-h-[40vh] overflow-hidden">
+      {/* No celular o sumário começa recolhido: a aula fica com a maior parte
+          da tela e a lista abre sob demanda. */}
+      <div className="lg:hidden border-t border-md-outline bg-md-surface max-h-[45dvh] flex flex-col min-h-0">
         <CourseSidebar
+          defaultCollapsed
           lessons={lessons.map((l) => ({
             id: l.id,
             title: l.title,
@@ -415,6 +449,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
           allCompleted={allCompleted}
           quizPassed={passed}
           onOpenQuiz={() => setQuizOpen(true)}
+          preview={isPreview}
         />
       </div>
 

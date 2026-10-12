@@ -230,6 +230,7 @@ export default function TenantRegisterPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                   className="absolute inset-y-0 right-0 pr-4 flex items-center text-md-on-surface-variant/60 hover:text-md-on-surface transition-colors"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}

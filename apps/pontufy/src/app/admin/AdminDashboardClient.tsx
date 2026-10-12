@@ -25,7 +25,7 @@ export default function AdminDashboardClient() {
     Promise.all([
       fetch(`/api/admin/tenant/branding?t=${ts}`, { cache: 'no-store' }).then((r) => r.json()),
       fetch(`/api/admin/analytics?t=${ts}`, { cache: 'no-store' }).then((r) => r.json()),
-      fetch(`/api/courses?limit=50&t=${ts}`, { cache: 'no-store' }).then((r) => r.json()),
+      fetch(`/api/courses?limit=50&includeDrafts=1&t=${ts}`, { cache: 'no-store' }).then((r) => r.json()),
       fetch(`/api/rewards?limit=50&t=${ts}`, { cache: 'no-store' }).then((r) => r.json()),
     ])
       .then(([tenantData, analyticsData, coursesData, rewardsData]) => {
@@ -41,7 +41,8 @@ export default function AdminDashboardClient() {
           merged.map((c: any) => ({
             id: c.id,
             title: c.title,
-            status: c.status === 'published' ? 'Publicado' : 'Rascunho',
+            status:
+              c.status === 'published' ? 'Publicado' : c.status === 'draft' ? 'Rascunho' : 'Só neste navegador',
             enrolled: c.enrollmentCount ?? 0,
             date: new Date(c.createdAt).toLocaleDateString('pt-BR'),
           })),
@@ -142,13 +143,13 @@ export default function AdminDashboardClient() {
                 + Gerar Novo Curso
               </a>
             </div>
-            <AISelectionTable courses={courses} />
+            <AISelectionTable courses={courses} onChanged={() => setReloadKey((k) => k + 1)} />
           </section>
 
-          <section className="md-card-outlined md-elevation-1 overflow-hidden">
+          <section id="recompensas" className="md-card-outlined md-elevation-1 overflow-hidden scroll-mt-20">
             <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-md-outline flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-md-surface-container-high/50">
               <div className="flex items-center gap-2">
-                <span style={{fontSize: '20px'}}>🎁</span>
+                <span style={{fontSize: '20px'}} aria-hidden="true">🎁</span>
                 <h2 className="text-title-lg font-bold text-md-on-surface">Catálogo de Recompensas</h2>
               </div>
             </div>

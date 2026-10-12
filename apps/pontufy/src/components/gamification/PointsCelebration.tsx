@@ -37,11 +37,17 @@ export default function PointsCelebration({
     }
   }, [isVisible, reduced]);
 
+  // Ref: um onComplete novo a cada render do pai não reinicia o timer.
+  const onCompleteRef = useRef(onComplete);
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  });
+
   useEffect(() => {
     if (!isVisible) return;
-    const timer = setTimeout(() => onComplete?.(), 2800);
+    const timer = setTimeout(() => onCompleteRef.current?.(), 2800);
     return () => clearTimeout(timer);
-  }, [isVisible, onComplete]);
+  }, [isVisible]);
 
   return (
     <>
@@ -56,10 +62,12 @@ export default function PointsCelebration({
               className="absolute inset-0 bg-md-tertiary/10"
             />
             <motion.div
-              initial={{ scale: 0.4, opacity: 0, y: 40 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.85, opacity: 0, y: 16 }}
-              transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+              role="status"
+              aria-live="polite"
+              initial={reduced ? { opacity: 0 } : { scale: 0.4, opacity: 0, y: 40 }}
+              animate={reduced ? { opacity: 1 } : { scale: 1, opacity: 1, y: 0 }}
+              exit={reduced ? { opacity: 0 } : { scale: 0.85, opacity: 0, y: 16 }}
+              transition={reduced ? { duration: 0.15 } : { type: 'spring', stiffness: 260, damping: 20 }}
               className="relative bg-md-surface px-10 py-8 rounded-3xl shadow-2xl border border-md-outline flex flex-col items-center gap-3"
             >
               <motion.div

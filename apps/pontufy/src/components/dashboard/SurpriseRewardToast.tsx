@@ -4,6 +4,10 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { triggerRewardRedemption } from "@/hooks/useApi";
 
+// Botão de teste do Autopilot: ferramenta de review do MVP, nunca visível
+// para colaboradores. Só aparece com NEXT_PUBLIC_AUTOPILOT_DEBUG=1.
+const SHOW_AUTOPILOT_DEBUG = process.env.NEXT_PUBLIC_AUTOPILOT_DEBUG === '1';
+
 type AutopilotResponse = {
   recommendedRewardId: string;
   aiMessage: string;
@@ -39,8 +43,9 @@ export default function SurpriseRewardToast() {
 
   return (
     <>
-      {/* Botão flutuante para forçar o Autopilot (Apenas no MVP para Review) —
+      {/* Botão flutuante para forçar o Autopilot (apenas review, via flag) —
           container tonal MD3 #f7d0a9 com texto escuro (AA 9:1) */}
+      {SHOW_AUTOPILOT_DEBUG && (
       <button
         type="button"
         onClick={triggerAutopilot}
@@ -56,6 +61,7 @@ export default function SurpriseRewardToast() {
           </>
         )}
       </button>
+      )}
 
       <AnimatePresence>
         {isVisible && data && (

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import {
   CheckCircle2,
   PlayCircle,
@@ -27,6 +27,10 @@ interface CourseSidebarProps {
   allCompleted: boolean;
   quizPassed: boolean;
   onOpenQuiz: () => void;
+  /** Começa recolhido (usado no celular para priorizar a aula). */
+  defaultCollapsed?: boolean;
+  /** Pré-visualização de rascunho: todas as aulas abertas, sem quiz. */
+  preview?: boolean;
 }
 
 export default function CourseSidebar({
@@ -37,8 +41,11 @@ export default function CourseSidebar({
   allCompleted,
   quizPassed,
   onOpenQuiz,
+  defaultCollapsed = false,
+  preview = false,
 }: CourseSidebarProps) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(defaultCollapsed);
+  const listId = useId();
   const progress = lessons.length > 0 ? Math.round((completedCount / lessons.length) * 100) : 0;
 
   // Acesso sequencial: a primeira aula incompleta é a "em andamento";
@@ -46,15 +53,17 @@ export default function CourseSidebar({
   const firstIncompleteIndex = lessons.findIndex((l) => !l.completed);
 
   return (
-    <div className="w-full h-full bg-md-surface flex flex-col overflow-hidden">
+    <div className="w-full h-full min-h-0 bg-md-surface flex flex-col overflow-hidden">
       {/* Header com colapso */}
       <div className="p-4 border-b border-md-outline flex-shrink-0">
         <button
+          type="button"
           onClick={() => setCollapsed((c) => !c)}
-          className="w-full flex items-center justify-between"
+          className="w-full min-h-11 -my-2 flex items-center justify-between"
           aria-expanded={!collapsed}
+          aria-controls={listId}
         >
-          <h2 className="font-bold text-white text-sm">Conteúdo do Curso</h2>
+          <h2 className="font-bold text-white text-sm">Conteúdo do curso</h2>
           <ChevronDown
             size={16}
             className={`text-gray-500 transition-transform ${collapsed ? '-rotate-90' : ''}`}
@@ -75,10 +84,10 @@ export default function CourseSidebar({
       {!collapsed && (
         <>
           {/* Lista de aulas */}
-          <div className="flex-1 overflow-y-auto">
+          <div id={listId} className="flex-1 min-h-0 overflow-y-auto">
             {lessons.map((lesson, index) => {
               const isActive = activeLesson?.id === lesson.id;
-              const locked = !lesson.completed && index > firstIncompleteIndex && !isActive;
+              const locked = !preview && !lesson.completed && index > firstIncompleteIndex && !isActive;
 
               return (
                 <button

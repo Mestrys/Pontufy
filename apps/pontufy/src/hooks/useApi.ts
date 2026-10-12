@@ -105,6 +105,7 @@ export async function triggerRewardRedemption(rewardId: string): Promise<{
   success: boolean;
   newBalance?: number;
   affiliateUrl?: string;
+  redemptionId?: string;
   message?: string;
   error?: string;
 }> {

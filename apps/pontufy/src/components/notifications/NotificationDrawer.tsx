@@ -145,6 +145,7 @@ export function NotificationDrawer({ isOpen, onClose }: NotificationDrawerProps)
                 </button>
                 <button
                   type="button"
+                  aria-label="Fechar notificações"
                   onClick={onClose}
                   className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition-colors"
                 >

@@ -142,6 +142,7 @@ export default function BattlesPage() {
               </h2>
               <div className="flex gap-3">
                 <select
+                  aria-label="Colega para desafiar"
                   value={selectedOpponent}
                   onChange={(e) => setSelectedOpponent(e.target.value)}
                   className="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-md-primary"

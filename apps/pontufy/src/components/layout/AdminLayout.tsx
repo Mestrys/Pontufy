@@ -2,7 +2,8 @@
 
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import Link from 'next/link';
-import { signOut } from 'next-auth/react';
+import { usePathname } from 'next/navigation';
+import { signOut, useSession } from 'next-auth/react';
 import {
   LayoutDashboard,
   BarChart3,
@@ -46,8 +47,8 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
   {
     label: 'Visão Geral',
     items: [
-      { href: '/admin', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
-      { href: '/admin/analytics', icon: <BarChart3 size={20} />, label: 'Analytics' },
+      { href: '/admin', icon: <LayoutDashboard size={20} />, label: 'Painel' },
+      { href: '/admin/analytics', icon: <BarChart3 size={20} />, label: 'Indicadores' },
     ],
   },
   {
@@ -66,7 +67,8 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
   {
     label: 'Catálogo',
     items: [
-      { href: '/admin/rewards', icon: <Gift size={20} />, label: 'Recompensas' },
+      // O catálogo é gerido no painel (seção #recompensas); não há rota própria.
+      { href: '/admin#recompensas', icon: <Gift size={20} />, label: 'Recompensas' },
     ],
   },
   {
@@ -78,7 +80,26 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
   },
 ];
 
+// Item ativo pela rota atual. Links com âncora (#) apontam para uma seção de
+// outra página e nunca ficam ativos; subrotas ativam o item pai.
+function isNavItemActive(href: string, pathname: string): boolean {
+  if (href.includes('#')) return false;
+  if (href === '/admin') return pathname === '/admin';
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+function currentSectionLabel(pathname: string): string {
+  for (const section of NAV_SECTIONS) {
+    for (const item of section.items) {
+      if (isNavItemActive(item.href, pathname)) return item.label;
+    }
+  }
+  return 'Painel';
+}
+
 export function AdminLayoutProvider({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const { data: session } = useSession();
   const [navOpen, setNavOpen] = useState(false);
   const [navCollapsed, setNavCollapsed] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -97,6 +118,16 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
         }
       })
       .catch(() => {});
+  }, []);
+
+  // O wizard avisa o novo saldo após gerar um curso (o layout não remonta).
+  useEffect(() => {
+    const onCredits = (e: Event) => {
+      const value = (e as CustomEvent<number>).detail;
+      if (typeof value === 'number') setAiCredits(value);
+    };
+    window.addEventListener('pontufy:ai-credits', onCredits);
+    return () => window.removeEventListener('pontufy:ai-credits', onCredits);
   }, []);
 
   // Handle outside click for profile dropdown
@@ -187,12 +218,15 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
                   {section.label}
                 </h3>
                 <div className="space-y-1">
-                  {section.items.map((item) => (
+                  {section.items.map((item) => {
+                    const active = isNavItemActive(item.href, pathname);
+                    return (
                     <Link
                       key={item.href}
                       href={item.href}
+                      aria-current={active ? 'page' : undefined}
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-body-md font-medium transition-all duration-200 ${
-                        item.href === window.location.pathname
+                        active
                           ? 'bg-md-primary-container text-md-on-primary-container'
                           : 'text-md-on-surface-variant hover:bg-md-surface-container-high hover:text-md-on-surface'
                       }`}
@@ -206,7 +240,8 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
                         </span>
                       )}
                     </Link>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             ))}
@@ -242,6 +277,7 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
                   onClick={() => { window.location.href = '/dashboard'; }}
                   className="p-2.5 rounded-xl text-md-on-surface-variant hover:bg-md-surface-container-high hover:text-md-on-surface transition-colors"
                   title="Visão do Colaborador"
+                  aria-label="Visão do Colaborador"
                 >
                   <LayoutDashboard size={22} />
                 </button>
@@ -250,6 +286,7 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
                   onClick={handleSignOut}
                   className="p-2.5 rounded-xl text-md-error hover:bg-md-error/10 transition-colors"
                   title="Sair"
+                  aria-label="Sair"
                 >
                   <LogOut size={22} />
                 </button>
@@ -258,24 +295,27 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
           </div>
         </aside>
 
-        {/* Mobile drawer toggle button (only visible on mobile when drawer closed) */}
-        <button
-          type="button"
-          onClick={() => setNavOpen(true)}
-          className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-xl bg-md-surface-container border border-md-outline shadow-md"
-          aria-label="Abrir menu"
-        >
-          <Menu size={24} className="text-md-on-surface" />
-        </button>
-
         {/* Main Content */}
         <main className={`flex-1 min-h-screen transition-all duration-300 ${navCollapsed ? 'md:ml-16' : 'md:ml-64'}`}>
           {/* Top App Bar */}
           <header className="sticky top-0 z-30 bg-md-surface-container border-b border-md-outline backdrop-blur-sm bg-opacity-80">
             <div className="flex items-center justify-between h-16 px-4 sm:px-6 md:px-8">
-              {/* Page Title */}
-              <div className="flex-1" data-page-title>
-                {children && false} // Placeholder - actual title comes from page
+              {/* Mobile: botão do menu dentro da barra (não sobrepõe o conteúdo)
+                  e o nome da seção atual, já que a gaveta fica oculta. No
+                  desktop a gaveta mostra o item ativo e cada página tem seu h1. */}
+              <div className="flex-1 min-w-0 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setNavOpen(true)}
+                  className="md:hidden -ml-2 size-11 flex items-center justify-center rounded-xl text-md-on-surface hover:bg-md-surface-container-high transition-colors"
+                  aria-label="Abrir menu"
+                  aria-expanded={navOpen}
+                >
+                  <Menu size={24} aria-hidden="true" />
+                </button>
+                <span className="md:hidden text-title-md text-md-on-surface truncate">
+                  {currentSectionLabel(pathname)}
+                </span>
               </div>
 
               {/* Actions */}
@@ -317,7 +357,7 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
                       {tenant?.name || 'Administrador'}
                     </span>
                     <span className="hidden sm:block text-label-sm text-md-tertiary bg-md-tertiary-container px-2 py-0.5 rounded-full">
-                      admin_rh
+                      Gestão de RH
                     </span>
                     <ChevronDown size={16} className={`text-md-on-surface-variant transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
                   </button>
@@ -326,8 +366,10 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
                     <div className="absolute right-0 top-full mt-2 w-56 bg-md-surface-container border border-md-outline rounded-2xl shadow-lg md-elevation-3 py-2">
                       <div className="px-4 py-3 border-b border-md-outline">
                         <p className="text-body-md font-semibold text-md-on-surface">{tenant?.name || 'Administrador'}</p>
-                        <p className="text-body-sm text-md-on-surface-variant">admin@empresa.com</p>
-                        <span className="inline-block mt-1 text-label-sm text-md-tertiary bg-md-tertiary-container px-2 py-0.5 rounded-full">admin_rh</span>
+                        {session?.user?.email && (
+                          <p className="text-body-sm text-md-on-surface-variant truncate">{session.user.email}</p>
+                        )}
+                        <span className="inline-block mt-1 text-label-sm text-md-tertiary bg-md-tertiary-container px-2 py-0.5 rounded-full">Gestão de RH</span>
                       </div>
                       <Link
                         href="/profile"

@@ -55,6 +55,7 @@ export async function POST(request: Request) {
           select: {
             id: true,
             title: true,
+            status: true,
             workloadHours: true,
             _count: { select: { lessons: true } },
           },
@@ -63,6 +64,11 @@ export async function POST(request: Request) {
     });
     if (!lesson) {
       return NextResponse.json({ error: 'Aula não encontrada no escopo da empresa.' }, { status: 404 });
+    }
+    // Rascunho (curso de IA em revisão) não gera pontos: a pré-visualização do RH
+    // não pode creditar nem emitir certificado.
+    if (lesson.course.status !== 'published') {
+      return NextResponse.json({ error: 'Este curso ainda não foi publicado.' }, { status: 409 });
     }
 
     // Distributed lock prevents double-credit if the client fires two concurrent completions.
