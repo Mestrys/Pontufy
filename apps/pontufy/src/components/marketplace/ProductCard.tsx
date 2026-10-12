@@ -45,13 +45,13 @@ export default function ProductCard({ product, userPoints, onRedeem }: ProductCa
         )}
 
         {/* Coupon Badge - Top Left */}
-        <div className="absolute top-3 left-3 bg-md-primary text-md-on-primary px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+        <div className="absolute top-3 left-3 bg-md-primary text-md-on-primary px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1">
           <TicketPercent size={12} />
           {isLomadee ? 'Cupom' : 'Benefício'}
         </div>
 
         {/* Partner Name Badge - Top Right */}
-        <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] font-bold text-white uppercase tracking-wider">
+        <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm px-2 py-0.5 rounded text-xs font-bold text-white uppercase tracking-wider">
           {partner}
         </div>
       </div>
@@ -73,7 +73,7 @@ export default function ProductCard({ product, userPoints, onRedeem }: ProductCa
               href={product.originalUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-1.5 text-md-on-surface-variant/60 hover:text-md-primary hover:bg-md-surface-container-high rounded transition-colors"
+              className="p-1.5 text-md-on-surface-muted hover:text-md-primary-text hover:bg-md-surface-container-high rounded transition-colors"
               title="Ver oferta original"
             >
               <ExternalLink size={14} />
@@ -92,7 +92,7 @@ export default function ProductCard({ product, userPoints, onRedeem }: ProductCa
           <div className="w-full flex flex-col gap-2">
             <button
               disabled
-              className="w-full bg-md-surface-container text-gray-600 font-bold py-2.5 rounded-lg cursor-not-allowed flex items-center justify-center gap-2 text-sm border border-md-outline"
+              className="w-full bg-md-surface-container text-md-on-surface-muted font-bold py-2.5 rounded-lg cursor-not-allowed flex items-center justify-center gap-2 text-sm border border-md-outline"
             >
               <Lock size={14} /> Resgatar
             </button>
@@ -103,7 +103,7 @@ export default function ProductCard({ product, userPoints, onRedeem }: ProductCa
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              <div className="text-[10px] text-gray-600 font-semibold text-center">
+              <div className="text-xs text-md-on-surface-muted font-semibold text-center">
                 Faltam {pointsMissing.toLocaleString('pt-BR')} pts
               </div>
             </div>

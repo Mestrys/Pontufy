@@ -5,7 +5,7 @@ import type { TopCourse } from './types';
 const formatNumber = (value: number): string => new Intl.NumberFormat('pt-BR').format(value);
 
 const STATUS_STYLES: Record<string, string> = {
-  published: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  published: 'bg-md-tertiary/10 text-md-tertiary border-md-tertiary/20',
   draft: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
   removed: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
 };
@@ -27,7 +27,7 @@ interface TopCoursesTableProps {
 export default function TopCoursesTable({ courses }: TopCoursesTableProps) {
   if (!courses.length) {
     return (
-      <p className="text-sm text-gray-500 py-6 text-center">
+      <p className="text-sm text-md-on-surface-muted py-6 text-center">
         Nenhum curso com conclusões registadas ainda.
       </p>
     );
@@ -37,7 +37,7 @@ export default function TopCoursesTable({ courses }: TopCoursesTableProps) {
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="text-left text-xs text-gray-500 uppercase tracking-wide border-b border-[#2a2a2a]">
+          <tr className="text-left text-xs text-md-on-surface-muted uppercase tracking-wide border-b border-[#2a2a2a]">
             <th className="pb-3 pr-4 font-semibold">Curso</th>
             <th className="pb-3 pr-4 font-semibold">Estado</th>
             <th className="pb-3 pr-4 font-semibold text-right">Conclusões</th>

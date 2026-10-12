@@ -12,9 +12,9 @@ export default function DevComponentsCatalog() {
     <main className="min-h-screen bg-md-surface-dim pt-24 pb-16 px-4 sm:px-8">
       <div className="max-w-3xl mx-auto">
         <h1 className="text-3xl font-black text-white tracking-tight mb-2">
-          Catálogo de Componentes <span className="text-md-primary-container">MD3</span>
+          Catálogo de Componentes <span className="text-md-primary-text">MD3</span>
         </h1>
-        <p className="text-gray-500 text-sm mb-10">
+        <p className="text-md-on-surface-muted text-sm mb-10">
           Validação visual dos primitivos atômicos — Material Design 3 · Google Sans Flex.
         </p>
 
@@ -58,15 +58,15 @@ export default function DevComponentsCatalog() {
           <div className="grid sm:grid-cols-3 gap-4">
             <Card variant="elevated" className="p-5">
               <p className="font-semibold text-white">Elevated</p>
-              <p className="text-sm text-gray-500 mt-1">shadow-md (M3 2dp)</p>
+              <p className="text-sm text-md-on-surface-muted mt-1">shadow-md (M3 2dp)</p>
             </Card>
             <Card variant="outlined" className="p-5">
               <p className="font-semibold text-white">Outlined</p>
-              <p className="text-sm text-gray-500 mt-1">border-md-outline</p>
+              <p className="text-sm text-md-on-surface-muted mt-1">border-md-outline</p>
             </Card>
             <Card variant="filled" className="p-5">
               <p className="font-semibold text-white">Filled</p>
-              <p className="text-sm text-gray-500 mt-1">surface-container</p>
+              <p className="text-sm text-md-on-surface-muted mt-1">surface-container</p>
             </Card>
           </div>
         </section>

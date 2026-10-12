@@ -60,7 +60,7 @@ export function MD3SearchBar({ compact = false }: { compact?: boolean }) {
             aria-label="Buscar cursos"
             className={`${
               compact ? 'w-full' : 'absolute right-10'
-            } pl-4 pr-9 py-1.5 rounded-full text-sm bg-md-surface-container border border-md-outline-variant text-white placeholder-gray-600 focus:outline-none focus:border-md-primary transition-colors`}
+            } pl-4 pr-9 py-1.5 rounded-full text-sm bg-md-surface-container border border-md-outline-variant text-white placeholder:text-md-on-surface-muted focus:outline-none focus:border-md-focus transition-colors`}
           />
         )}
       </AnimatePresence>

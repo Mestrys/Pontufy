@@ -16,7 +16,7 @@ export function ErrorState({ title, description, reset }: ErrorStateProps) {
         <AlertTriangle size={28} className="text-md-error" />
       </div>
       <h2 className="text-xl font-bold text-white">{title}</h2>
-      <p className="text-gray-500 max-w-md text-sm">
+      <p className="text-md-on-surface-muted max-w-md text-sm">
         {description ?? 'Ocorreu um erro ao carregar esta seção. Você pode tentar novamente.'}
       </p>
       <Button variant="tonal" onClick={reset} className="mt-2">

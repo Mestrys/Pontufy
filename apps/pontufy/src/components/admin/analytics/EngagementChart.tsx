@@ -47,7 +47,7 @@ export default function EngagementChart({ data }: EngagementChartProps) {
   if (!data.length) {
     return (
       <div className="flex h-72 items-center justify-center">
-        <p className="text-sm text-gray-500">Sem dados de engajamento nos últimos 30 dias.</p>
+        <p className="text-sm text-md-on-surface-muted">Sem dados de engajamento nos últimos 30 dias.</p>
       </div>
     );
   }
@@ -70,13 +70,13 @@ export default function EngagementChart({ data }: EngagementChartProps) {
             <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" vertical={false} />
             <XAxis
               dataKey="date"
-              tick={{ fill: '#6b7280', fontSize: 11 }}
+              tick={{ fill: 'var(--color-md-on-surface-muted)', fontSize: 12 }}
               tickLine={false}
               axisLine={{ stroke: '#2a2a2a' }}
               minTickGap={24}
             />
             <YAxis
-              tick={{ fill: '#6b7280', fontSize: 11 }}
+              tick={{ fill: 'var(--color-md-on-surface-muted)', fontSize: 12 }}
               tickLine={false}
               axisLine={false}
               allowDecimals={false}

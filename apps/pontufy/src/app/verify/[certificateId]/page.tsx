@@ -75,7 +75,7 @@ export default async function VerifyCertificatePage({ params }: Props) {
       <div className="w-full max-w-2xl bg-black/20 border border-white/10 rounded-2xl p-8 md:p-12">
         <div className="text-center mb-8">
           <div className={`inline-flex items-center gap-3 px-6 py-3 rounded-full border ${
-            isValid ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400' : 'border-red-500/50 bg-red-500/10 text-red-400'
+            isValid ? 'border-md-tertiary/50 bg-md-tertiary/10 text-md-tertiary' : 'border-red-500/50 bg-red-500/10 text-red-400'
           }`}>
             {isValid ? (
               <>
@@ -93,39 +93,39 @@ export default async function VerifyCertificatePage({ params }: Props) {
 
         <div className="bg-black/30 border border-white/5 rounded-xl p-6 space-y-4">
           <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Colaborador</p>
+            <p className="text-xs text-md-on-surface-muted uppercase tracking-wider">Colaborador</p>
             <p className="text-xl font-bold text-white mt-1">{certificate.user?.name || 'Desconhecido'}</p>
           </div>
 
           <div className="border-t border-white/10 pt-4">
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Curso</p>
-            <p className="text-lg font-semibold text-md-primary mt-1">{certificate.courseName}</p>
+            <p className="text-xs text-md-on-surface-muted uppercase tracking-wider">Curso</p>
+            <p className="text-lg font-semibold text-md-primary-text mt-1">{certificate.courseName}</p>
           </div>
 
           <div className="border-t border-white/10 pt-4">
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Empresa</p>
+            <p className="text-xs text-md-on-surface-muted uppercase tracking-wider">Empresa</p>
             <p className="text-lg text-gray-300 mt-1">{tenant?.name || 'Desconhecida'}</p>
           </div>
 
           <div className="border-t border-white/10 pt-4">
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Data de Emissão</p>
+            <p className="text-xs text-md-on-surface-muted uppercase tracking-wider">Data de Emissão</p>
             <p className="text-lg text-gray-300 mt-1">{issuedDate}</p>
           </div>
 
           <div className="border-t border-white/10 pt-4">
-            <p className="text-xs text-gray-500 uppercase tracking-wider">Código de Verificação</p>
+            <p className="text-xs text-md-on-surface-muted uppercase tracking-wider">Código de Verificação</p>
             <p className="font-mono text-sm text-gray-400 mt-1 break-all">{certificate.verificationHash || 'Não disponível'}</p>
           </div>
 
           {certificate.signature && (
             <div className="border-t border-white/10 pt-4">
-              <p className="text-xs text-gray-500 uppercase tracking-wider">Assinatura Criptográfica</p>
-              <p className="font-mono text-xs text-gray-500 mt-1 break-all">{certificate.signature.slice(0, 32)}…</p>
+              <p className="text-xs text-md-on-surface-muted uppercase tracking-wider">Assinatura Criptográfica</p>
+              <p className="font-mono text-xs text-md-on-surface-muted mt-1 break-all">{certificate.signature.slice(0, 32)}…</p>
             </div>
           )}
 
           <div className="border-t border-white/10 pt-4 text-center">
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-md-on-surface-muted">
               {isValid
                 ? 'Este certificado foi verificado criptograficamente e é autêntico.'
                 : 'Este certificado não pôde ser verificado. Pode ter sido alterado ou corrompido.'}
@@ -133,7 +133,7 @@ export default async function VerifyCertificatePage({ params }: Props) {
           </div>
         </div>
 
-        <div className="mt-8 text-center text-sm text-gray-500">
+        <div className="mt-8 text-center text-sm text-md-on-surface-muted">
           <p>Pontufy Platform — Verificação pública de certificados</p>
           <p className="mt-1">ID: {certificateId}</p>
         </div>

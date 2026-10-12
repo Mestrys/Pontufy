@@ -14,7 +14,7 @@ const variants: Record<Variant, string> = {
   tonal: 'bg-md-secondary/15 text-md-secondary hover:bg-md-secondary/25 active:scale-[0.98]',
   outlined:
     'border border-md-outline text-md-on-surface-variant hover:border-md-outline-variant hover:text-md-on-surface',
-  text: 'text-md-primary-container hover:bg-md-primary/10',
+  text: 'text-md-primary-text hover:bg-md-primary/10',
 };
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

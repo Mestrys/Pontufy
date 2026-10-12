@@ -34,7 +34,7 @@ export default function PrivacidadePage() {
     <main className="min-h-screen bg-[#0a0a0a] py-20 px-6">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center gap-3">
-          <div className="flex size-12 items-center justify-center rounded-md bg-emerald-500/15 text-emerald-400">
+          <div className="flex size-12 items-center justify-center rounded-md bg-md-tertiary/15 text-md-tertiary">
             <ShieldCheck className="size-6" aria-hidden="true" />
           </div>
           <span className="rounded-full border border-[#2a2a2a] bg-[#141414] px-3 py-1 text-label-sm text-gray-400">
@@ -43,9 +43,9 @@ export default function PrivacidadePage() {
         </div>
 
         <h1 className="mt-6 text-display-sm font-black text-white">
-          Política de <span className="text-emerald-400">Privacidade</span>
+          Política de <span className="text-md-tertiary">Privacidade</span>
         </h1>
-        <p className="mt-4 text-body-sm text-gray-500">Última atualização: {LAST_UPDATED}</p>
+        <p className="mt-4 text-body-sm text-md-on-surface-muted">Última atualização: {LAST_UPDATED}</p>
 
         <div className="mt-8 md-card-elevated p-5 text-body-sm text-gray-400 border border-[#2a2a2a]">
           Este documento é mantido pela{' '}
@@ -86,7 +86,7 @@ export default function PrivacidadePage() {
             <p>
               <strong className="text-white">Encarregado (DPO):</strong> em cumprimento ao art.
               41 da LGPD e, no que aplicável, ao art. 37 do GDPR, disponibilizamos o canal{' '}
-              <a href={`mailto:${DPO_EMAIL}`} className="text-emerald-400 hover:underline">
+              <a href={`mailto:${DPO_EMAIL}`} className="text-md-tertiary hover:underline">
                 {DPO_EMAIL}
               </a>{' '}
               para tratar de qualquer assunto relacionado a dados pessoais.
@@ -285,14 +285,14 @@ export default function PrivacidadePage() {
             <p>
               Dúvidas, solicitações ou reclamações relacionadas a dados pessoais podem ser
               enviadas para{' '}
-              <a href={`mailto:${DPO_EMAIL}`} className="text-emerald-400 hover:underline">
+              <a href={`mailto:${DPO_EMAIL}`} className="text-md-tertiary hover:underline">
                 {DPO_EMAIL}
               </a>
               . Caso não fique satisfeito com nossa resposta, você também pode apresentar
               reclamação à Autoridade Nacional de Proteção de Dados (ANPD) ou, se aplicável, à
               autoridade de proteção de dados de seu país de residência habitual, local de
               trabalho ou local da suposta infração no âmbito do GDPR. Veja também nossos{' '}
-              <Link href="/termos" className="text-emerald-400 hover:underline">
+              <Link href="/termos" className="text-md-tertiary hover:underline">
                 Termos de Uso
               </Link>
               .

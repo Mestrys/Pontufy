@@ -41,11 +41,11 @@ export default function LeaderboardCard() {
   return (
     <section className="bg-black/20 border border-white/10 rounded-2xl p-5">
       <header className="flex items-center gap-2 mb-4">
-        <Trophy className="text-md-primary" size={20} />
+        <Trophy className="text-md-primary-text" size={20} />
         <h2 className="text-lg font-black text-white tracking-tight">
           Ranking Interdepartamental
         </h2>
-        <span className="ml-auto text-[10px] uppercase tracking-wider text-gray-500 bg-white/5 border border-white/10 rounded-full px-2.5 py-1">
+        <span className="ml-auto text-xs uppercase tracking-wider text-md-on-surface-muted bg-white/5 border border-white/10 rounded-full px-2.5 py-1">
           Semana atual
         </span>
       </header>
@@ -55,13 +55,13 @@ export default function LeaderboardCard() {
       )}
       {!ranking && !error && (
         <div className="flex justify-center py-10">
-          <Loader2 className="animate-spin text-md-primary" size={26} />
+          <Loader2 className="animate-spin text-md-primary-text" size={26} />
         </div>
       )}
 
       {ranking && ranking.length === 0 && (
         <div className="text-center py-10">
-          <Users className="mx-auto text-gray-600 mb-3" size={36} />
+          <Users className="mx-auto text-md-on-surface-muted mb-3" size={36} />
           <p className="text-gray-400 text-sm">
             Nenhum departamento definido ainda. Defina o seu departamento no perfil para entrar no ranking.
           </p>
@@ -87,34 +87,34 @@ export default function LeaderboardCard() {
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="font-bold text-white text-sm truncate">{entry.department}</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-md-on-surface-muted">
                       {entry.members} {entry.members === 1 ? 'membro' : 'membros'}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="font-black text-md-primary text-lg leading-none">
+                    <p className="font-black text-md-primary-text text-lg leading-none">
                       {entry.points.toLocaleString('pt-BR')}
                     </p>
-                    <p className="text-[10px] text-gray-500 mt-1">pontos</p>
+                    <p className="text-xs text-md-on-surface-muted mt-1">pontos</p>
                   </div>
                 </div>
 
                 {/* 13.5 — Progresso da meta semanal de horas */}
                 <div className="mt-3 flex items-center gap-2">
-                  <Timer size={14} className="text-gray-500 shrink-0" />
+                  <Timer size={14} className="text-md-on-surface-muted shrink-0" />
                   <div className="flex-1 h-2 bg-black/40 rounded-full overflow-hidden">
                     <div
-                      className={`h-full transition-all ${entry.goalMet ? 'bg-emerald-400' : 'bg-md-primary'}`}
+                      className={`h-full transition-all ${entry.goalMet ? 'bg-md-tertiary' : 'bg-md-primary'}`}
                       style={{ width: `${pct}%` }}
                     />
                   </div>
-                  <span className="text-[10px] text-gray-500 whitespace-nowrap">
+                  <span className="text-xs text-md-on-surface-muted whitespace-nowrap">
                     {entry.hours.toFixed(1)}h / {entry.goalHours}h
                   </span>
                 </div>
 
                 {entry.goalMet && (
-                  <p className="mt-2 text-[11px] font-semibold text-emerald-300 flex items-center gap-1.5">
+                  <p className="mt-2 text-xs font-semibold text-md-tertiary flex items-center gap-1.5">
                     <Gift size={13} />
                     {entry.bonusAwarded
                       ? 'Bônus coletivo de 25 pts concedido esta semana!'

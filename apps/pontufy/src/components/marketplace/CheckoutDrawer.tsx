@@ -155,7 +155,7 @@ export default function CheckoutDrawer({
               )}
               
               <div className="flex-1">
-                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">
+                <div className="text-xs font-bold text-md-on-surface-muted uppercase tracking-wider mb-1">
                   Na {partner}
                 </div>
                 <h3 className="font-bold text-md-on-surface leading-tight text-sm">
@@ -173,11 +173,11 @@ export default function CheckoutDrawer({
               >
                 <div className="space-y-4">
                   <div className="flex justify-between items-center py-3 border-b border-md-outline">
-                    <span className="text-gray-500">Seu Saldo Atual</span>
+                    <span className="text-md-on-surface-muted">Seu Saldo Atual</span>
                     <span className="font-bold text-md-tertiary">{userBalance} pts</span>
                   </div>
                   <div className="flex justify-between items-center py-3 border-b border-md-outline">
-                    <span className="text-gray-500">Valor do Resgate</span>
+                    <span className="text-md-on-surface-muted">Valor do Resgate</span>
                     <span className="font-bold text-md-error">- {price} pts</span>
                   </div>
                   <div className="flex justify-between items-center py-3">
@@ -218,13 +218,13 @@ export default function CheckoutDrawer({
                   <div className="absolute inset-0 rounded-full border-4 border-md-tertiary/20 border-t-md-tertiary animate-spin"></div>
                   {/* Inner glowing core */}
                   <div className="absolute inset-2 bg-md-primary rounded-full animate-pulse opacity-20"></div>
-                  <Loader2 className="absolute inset-0 m-auto text-md-primary animate-spin" size={32} />
+                  <Loader2 className="absolute inset-0 m-auto text-md-primary-text animate-spin" size={32} />
                 </div>
                 <div className="text-center space-y-2">
                   <h3 className="font-bold text-md-on-surface text-lg">
                     Processando transação...
                   </h3>
-                  <p className="text-gray-500 text-sm animate-pulse">
+                  <p className="text-md-on-surface-muted text-sm animate-pulse">
                     Comunicação segura com a API
                   </p>
                 </div>
@@ -295,7 +295,7 @@ export default function CheckoutDrawer({
                   )}
                   <button
                     onClick={onClose}
-                    className="w-full py-3.5 rounded-xl font-bold text-md-primary hover:bg-md-surface-container transition-colors"
+                    className="w-full py-3.5 rounded-xl font-bold text-md-primary-text hover:bg-md-surface-container transition-colors"
                   >
                     Voltar para o Catálogo
                   </button>

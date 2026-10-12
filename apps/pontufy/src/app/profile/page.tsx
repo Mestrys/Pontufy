@@ -55,7 +55,7 @@ export default function ProfilePage() {
   if (status === 'loading') {
     return (
       <main className="min-h-screen flex items-center justify-center bg-md-surface-dim">
-        <Loader2 className="animate-spin text-md-primary" size={36} />
+        <Loader2 className="animate-spin text-md-primary-text" size={36} />
       </main>
     );
   }
@@ -65,7 +65,7 @@ export default function ProfilePage() {
       <div className="max-w-[720px] mx-auto px-6 md:px-8">
         <header className="mb-8">
           <h1 className="text-3xl font-black text-white tracking-tight">Meu Perfil</h1>
-          <p className="text-gray-500 mt-1.5 text-sm">Gerencie suas informações pessoais.</p>
+          <p className="text-md-on-surface-muted mt-1.5 text-sm">Gerencie suas informações pessoais.</p>
         </header>
 
         <div className="space-y-6">
@@ -77,7 +77,7 @@ export default function ProfilePage() {
               </div>
               <div className="min-w-0">
                 <h2 className="text-lg font-bold text-white truncate">{session?.user?.name}</h2>
-                <p className="text-sm text-gray-500 truncate">{session?.user?.email}</p>
+                <p className="text-sm text-md-on-surface-muted truncate">{session?.user?.email}</p>
                 <span className="inline-flex items-center gap-1.5 mt-1 text-xs font-bold px-2 py-0.5 rounded-full border bg-white/5 text-gray-300 border-white/10">
                   <ShieldCheck size={11} className="text-md-tertiary" />
                   {roleLabel}
@@ -110,7 +110,7 @@ export default function ProfilePage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Seu nome completo"
-                className="flex-1 px-4 py-2.5 rounded-lg bg-md-surface-container border border-md-outline text-white placeholder-gray-600 focus:outline-none focus:border-md-primary text-sm"
+                className="flex-1 px-4 py-2.5 rounded-lg bg-md-surface-container border border-md-outline text-white placeholder:text-md-on-surface-muted focus:outline-none focus:border-md-focus text-sm"
               />
               <button
                 type="button"
@@ -132,7 +132,7 @@ export default function ProfilePage() {
           {/* Preferências de feedback sensorial (5.2) */}
           <section className="bg-md-surface border border-md-outline rounded-xl p-6">
             <h3 className="font-bold text-white mb-1">Feedback Sonoro</h3>
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-sm text-md-on-surface-muted mb-4">
               Sons sutis e vibração háptica ao ganhar pontos, acertar quizzes e concluir cursos.
             </p>
             <button
@@ -173,7 +173,7 @@ export default function ProfilePage() {
           {/* Segurança (7.3) — revogação instantânea de sessões */}
           <section className="bg-md-surface border border-md-outline rounded-xl p-6">
             <h3 className="font-bold text-white mb-1">Sessões Ativas</h3>
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-sm text-md-on-surface-muted mb-4">
               Encerra todas as sessões em outros dispositivos imediatamente (útil se seu
               dispositivo for perdido ou roubado).
             </p>

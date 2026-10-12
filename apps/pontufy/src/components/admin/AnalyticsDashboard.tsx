@@ -85,7 +85,7 @@ export default function AnalyticsDashboard() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Loader2 className="animate-spin text-md-primary" size={32} />
+        <Loader2 className="animate-spin text-md-primary-text" size={32} />
       </div>
     );
   }

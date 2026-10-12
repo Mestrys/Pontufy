@@ -86,16 +86,16 @@ export default function AnalyticsClient() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-              <BarChart3 size={22} className="text-emerald-400" /> Painel de Analytics
+              <BarChart3 size={22} className="text-md-tertiary" /> Painel de Analytics
             </h1>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-md-on-surface-muted mt-1">
               Desempenho da equipa, engajamento e consumo de pontos nos últimos 30 dias
             </p>
           </div>
 
           <a
             href="/api/admin/payroll/export?period=month"
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-md-on-primary bg-md-primary hover:bg-md-primary-container transition-colors"
           >
             <Download size={15} /> Exportar Folha (CSV)
           </a>
@@ -105,9 +105,9 @@ export default function AnalyticsClient() {
 
         <section className="bg-[#141414] border border-[#2a2a2a] rounded-2xl p-6">
           <h2 className="text-sm font-bold text-white uppercase tracking-wide mb-1 flex items-center gap-2">
-            <TrendingUp size={16} className="text-emerald-400" /> Engajamento Diário
+            <TrendingUp size={16} className="text-md-tertiary" /> Engajamento Diário
           </h2>
-          <p className="text-xs text-gray-500 mb-4">Conclusões de aulas vs. resgates de benefícios</p>
+          <p className="text-xs text-md-on-surface-muted mb-4">Conclusões de aulas vs. resgates de benefícios</p>
           <EngagementChart data={data.engagement} />
         </section>
 

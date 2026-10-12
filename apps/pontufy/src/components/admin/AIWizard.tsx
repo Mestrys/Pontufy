@@ -266,7 +266,7 @@ export default function AIWizard() {
 
         <div className="mb-8">
           <h2 className="text-headline-sm font-bold text-md-on-surface flex items-center gap-2 mb-2">
-            <Sparkles className="text-md-primary" size={24} /> Assistente de IA
+            <Sparkles className="text-md-primary-text" size={24} /> Assistente de IA
           </h2>
           <p className="text-body-md text-md-on-surface-variant">Crie treinamentos corporativos engajadores em segundos.</p>
         </div>
@@ -363,7 +363,7 @@ export default function AIWizard() {
               id="wizard-sector"
               value={sector}
               onChange={(e) => setSector(e.target.value)}
-              className="w-full bg-md-surface-container border border-md-outline text-md-on-surface rounded-xl p-3 outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 transition-all text-body-md"
+              className="w-full bg-md-surface-container border border-md-outline text-md-on-surface rounded-xl p-3 outline-none focus:border-md-focus focus:ring-2 focus:ring-md-focus/40 transition-all text-body-md"
             >
               <option value="tech">Tecnologia e Inovação</option>
               <option value="health">Saúde e Bem-Estar</option>
@@ -386,14 +386,14 @@ export default function AIWizard() {
               id="wizard-prompt"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              className="w-full h-32 bg-md-surface-container border border-md-outline text-md-on-surface rounded-xl p-3 outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 transition-all resize-none text-body-md placeholder:text-md-on-surface-variant/50"
+              className="w-full h-32 bg-md-surface-container border border-md-outline text-md-on-surface rounded-xl p-3 outline-none focus:border-md-focus focus:ring-2 focus:ring-md-focus/40 transition-all resize-none text-body-md placeholder:text-md-on-surface-muted"
               placeholder={PROMPT_PLACEHOLDERS[contentType]}
             />
           </div>
 
           <div>
             <p id="wizard-files-label" className="text-label-lg text-md-on-surface-variant mb-2 block">
-              Material de Referência <span className="text-md-on-surface-variant/60 font-normal">(opcional)</span>
+              Material de Referência <span className="text-md-on-surface-muted font-normal">(opcional)</span>
             </p>
             {/* Zona de upload operável por teclado (Enter/Espaço abrem o seletor). */}
             <div
@@ -428,11 +428,11 @@ export default function AIWizard() {
                 onChange={(e) => { if (e.target.files) addFiles(e.target.files); e.target.value = ''; }}
                 className="hidden"
               />
-              <Upload size={24} className="mx-auto mb-2 text-md-on-surface-variant/50" />
+              <Upload size={24} className="mx-auto mb-2 text-md-on-surface-muted" />
               <p className="text-body-sm text-md-on-surface-variant">
-                Arraste arquivos aqui ou <span className="text-md-primary font-semibold">clique para selecionar</span>
+                Arraste arquivos aqui ou <span className="text-md-primary-text font-semibold">clique para selecionar</span>
               </p>
-              <p className="text-xs text-md-on-surface-variant/50 mt-1">
+              <p className="text-xs text-md-on-surface-muted mt-1">
                 PDF, Word, TXT, PowerPoint, Excel, MD, MP4, MP3 — até {MAX_FILES} arquivos, 10MB cada
               </p>
             </div>
@@ -441,15 +441,15 @@ export default function AIWizard() {
               <div className="mt-3 space-y-2">
                 {files.map((f, i) => (
                   <div key={i} className="flex items-center gap-3 bg-md-surface-container-high rounded-lg px-3 py-2 group">
-                    <FileText size={16} className="text-md-primary flex-shrink-0" />
+                    <FileText size={16} className="text-md-primary-text flex-shrink-0" />
                     <span className="text-body-sm text-md-on-surface truncate flex-1">{f.name}</span>
-                    <span className="text-xs text-md-on-surface-variant/60">{formatFileSize(f.size)}</span>
+                    <span className="text-xs text-md-on-surface-muted">{formatFileSize(f.size)}</span>
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); removeFile(i); }}
                       className="p-1 rounded hover:bg-md-outline transition-colors opacity-0 group-hover:opacity-100"
                     >
-                      <X size={14} className="text-md-on-surface-variant/50" />
+                      <X size={14} className="text-md-on-surface-muted" />
                     </button>
                   </div>
                 ))}
@@ -460,10 +460,10 @@ export default function AIWizard() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-4 border-t border-md-outline">
             <div className="flex items-center gap-2 text-body-sm flex-wrap">
               <span className="text-md-on-surface-variant">Custo da operação:</span>
-              <span className="font-bold text-md-primary bg-md-primary-container px-2 py-0.5 rounded-full">
+              <span className="font-bold text-md-on-primary-container bg-md-primary-container px-2 py-0.5 rounded-full">
                 1 Crédito de IA
               </span>
-              <span className="text-md-on-surface-variant/50">·</span>
+              <span className="text-md-on-surface-muted">·</span>
               <span className="text-md-on-surface-variant">Formato:</span>
               <span className="font-bold text-md-on-surface">{CONTENT_TYPE_LABELS[contentType]}</span>
             </div>
@@ -514,7 +514,7 @@ export default function AIWizard() {
               <div
                 key={index}
                 className={`flex items-center gap-3 transition-all duration-500 ${
-                  isCompleted ? 'text-md-tertiary' : isActive ? 'text-md-on-surface font-semibold' : 'text-md-on-surface-variant/60'
+                  isCompleted ? 'text-md-tertiary' : isActive ? 'text-md-on-surface font-semibold' : 'text-md-on-surface-muted'
                 }`}
               >
                 {isCompleted ? (
@@ -593,7 +593,7 @@ export default function AIWizard() {
               setFiles([]);
               setResult(null);
             }}
-            className="h-11 text-body-sm font-semibold text-md-on-surface-variant hover:text-md-primary flex items-center gap-1 transition-colors"
+            className="h-11 text-body-sm font-semibold text-md-on-surface-variant hover:text-md-primary-text flex items-center gap-1 transition-colors"
           >
             <ArrowLeft size={16} aria-hidden="true" /> Criar outro
           </button>
@@ -648,7 +648,7 @@ export default function AIWizard() {
               {lessons.map((lesson, i) => (
                 <div key={i} className="px-4 py-3 flex justify-between items-center">
                   <span className="text-body-md font-medium text-md-on-surface">{lesson.title}</span>
-                  <span className="text-label-sm font-bold text-md-primary bg-md-primary-container px-2 py-1 rounded-full">
+                  <span className="text-label-sm font-bold text-md-on-primary-container bg-md-primary-container px-2 py-1 rounded-full">
                     +{lesson.pointsAssigned} pts
                   </span>
                 </div>

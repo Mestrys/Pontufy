@@ -18,7 +18,7 @@ export default function HeroCourse({ course }: { course: any }) {
 
       {/* Content */}
       <div className="relative z-10 px-8 md:px-16 max-w-2xl">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-md-primary-container text-md-on-primary-container text-[11px] font-black rounded-sm mb-5 uppercase tracking-widest">
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-md-primary-container text-md-on-primary-container text-xs font-black rounded-sm mb-5 uppercase tracking-widest">
           <Star size={10} fill="white" strokeWidth={0} /> Em Destaque
         </div>
 
@@ -28,9 +28,9 @@ export default function HeroCourse({ course }: { course: any }) {
 
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm font-semibold mb-5">
           <span className="text-md-secondary font-bold">{course.duration}</span>
-          <span className="text-gray-600">•</span>
+          <span className="text-md-on-surface-muted">•</span>
           <span className="text-gray-300">{course.modules} módulos</span>
-          <span className="text-gray-600">•</span>
+          <span className="text-md-on-surface-muted">•</span>
           <span className="flex items-center gap-1 text-md-tertiary font-bold">
             <Coins size={13} fill="currentColor" /> +{course.pointsReward} pontos
           </span>

@@ -45,6 +45,20 @@
   --color-md-error: #f87171;
   --color-md-on-error: #1c0a0a;
 
+  /* Papéis de texto e estado com contraste medido (WCAG AA ≥ 4,5:1 em
+     #141414 e #1f1f1f). md-primary (#5c4152) é só preenchimento: como texto
+     fica em ~2:1. Para texto/ícone na cor da marca use md-primary-text. */
+  --color-md-on-surface-muted: #949494;   /* metadados: 6,07:1 em #141414 */
+  --color-md-primary-text: #d99bb8;       /* links e destaques: 8,19:1 */
+  --color-md-focus: #f7d0a9;              /* anel de foco: 12,76:1 */
+  --color-md-field-border: #636363;       /* borda de campo: 3,07:1 */
+
+  /* Containers tonais (sólidos; aceitam /NN para tingir a superfície) */
+  --color-md-tertiary-container: #2f4a3b;
+  --color-md-on-tertiary-container: #cfe3d6;
+  --color-md-secondary-container: #5a2e2a;
+  --color-md-on-secondary-container: #f6d5d1;
+
   /* M3 elevation levels 1–5 (tokens canônicos solicitados; mapeiam as
      sombras shadow-xs..2xl acima — 0dp = shadow-none/--shadow-2xs). */
   --md-elevation-1: 0 1px 2px 0 rgb(0 0 0 / 0.30), 0 1px 3px 1px rgb(0 0 0 / 0.15);
@@ -101,9 +115,30 @@
     @apply font-sans antialiased;
   }
   ::selection {
-    background: #10b981;
+    background: #b4585d;
     color: #fff;
   }
+  /* Foco de teclado único e visível em toda a aplicação. Não remova com
+     focus:outline-none; campos podem trocar por focus:border-md-focus. */
+  :focus-visible {
+    outline: 2px solid var(--color-md-focus);
+    outline-offset: 2px;
+  }
+}
+
+/* Borda de campo de formulário (3:1 contra a superfície). Fora de @layer de
+   propósito: precisa vencer o border-md-outline (#2a2a2a, 1,28:1) dos
+   utilitários; o estado de foco continua com o utilitário do componente. */
+:where(input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="hidden"]), select, textarea):not(:focus) {
+  border-color: var(--color-md-field-border);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [class*="animate-[fadeIn"] { animation: none; }
 }
 
 @layer components {
@@ -141,8 +176,8 @@
   .md-btn-filled { background-color: #5c4152; color: #fff; }
   .md-btn-filled:hover { background-color: #b4585d; box-shadow: var(--shadow-sm); }
   .md-btn-tonal { background-color: rgb(217 127 118 / 0.15); color: #d97f76; }
-  .md-btn-outlined { border: 1px solid #2a2a2a; color: #b4585d; background: transparent; }
-  .md-btn-text { color: #b4585d; background: transparent; padding-inline: 0.75rem; }
+  .md-btn-outlined { border: 1px solid #636363; color: #d99bb8; background: transparent; }
+  .md-btn-text { color: #d99bb8; background: transparent; padding-inline: 0.75rem; }
 
   /* Cards M3 sobre a paleta atual */
   .md-card-elevated {
@@ -194,7 +229,7 @@
   .text-body-sm { font-size: 0.75rem; line-height: 1rem; letter-spacing: 0.033333em; }
   .text-label-lg { font-size: 0.875rem; line-height: 1.25rem; letter-spacing: 0.00714em; font-weight: 600; }
   .text-label-md { font-size: 0.75rem; line-height: 1rem; letter-spacing: 0.041666em; font-weight: 600; }
-  .text-label-sm { font-size: 0.6875rem; line-height: 1rem; letter-spacing: 0.045454em; font-weight: 600; }
+  .text-label-sm { font-size: 0.75rem; line-height: 1rem; letter-spacing: 0.041666em; font-weight: 600; }
 
   .bg-gradient-pontufy {
     background: linear-gradient(135deg, var(--brand-primary, #10b981) 0%, #059669 100%);

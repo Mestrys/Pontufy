@@ -47,9 +47,9 @@ export default function AISelectionTable({
   if (courses.length === 0) {
     return (
       <div className="p-8 text-center">
-        <Sparkles size={48} className="mx-auto text-md-on-surface-variant/30 mb-4" />
+        <Sparkles size={48} className="mx-auto text-md-on-surface-muted mb-4" aria-hidden="true" />
         <p className="text-body-md text-md-on-surface-variant">Nenhum curso gerado ainda</p>
-        <p className="text-body-sm text-md-on-surface-variant/60 mt-1">Use o assistente de IA para criar o primeiro curso</p>
+        <p className="text-body-sm text-md-on-surface-muted mt-1">Use o assistente de IA para criar o primeiro curso</p>
         <Link href="/admin/wizard" className="md-btn md-btn-filled mt-4 inline-flex">
           <Sparkles size={18} className="mr-2" />
           Gerar primeiro curso
@@ -91,7 +91,7 @@ export default function AISelectionTable({
                 </td>
                 <td className="px-3 sm:px-6 py-4 text-center text-md-on-surface-variant font-medium">
                   <span className="inline-flex items-center justify-center gap-1.5">
-                    <Users size={16} className="text-md-on-surface-variant/60" />
+                    <Users size={16} className="text-md-on-surface-muted" />
                     {course.enrolled}
                   </span>
                 </td>

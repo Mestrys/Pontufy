@@ -59,7 +59,7 @@ export function RewardFilters({
               type="button"
               onClick={() => handleCategorySelect(null)}
               className={`w-full px-4 py-2 text-left text-sm transition-colors ${
-                !selectedCategory ? 'bg-md-primary/15 text-md-primary-container' : 'text-gray-300 hover:bg-white/5'
+                !selectedCategory ? 'bg-md-primary/15 text-md-primary-text' : 'text-gray-300 hover:bg-white/5'
               }`}
             >
               Todas
@@ -70,7 +70,7 @@ export function RewardFilters({
                 type="button"
                 onClick={() => handleCategorySelect(cat)}
                 className={`w-full px-4 py-2 text-left text-sm transition-colors ${
-                  selectedCategory === cat ? 'bg-md-primary/15 text-md-primary-container' : 'text-gray-300 hover:bg-white/5'
+                  selectedCategory === cat ? 'bg-md-primary/15 text-md-primary-text' : 'text-gray-300 hover:bg-white/5'
                 }`}
               >
                 {cat}
@@ -99,7 +99,7 @@ export function RewardFilters({
                 type="button"
                 onClick={() => handleSortSelect(opt.value)}
                 className={`w-full px-4 py-2 text-left text-sm transition-colors ${
-                  sortBy === opt.value ? 'bg-md-primary/15 text-md-primary-container' : 'text-gray-300 hover:bg-white/5'
+                  sortBy === opt.value ? 'bg-md-primary/15 text-md-primary-text' : 'text-gray-300 hover:bg-white/5'
                 }`}
               >
                 {opt.label}

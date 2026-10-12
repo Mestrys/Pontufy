@@ -48,7 +48,7 @@ export default function SkillTree({ skills }: { skills: SkillView[] }) {
   if (skills.length === 0) {
     return (
       <div className="bg-md-surface border border-md-outline rounded-xl p-10 text-center">
-        <p className="text-gray-500 text-sm">
+        <p className="text-md-on-surface-muted text-sm">
           Nenhuma trilha de competência publicada ainda. Peça ao seu gestor para criar a árvore de habilidades.
         </p>
       </div>
@@ -108,11 +108,11 @@ function SkillBranch({
       <header className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div>
           <h2 className="text-lg font-black text-white">{skill.name}</h2>
-          <p className="text-xs text-gray-500 uppercase tracking-wider mt-0.5">{skill.category}</p>
+          <p className="text-xs text-md-on-surface-muted uppercase tracking-wider mt-0.5">{skill.category}</p>
         </div>
         <div className="flex items-center gap-4">
           <div className="w-36">
-            <div className="flex justify-between text-[10px] font-bold text-gray-500 mb-1">
+            <div className="flex justify-between text-xs font-bold text-md-on-surface-muted mb-1">
               <span>Proficiência</span>
               <span className={levelColor}>Nv. {skill.proficiencyLevel}/{skill.targetLevel}</span>
             </div>
@@ -173,7 +173,7 @@ function SkillBranch({
                   x={cx}
                   y={cy + NODE_RADIUS + 14}
                   textAnchor="middle"
-                  className="fill-gray-300 text-[10px] font-semibold uppercase tracking-wide"
+                  className="fill-gray-300 text-xs font-semibold uppercase tracking-wide"
                 >
                   {node.title.length > 16 ? `${node.title.slice(0, 15)}…` : node.title}
                 </text>
@@ -203,7 +203,7 @@ function NodeDetail({ node, onClose }: { node: SkillNodeView; onClose: () => voi
         aria-modal="true"
       >
         <h3 className="font-black text-white text-lg">{node.title}</h3>
-        <p className="text-sm text-gray-500 mt-1">{node.description ?? 'Sem descrição.'}</p>
+        <p className="text-sm text-md-on-surface-muted mt-1">{node.description ?? 'Sem descrição.'}</p>
 
         <div className="mt-4 space-y-2 text-sm">
           <div className="flex justify-between text-gray-400">
@@ -236,7 +236,7 @@ function NodeDetail({ node, onClose }: { node: SkillNodeView; onClose: () => voi
               Ir para o curso
             </Link>
           ) : (
-            <div className="flex-1 px-4 py-2.5 rounded-xl font-bold bg-md-surface-container border border-md-outline text-gray-500 text-sm text-center">
+            <div className="flex-1 px-4 py-2.5 rounded-xl font-bold bg-md-surface-container border border-md-outline text-md-on-surface-muted text-sm text-center">
               {node.status === 'locked' ? 'Conclua o pré-requisito para liberar' : 'Curso não vinculado'}
             </div>
           )}

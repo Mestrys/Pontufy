@@ -143,7 +143,7 @@ export function CheckoutDrawer({ isOpen, onClose, reward }: CheckoutDrawerProps)
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-white truncate">{reward.title}</h3>
                       <p className="text-sm text-gray-400 mt-1">{partnerIcon} {partnerDisplay}</p>
-                      <p className="text-sm text-gray-500 mt-1">Categoria: {reward.pricePoints > 5000 ? 'Premium' : reward.pricePoints > 1000 ? 'Standard' : 'Essencial'}</p>
+                      <p className="text-sm text-md-on-surface-muted mt-1">Categoria: {reward.pricePoints > 5000 ? 'Premium' : reward.pricePoints > 1000 ? 'Standard' : 'Essencial'}</p>
                     </div>
                   </div>
 
@@ -179,13 +179,13 @@ export function CheckoutDrawer({ isOpen, onClose, reward }: CheckoutDrawerProps)
                     className={`w-full py-3 rounded-xl font-semibold text-sm transition-all ${
                       canAfford
                         ? 'bg-md-primary text-md-on-primary hover:bg-md-primary-container active:scale-[0.98]'
-                        : 'bg-white/5 text-gray-500 cursor-not-allowed'
+                        : 'bg-white/5 text-md-on-surface-muted cursor-not-allowed'
                     }`}
                   >
                     Confirmar Resgate
                   </button>
 
-                  <p className="text-center text-xs text-gray-500">
+                  <p className="text-center text-xs text-md-on-surface-muted">
                     Ao confirmar, os pontos serão debitados imediatamente e você receberá o link de acesso ao parceiro.
                   </p>
                 </motion.div>
@@ -199,7 +199,7 @@ export function CheckoutDrawer({ isOpen, onClose, reward }: CheckoutDrawerProps)
                   exit={{ opacity: 0, y: -20 }}
                   className="flex flex-col items-center justify-center py-12 space-y-4"
                 >
-                  <Loader2 size={48} className="text-md-primary animate-spin" />
+                  <Loader2 size={48} className="text-md-primary-text animate-spin" />
                   <h3 className="text-lg font-semibold text-white">Processando resgate...</h3>
                   <p className="text-gray-400 text-center px-4">
                     Debitando pontos e gerando seu link de acesso. Isso pode levar alguns segundos.
@@ -235,13 +235,13 @@ export function CheckoutDrawer({ isOpen, onClose, reward }: CheckoutDrawerProps)
                       <span className="text-gray-400">Novo saldo</span>
                       <span className="font-bold text-md-tertiary text-lg">{newBalance.toLocaleString('pt-BR')} pts</span>
                     </div>
-                    <p className="text-sm text-gray-500">Seu voucher está pronto para uso no {partnerDisplay}.</p>
+                    <p className="text-sm text-md-on-surface-muted">Seu voucher está pronto para uso no {partnerDisplay}.</p>
                   </div>
 
                   <div className="w-full space-y-3">
                     <button
                       onClick={handleGoToPartner}
-                      className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-emerald-500 text-white font-semibold rounded-xl hover:bg-emerald-400 transition-colors active:scale-[0.98]"
+                      className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-md-primary text-md-on-primary font-semibold rounded-xl hover:bg-md-primary-container transition-colors active:scale-[0.98]"
                     >
                       <ExternalLink size={18} />
                       Acessar Benefício no {partnerDisplay}

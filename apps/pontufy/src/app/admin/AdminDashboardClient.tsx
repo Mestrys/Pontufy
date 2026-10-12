@@ -89,7 +89,7 @@ export default function AdminDashboardClient() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="animate-spin text-md-primary" size={48} />
+        <Loader2 className="animate-spin text-md-primary-text" size={48} />
       </div>
     );
   }
@@ -133,7 +133,7 @@ export default function AdminDashboardClient() {
           <section className="md-card-outlined md-elevation-1 overflow-hidden">
             <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-md-outline flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-md-surface-container-high/50">
               <div className="flex items-center gap-2">
-                <span className="text-md-primary" style={{fontSize: '20px'}}>✨</span>
+                <span className="text-md-primary-text" style={{fontSize: '20px'}}>✨</span>
                 <h2 className="text-title-lg font-bold text-md-on-surface">Cursos Gerados pela IA</h2>
               </div>
               <a

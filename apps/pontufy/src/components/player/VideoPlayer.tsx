@@ -31,7 +31,7 @@ export default function VideoPlayer({ lesson, onComplete }: VideoPlayerProps) {
           <div className="absolute inset-0 bg-md-surface-dim flex items-center justify-center">
             <div className="text-center">
               <h3 className="text-white text-2xl font-bold mb-2">{lesson.title}</h3>
-              <p className="text-gray-500 text-sm">Área do Player de Vídeo</p>
+              <p className="text-md-on-surface-muted text-sm">Área do Player de Vídeo</p>
             </div>
           </div>
 

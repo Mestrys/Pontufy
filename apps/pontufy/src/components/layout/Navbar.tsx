@@ -74,7 +74,7 @@ export default function Navbar() {
           {/* Left: Logo + Desktop links */}
           <div className="flex items-center gap-8">
             <Link href="/dashboard" className="text-xl font-black tracking-tight text-white flex-shrink-0">
-              <span className="text-md-primary-container">Pontu</span>fy
+              <span className="text-md-primary-text">Pontu</span>fy
             </Link>
 
             <div className="hidden md:flex items-center gap-0.5">
@@ -134,23 +134,20 @@ export default function Navbar() {
                 <button
                   type="button"
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  aria-label="Menu do perfil"
+                  aria-haspopup="menu"
+                  aria-expanded={isDropdownOpen}
                   className="relative w-8 h-8 rounded-full bg-md-primary flex items-center justify-center hover:bg-md-primary-container transition-colors text-white font-black text-sm"
                 >
                   {session?.user?.name?.[0]?.toUpperCase() ?? <User size={16} />}
                   {/* Badge de status de conexão (3.4) */}
                   <span
                     className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-md-surface ${
-                      isOnline ? 'bg-emerald-500' : 'bg-red-500'
+                      isOnline ? 'bg-md-tertiary' : 'bg-red-500'
                     }`}
                     title={isOnline ? 'Conectado' : 'Offline'}
                   />
                 </button>
-                {/* Badge de nível/role (3.4) */}
-                {role && (
-                  <span className="absolute -top-1.5 -right-1.5 text-[9px] font-black px-1.5 py-0.5 rounded-full bg-md-tertiary text-md-on-tertiary">
-                    {role === 'super_admin' ? 'SA' : role === 'admin_rh' ? 'RH' : 'EM'}
-                  </span>
-                )}
 
                 {isDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-md-surface-container rounded-xl shadow-2xl border border-md-outline py-1 overflow-hidden">
@@ -158,7 +155,7 @@ export default function Navbar() {
                       <p className="text-sm font-semibold text-white truncate">
                         {session?.user?.name}
                       </p>
-                      <p className="text-xs text-gray-500 truncate">
+                      <p className="text-xs text-md-on-surface-muted truncate">
                         {session?.user?.email}
                       </p>
                     </div>

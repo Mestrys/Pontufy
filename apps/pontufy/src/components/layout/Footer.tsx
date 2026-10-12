@@ -2,13 +2,13 @@ import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="bg-md-surface-dim border-t border-md-outline text-gray-500 py-8 px-6 pb-20 sm:pb-8 mt-auto">
+    <footer className="bg-md-surface-dim border-t border-md-outline text-md-on-surface-muted py-8 px-6 pb-20 sm:pb-8 mt-auto">
       <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
         <div className="flex items-center gap-3">
           <span className="text-base font-black text-white">
-            <span className="text-md-primary-container">Pontu</span>fy
+            <span className="text-md-primary-text">Pontu</span>fy
           </span>
-          <span className="text-xs text-gray-600 leading-relaxed">
+          <span className="text-xs text-md-on-surface-muted leading-relaxed">
             © 2026 Mestry&apos;s Tecnologia e Consultoria em TI LTDA. Todos os direitos reservados.
             <br />
             CNPJ: 68.027.889/0001-34

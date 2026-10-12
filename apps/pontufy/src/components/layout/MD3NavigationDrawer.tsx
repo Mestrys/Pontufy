@@ -86,7 +86,7 @@ export function MD3NavigationDrawer({ open, onClose, links, activeHref }: MD3Nav
             {/* Header do drawer */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-md-outline flex-shrink-0">
               <Link href="/dashboard" onClick={onClose} className="text-lg font-black tracking-tight text-white">
-                <span className="text-md-primary-container">Pontu</span>fy
+                <span className="text-md-primary-text">Pontu</span>fy
               </Link>
               <button
                 type="button"
@@ -152,14 +152,14 @@ export function MD3NavigationDrawer({ open, onClose, links, activeHref }: MD3Nav
                     </div>
                     <span
                       className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-md-surface ${
-                        isOnline ? 'bg-emerald-500' : 'bg-red-500'
+                        isOnline ? 'bg-md-tertiary' : 'bg-red-500'
                       }`}
                       title={isOnline ? 'Conectado' : 'Offline'}
                     />
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-white truncate">{session?.user?.name}</p>
-                    <p className="text-xs text-gray-500 truncate">{session?.user?.email}</p>
+                    <p className="text-xs text-md-on-surface-muted truncate">{session?.user?.email}</p>
                   </div>
                 </div>
                 <Link

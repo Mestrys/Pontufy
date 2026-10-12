@@ -48,12 +48,12 @@ export default async function SuperAdminTenantsPage() {
           <div>
             <Link
               href="/superadmin"
-              className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-300 transition-colors mb-2"
+              className="inline-flex items-center gap-1.5 text-sm text-md-on-surface-muted hover:text-gray-300 transition-colors mb-2"
             >
               ← Voltar ao console
             </Link>
             <h1 className="text-2xl font-bold text-white">Locatários & Consumo de IA</h1>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-md-on-surface-muted mt-1">
               Governança global · {session.user.email}
             </p>
           </div>
@@ -61,19 +61,19 @@ export default async function SuperAdminTenantsPage() {
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="bg-[#141414] border border-[#2a2a2a] rounded-2xl p-5">
-            <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Empresas</p>
+            <p className="text-xs text-md-on-surface-muted uppercase tracking-wide font-semibold">Empresas</p>
             <p className="text-2xl font-black text-white mt-1">{totals.tenants}</p>
           </div>
           <div className="bg-[#141414] border border-[#2a2a2a] rounded-2xl p-5">
-            <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Utilizadores</p>
+            <p className="text-xs text-md-on-surface-muted uppercase tracking-wide font-semibold">Utilizadores</p>
             <p className="text-2xl font-black text-white mt-1">{totals.users}</p>
           </div>
           <div className="bg-[#141414] border border-[#2a2a2a] rounded-2xl p-5">
-            <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Cursos</p>
+            <p className="text-xs text-md-on-surface-muted uppercase tracking-wide font-semibold">Cursos</p>
             <p className="text-2xl font-black text-white mt-1">{totals.courses}</p>
           </div>
           <div className="bg-[#141414] border border-[#2a2a2a] rounded-2xl p-5">
-            <p className="text-xs text-gray-500 uppercase tracking-wide font-semibold">Créditos de IA</p>
+            <p className="text-xs text-md-on-surface-muted uppercase tracking-wide font-semibold">Créditos de IA</p>
             <p className="text-2xl font-black text-white mt-1">{totals.credits}</p>
           </div>
         </div>

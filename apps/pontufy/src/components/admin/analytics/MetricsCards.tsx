@@ -30,7 +30,7 @@ function KpiCard({ label, value, hint, icon, accent }: KpiCardProps) {
         </span>
       </div>
       <p className="text-2xl font-black text-white mt-2">{value}</p>
-      <p className="text-[11px] text-gray-500 mt-0.5">{hint}</p>
+      <p className="text-xs text-md-on-surface-muted mt-0.5">{hint}</p>
     </div>
   );
 }

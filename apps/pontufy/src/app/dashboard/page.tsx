@@ -88,7 +88,7 @@ export default function Home() {
 
       {isLoading ? (
         <div className="flex items-center justify-center h-[60vh]">
-          <Loader2 className="animate-spin text-md-primary" size={40} />
+          <Loader2 className="animate-spin text-md-primary-text" size={40} />
         </div>
       ) : (
         <>
@@ -108,7 +108,7 @@ export default function Home() {
 
             {filteredInProgress.length === 0 && filteredAvailable.length === 0 && !heroCourse && (
               <div className="px-8 md:px-16 py-20 text-center">
-                <p className="text-gray-500 text-base">
+                <p className="text-md-on-surface-muted text-base">
                   {searchQuery
                     ? `Nenhum curso encontrado para "${searchQuery}".`
                     : 'Nenhum curso disponível ainda. Peça ao seu gestor para criar treinamentos.'}

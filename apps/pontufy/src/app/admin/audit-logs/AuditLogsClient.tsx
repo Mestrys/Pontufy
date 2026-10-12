@@ -23,8 +23,8 @@ const ACTION_STYLES: Record<string, string> = {
   INVITATION_REVOKED: 'bg-red-500/10 text-red-400 border-red-500/20',
   REWARD_REDEEMED: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
   USER_IMPORT: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  TENANT_ONBOARDED: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  SUBSCRIPTION_ACTIVATED: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  TENANT_ONBOARDED: 'bg-md-tertiary/10 text-md-tertiary border-md-tertiary/20',
+  SUBSCRIPTION_ACTIVATED: 'bg-md-tertiary/10 text-md-tertiary border-md-tertiary/20',
 };
 
 function actionStyle(action: string): string {
@@ -101,12 +101,12 @@ export default function AuditLogsClient() {
           <div>
             <Link
               href="/admin"
-              className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-300 transition-colors mb-2"
+              className="inline-flex items-center gap-1.5 text-sm text-md-on-surface-muted hover:text-gray-300 transition-colors mb-2"
             >
               <ArrowLeft size={15} /> Voltar ao painel
             </Link>
             <h1 className="text-2xl font-bold text-white">Trilha de Auditoria</h1>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-md-on-surface-muted mt-1">
               Registro imutável (append-only) das ações administrativas · {total} eventos
             </p>
           </div>
@@ -114,7 +114,7 @@ export default function AuditLogsClient() {
           <button
             type="button"
             onClick={handleExport}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-md-on-primary bg-md-primary hover:bg-md-primary-container transition-colors"
           >
             <Download size={15} /> Exportar CSV
           </button>
@@ -134,7 +134,7 @@ export default function AuditLogsClient() {
                   setAction(e.target.value);
                   setPage(1);
                 }}
-                className="w-full px-4 py-2.5 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm transition-colors"
+                className="w-full px-4 py-2.5 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg text-white focus:outline-none focus:border-md-focus text-sm transition-colors"
               >
                 <option value="">Todas</option>
                 {availableActions.map((a) => (
@@ -157,7 +157,7 @@ export default function AuditLogsClient() {
                   setFrom(e.target.value);
                   setPage(1);
                 }}
-                className="w-full px-4 py-2.5 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm transition-colors"
+                className="w-full px-4 py-2.5 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg text-white focus:outline-none focus:border-md-focus text-sm transition-colors"
               />
             </div>
 
@@ -173,7 +173,7 @@ export default function AuditLogsClient() {
                   setTo(e.target.value);
                   setPage(1);
                 }}
-                className="w-full px-4 py-2.5 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm transition-colors"
+                className="w-full px-4 py-2.5 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg text-white focus:outline-none focus:border-md-focus text-sm transition-colors"
               />
             </div>
           </div>
@@ -188,15 +188,15 @@ export default function AuditLogsClient() {
         {/* ── Tabela ─────────────────────────────────────────────────── */}
         <section className="bg-[#141414] border border-[#2a2a2a] rounded-2xl p-6">
           <h2 className="text-sm font-bold text-white uppercase tracking-wide mb-4 flex items-center gap-2">
-            <ScrollText size={16} className="text-emerald-400" /> Eventos
+            <ScrollText size={16} className="text-md-tertiary" /> Eventos
           </h2>
 
           {loading ? (
             <div className="flex justify-center py-10">
-              <Loader2 className="animate-spin text-gray-600" size={22} />
+              <Loader2 className="animate-spin text-md-on-surface-muted" size={22} />
             </div>
           ) : logs.length === 0 ? (
-            <div className="flex flex-col items-center py-10 text-gray-600">
+            <div className="flex flex-col items-center py-10 text-md-on-surface-muted">
               <Search size={22} className="mb-2" />
               <p className="text-sm">Nenhum evento encontrado para os filtros.</p>
             </div>
@@ -204,7 +204,7 @@ export default function AuditLogsClient() {
             <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Registros de auditoria">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left text-xs text-gray-500 uppercase tracking-wide border-b border-[#2a2a2a]">
+                  <tr className="text-left text-xs text-md-on-surface-muted uppercase tracking-wide border-b border-[#2a2a2a]">
                     <th className="pb-3 pr-4 font-semibold">Data</th>
                     <th className="pb-3 pr-4 font-semibold">Ação</th>
                     <th className="pb-3 pr-4 font-semibold">Entidade</th>
@@ -229,7 +229,7 @@ export default function AuditLogsClient() {
                       <td className="py-3 pr-4 text-gray-400">
                         {log.entity}
                         {log.entityId ? (
-                          <span className="block text-xs text-gray-600 font-mono">{log.entityId.slice(0, 12)}</span>
+                          <span className="block text-xs text-md-on-surface-muted font-mono">{log.entityId.slice(0, 12)}</span>
                         ) : null}
                       </td>
                       <td className="py-3 pr-4 text-gray-400">
@@ -239,18 +239,18 @@ export default function AuditLogsClient() {
                           '—'
                         )}
                       </td>
-                      <td className="py-3 pr-4 text-gray-500 font-mono text-xs whitespace-nowrap">
+                      <td className="py-3 pr-4 text-md-on-surface-muted font-mono text-xs whitespace-nowrap">
                         {log.ipAddress ?? '—'}
                       </td>
                       <td className="py-3 text-gray-300 max-w-[240px]">
                         <div className="space-y-0.5">
                           {log.oldValue !== null && (
-                            <p className="text-xs text-red-400/80 line-clamp-1">{shortValue(log.oldValue)}</p>
+                            <p className="text-xs text-md-error line-clamp-1">{shortValue(log.oldValue)}</p>
                           )}
                           {log.newValue !== null && (
-                            <p className="text-xs text-emerald-400/80 line-clamp-1">{shortValue(log.newValue)}</p>
+                            <p className="text-xs text-md-tertiary line-clamp-1">{shortValue(log.newValue)}</p>
                           )}
-                          {log.oldValue === null && log.newValue === null && <span className="text-xs text-gray-600">—</span>}
+                          {log.oldValue === null && log.newValue === null && <span className="text-xs text-md-on-surface-muted">—</span>}
                         </div>
                       </td>
                     </tr>
@@ -266,18 +266,18 @@ export default function AuditLogsClient() {
                 type="button"
                 disabled={page <= 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
-                className="px-4 py-2 rounded-full text-sm font-bold text-white bg-[#1f1f1f] border border-[#2a2a2a] hover:border-emerald-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="px-4 py-2 rounded-full text-sm font-bold text-white bg-[#1f1f1f] border border-[#2a2a2a] hover:border-md-tertiary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Anterior
               </button>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-md-on-surface-muted">
                 Página {page} de {totalPages}
               </span>
               <button
                 type="button"
                 disabled={page >= totalPages}
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                className="px-4 py-2 rounded-full text-sm font-bold text-white bg-[#1f1f1f] border border-[#2a2a2a] hover:border-emerald-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="px-4 py-2 rounded-full text-sm font-bold text-white bg-[#1f1f1f] border border-[#2a2a2a] hover:border-md-tertiary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Próxima
               </button>

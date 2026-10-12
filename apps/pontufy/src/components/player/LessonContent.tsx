@@ -139,7 +139,7 @@ export default function LessonContent({
       <div className="flex-1 overflow-y-auto" tabIndex={0} role="region" aria-label="Conteúdo da aula">
         {/* Cabeçalho da aula */}
         <div className="bg-md-surface border-b border-md-outline px-6 sm:px-10 py-6">
-          <div className="flex items-center gap-2 text-gray-600 text-xs mb-2">
+          <div className="flex items-center gap-2 text-md-on-surface-muted text-xs mb-2">
             <BookOpen size={13} />
             <span>Aula {lessonIndex} de {totalLessons}</span>
           </div>
@@ -152,8 +152,8 @@ export default function LessonContent({
             <MarkdownContent content={content} />
           ) : (
             <div className="text-center py-16">
-              <BookOpen size={40} className="mx-auto text-gray-700 mb-4" />
-              <p className="text-gray-500">Conteúdo desta aula em breve.</p>
+              <BookOpen size={40} className="mx-auto text-md-on-surface-muted mb-4" />
+              <p className="text-md-on-surface-muted">Conteúdo desta aula em breve.</p>
             </div>
           )}
         </div>
@@ -171,7 +171,7 @@ export default function LessonContent({
             onClick={() => onPrevious?.()}
             disabled={!onPrevious}
             aria-label="Aula anterior"
-            className="h-11 min-w-11 px-3 sm:px-4 rounded-lg font-bold transition-colors text-sm flex items-center justify-center gap-2 border border-md-outline text-gray-300 hover:border-md-outline-variant hover:text-white disabled:text-gray-600 disabled:cursor-not-allowed disabled:hover:border-md-outline"
+            className="h-11 min-w-11 px-3 sm:px-4 rounded-lg font-bold transition-colors text-sm flex items-center justify-center gap-2 border border-md-outline text-gray-300 hover:border-md-outline-variant hover:text-white disabled:text-md-on-surface/40 disabled:cursor-not-allowed disabled:hover:border-md-outline"
           >
             <ArrowLeft size={16} aria-hidden="true" />
             <span className="hidden sm:inline">Anterior</span>

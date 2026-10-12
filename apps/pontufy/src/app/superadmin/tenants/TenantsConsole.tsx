@@ -16,7 +16,7 @@ interface TenantRow {
 }
 
 const PLAN_CONFIG: Record<string, { label: string; bg: string; text: string; border: string }> = {
-  trial: { label: 'Trial', bg: 'bg-md-highlight/10', text: 'text-md-on-highlight', border: 'border-md-highlight/30' },
+  trial: { label: 'Trial', bg: 'bg-md-highlight/10', text: 'text-md-highlight', border: 'border-md-highlight/30' },
   starter: { label: 'Starter', bg: 'bg-md-primary-container/10', text: 'text-md-on-primary-container', border: 'border-md-primary-container/30' },
   enterprise: { label: 'Enterprise', bg: 'bg-md-tertiary-container/10', text: 'text-md-on-tertiary-container', border: 'border-md-tertiary-container/30' },
 };
@@ -63,7 +63,7 @@ export default function TenantsConsole({ initialTenants }: { initialTenants: Ten
   return (
     <section className="md-card-outlined md-elevation-1 p-6 overflow-hidden">
       <h2 className="text-label-lg font-bold text-md-on-surface uppercase tracking-wider mb-5 flex items-center gap-2">
-        <Zap size={18} className="text-md-primary" /> Empresas
+        <Zap size={18} className="text-md-primary-text" /> Empresas
       </h2>
 
       {error && (
@@ -75,7 +75,7 @@ export default function TenantsConsole({ initialTenants }: { initialTenants: Ten
       <div className="overflow-x-auto">
         <table className="w-full text-body-sm">
           <thead>
-            <tr className="text-left text-label-sm text-md-on-surface-variant/60 uppercase tracking-wider border-b border-md-outline">
+            <tr className="text-left text-label-sm text-md-on-surface-muted uppercase tracking-wider border-b border-md-outline">
               <th className="pb-3 pr-4 font-semibold">Empresa</th>
               <th className="pb-3 pr-4 font-semibold">Plano</th>
               <th className="pb-3 pr-4 font-semibold">Assinatura</th>
@@ -99,17 +99,17 @@ export default function TenantsConsole({ initialTenants }: { initialTenants: Ten
                 <tr key={tenant.id} className="align-top transition-colors hover:bg-md-surface-container-high/50">
                   <td className="py-4 pr-4">
                     <p className="text-md-on-surface font-medium">{tenant.name}</p>
-                    <p className="text-body-sm text-md-on-surface-variant/60 font-mono">{tenant.slug}</p>
+                    <p className="text-body-sm text-md-on-surface-muted font-mono">{tenant.slug}</p>
                   </td>
                   <td className="py-4 pr-4">
                     <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-label-sm font-semibold ${config.bg} ${config.text} ${config.border}`}>
                       {config.label}
                     </span>
                   </td>
-                  <td className="py-4 pr-4 text-md-on-surface-variant/60">{tenant.subscriptionStatus ?? '—'}</td>
-                  <td className="py-4 pr-4 text-center text-md-on-surface-variant/60">{tenant._count.users}</td>
-                  <td className="py-4 pr-4 text-center text-md-on-surface-variant/60">{tenant._count.courses}</td>
-                  <td className="py-4 pr-4 text-center text-md-on-surface-variant/60 whitespace-nowrap">
+                  <td className="py-4 pr-4 text-md-on-surface-muted">{tenant.subscriptionStatus ?? '—'}</td>
+                  <td className="py-4 pr-4 text-center text-md-on-surface-muted">{tenant._count.users}</td>
+                  <td className="py-4 pr-4 text-center text-md-on-surface-muted">{tenant._count.courses}</td>
+                  <td className="py-4 pr-4 text-center text-md-on-surface-muted whitespace-nowrap">
                     {tenant.trialEndsAt
                       ? new Date(tenant.trialEndsAt).toLocaleDateString('pt-BR')
                       : '—'}
@@ -122,7 +122,7 @@ export default function TenantsConsole({ initialTenants }: { initialTenants: Ten
                           min={0}
                           value={draft}
                           onChange={(e) => setDraft(Number.parseInt(e.target.value, 10) || 0)}
-                          className="w-24 px-3 py-2 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface text-body-sm focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20"
+                          className="w-24 px-3 py-2 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface text-body-sm focus:outline-none focus:border-md-focus focus:ring-2 focus:ring-md-focus/40"
                         />
                         <button
                           type="button"
@@ -145,7 +145,7 @@ export default function TenantsConsole({ initialTenants }: { initialTenants: Ten
                           setEditingId(tenant.id);
                           setDraft(tenant.aiCredits);
                         }}
-                        className="flex items-center gap-1 text-md-primary font-bold hover:text-md-primary-container transition-colors"
+                        className="flex items-center gap-1 text-md-primary-text font-bold hover:text-md-on-surface transition-colors"
                       >
                         <CreditCard size={16} />
                         {tenant.aiCredits}

@@ -17,7 +17,7 @@ type Rarity = 'common' | 'rare' | 'epic' | 'legendary';
 
 const RARITY_CONFIG: Record<Rarity, { label: string; color: string; bg: string; border: string; icon: React.ReactNode }> = {
   common: { label: 'Comum', color: 'text-gray-400', bg: 'bg-gray-800/50', border: 'border-gray-700', icon: <Star className="w-5 h-5 text-gray-400" /> },
-  rare: { label: 'Raro', color: 'text-md-primary', bg: 'bg-md-primary/10', border: 'border-md-primary/30', icon: <Star className="w-5 h-5 text-md-primary" fill="currentColor" /> },
+  rare: { label: 'Raro', color: 'text-md-primary-text', bg: 'bg-md-primary/10', border: 'border-md-primary/30', icon: <Star className="w-5 h-5 text-md-primary-text" fill="currentColor" /> },
   epic: { label: 'Épico', color: 'text-purple-400', bg: 'bg-purple-900/20', border: 'border-purple-500/30', icon: <Sparkles className="w-5 h-5 text-purple-400" /> },
   legendary: { label: 'Lendário', color: 'text-amber-400', bg: 'bg-amber-900/20', border: 'border-amber-500/30', icon: <Trophy className="w-5 h-5 text-amber-400" /> },
 };
@@ -68,9 +68,9 @@ export default function CertificateBadgeMural({ certificates }: { certificates: 
   if (enriched.length === 0) {
     return (
       <div className="bg-black/20 border border-white/10 rounded-2xl p-8 text-center">
-        <Award className="mx-auto text-gray-600 mb-4" size={48} />
+        <Award className="mx-auto text-md-on-surface-muted mb-4" size={48} />
         <p className="text-gray-400">Nenhum certificado emitido ainda.</p>
-        <p className="text-xs text-gray-500 mt-1">Complete cursos para ganhar badges de raridade única!</p>
+        <p className="text-xs text-md-on-surface-muted mt-1">Complete cursos para ganhar badges de raridade única!</p>
       </div>
     );
   }
@@ -83,10 +83,10 @@ export default function CertificateBadgeMural({ certificates }: { certificates: 
       <header className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
-            <Award className="text-md-primary" size={24} />
+            <Award className="text-md-primary-text" size={24} />
             Meus Certificados
           </h2>
-          <p className="text-gray-500 text-sm mt-0.5">
+          <p className="text-md-on-surface-muted text-sm mt-0.5">
             {certificates.length} certificado{certificates.length !== 1 ? 's' : ''} — cada um com raridade única baseada no hash criptográfico
           </p>
         </div>
@@ -101,7 +101,7 @@ export default function CertificateBadgeMural({ certificates }: { certificates: 
               className={`relative group overflow-hidden rounded-2xl p-5 border transition-all duration-300 ${cfg.bg} ${cfg.border} hover:border-opacity-70 hover:scale-[1.015]`}
             >
               {/* Rarity badge */}
-              <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm border text-[10px] font-bold uppercase tracking-wider">
+              <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm border text-xs font-bold uppercase tracking-wider">
                 {cfg.icon}
                 <span className={cfg.color}>{cfg.label}</span>
               </div>
@@ -113,7 +113,7 @@ export default function CertificateBadgeMural({ certificates }: { certificates: 
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-white truncate">{cert.courseName}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">Emitido em {cert.issuedDate}</p>
+                  <p className="text-xs text-md-on-surface-muted mt-0.5">Emitido em {cert.issuedDate}</p>
                 </div>
               </div>
 

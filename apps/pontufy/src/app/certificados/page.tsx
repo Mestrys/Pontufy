@@ -42,7 +42,7 @@ export default function CertificatesPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-[70vh] bg-md-surface-dim">
-        <Loader2 className="animate-spin text-md-primary" size={36} />
+        <Loader2 className="animate-spin text-md-primary-text" size={36} />
       </div>
     );
   }
@@ -54,21 +54,21 @@ export default function CertificatesPage() {
     <main className="min-h-screen pb-20 pt-24 bg-md-surface-dim">
       <div className="max-w-5xl mx-auto px-6 md:px-8">
         <header className="mb-8 flex items-center gap-3">
-          <Award size={28} className="text-md-primary" />
+          <Award size={28} className="text-md-primary-text" />
           <div>
             <h1 className="text-3xl font-black text-white tracking-tight">Meus Certificados</h1>
-            <p className="text-gray-500 mt-0.5 text-sm">Certificados emitidos pelos cursos que você concluiu — cada um com raridade única e verificação criptográfica.</p>
+            <p className="text-md-on-surface-muted mt-0.5 text-sm">Certificados emitidos pelos cursos que você concluiu — cada um com raridade única e verificação criptográfica.</p>
           </div>
         </header>
 
         {certificates.length === 0 ? (
           <div className="text-center py-24 bg-black/20 border border-white/10 rounded-2xl">
-            <BookOpen size={40} className="mx-auto text-gray-600 mb-4" />
+            <BookOpen size={40} className="mx-auto text-md-on-surface-muted mb-4" />
             <p className="text-white font-semibold mb-1">Nenhum certificado ainda</p>
-            <p className="text-gray-500 text-sm mb-6">Conclua um curso para receber seu certificado com badge de raridade.</p>
+            <p className="text-md-on-surface-muted text-sm mb-6">Conclua um curso para receber seu certificado com badge de raridade.</p>
             <a
               href="/cursos"
-              className="inline-block px-5 py-2.5 rounded-full text-sm font-bold text-black bg-md-primary hover:opacity-90 transition"
+              className="inline-block px-5 py-2.5 rounded-full text-sm font-bold text-md-on-primary bg-md-primary hover:opacity-90 transition"
             >
               Ver cursos disponíveis
             </a>

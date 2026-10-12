@@ -111,10 +111,10 @@ export default function BattlesPage() {
       <div className="max-w-5xl mx-auto px-6 md:px-8">
         <header className="mb-8">
           <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
-            <Swords className="text-md-primary" size={28} />
+            <Swords className="text-md-primary-text" size={28} />
             Batalhas de Conhecimento
           </h1>
-          <p className="text-gray-500 mt-1.5 text-sm">
+          <p className="text-md-on-surface-muted mt-1.5 text-sm">
             Desafie um colega para um duelo de 5 questões com 15 segundos cada — seus acertos
             alimentam o ranking do seu departamento.
           </p>
@@ -126,7 +126,7 @@ export default function BattlesPage() {
           </div>
         )}
         {notice && (
-          <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm p-3 rounded-lg text-center font-medium mb-4">
+          <div className="bg-md-tertiary/10 border border-md-tertiary/20 text-md-tertiary text-sm p-3 rounded-lg text-center font-medium mb-4">
             {notice}
           </div>
         )}
@@ -137,7 +137,7 @@ export default function BattlesPage() {
             {/* Criação de desafio */}
             <section className="bg-black/20 border border-white/10 rounded-2xl p-5">
               <h2 className="text-lg font-black text-white tracking-tight flex items-center gap-2 mb-4">
-                <Users size={20} className="text-md-primary" />
+                <Users size={20} className="text-md-primary-text" />
                 Novo duelo
               </h2>
               <div className="flex gap-3">
@@ -145,7 +145,7 @@ export default function BattlesPage() {
                   aria-label="Colega para desafiar"
                   value={selectedOpponent}
                   onChange={(e) => setSelectedOpponent(e.target.value)}
-                  className="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-md-primary"
+                  className="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-md-focus"
                 >
                   <option value="">Escolha um colega…</option>
                   {colleagues.map((c) => (
@@ -158,12 +158,12 @@ export default function BattlesPage() {
                 <button
                   onClick={handleCreate}
                   disabled={!selectedOpponent || creating}
-                  className="px-6 py-3 rounded-xl bg-md-primary text-black font-bold text-sm hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+                  className="px-6 py-3 rounded-xl bg-md-primary text-md-on-primary font-bold text-sm hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
                 >
                   {creating ? <Loader2 size={16} className="animate-spin mx-auto" /> : 'Desafiar'}
                 </button>
               </div>
-              <p className="text-[11px] text-gray-500 mt-3">
+              <p className="text-xs text-md-on-surface-muted mt-3">
                 O desafiante responde primeiro; o oponente recebe as mesmas 5 questões depois.
                 Cada acerto vale 5 pontos para o departamento. Desafio expira em 72h.
               </p>
@@ -172,15 +172,15 @@ export default function BattlesPage() {
             {/* Lista de batalhas */}
             <section className="bg-black/20 border border-white/10 rounded-2xl p-5">
               <h2 className="text-lg font-black text-white tracking-tight flex items-center gap-2 mb-4">
-                <Hourglass size={20} className="text-md-primary" />
+                <Hourglass size={20} className="text-md-primary-text" />
                 Meus duelos
               </h2>
               {!battles ? (
                 <div className="flex justify-center py-10">
-                  <Loader2 className="animate-spin text-md-primary" size={26} />
+                  <Loader2 className="animate-spin text-md-primary-text" size={26} />
                 </div>
               ) : battles.length === 0 ? (
-                <p className="text-gray-500 text-sm text-center py-8">
+                <p className="text-md-on-surface-muted text-sm text-center py-8">
                   Nenhuma batalha ainda. Lance o primeiro desafio!
                 </p>
               ) : (
@@ -196,24 +196,24 @@ export default function BattlesPage() {
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-bold text-white truncate">
                             {b.challengerName}
-                            <span className="text-gray-500 font-normal mx-2">vs</span>
+                            <span className="text-md-on-surface-muted font-normal mx-2">vs</span>
                             {b.opponentName}
                           </p>
-                          <p className="text-xs text-gray-500 mt-0.5">
+                          <p className="text-xs text-md-on-surface-muted mt-0.5">
                             {statusLabel(b)}
                             {expired && !b.status.includes('completed') ? ' · expirado' : ''}
                           </p>
                         </div>
                         {b.status === 'completed' ? (
                           b.winnerId ? (
-                            <CheckCircle2 size={20} className="text-md-primary shrink-0" />
+                            <CheckCircle2 size={20} className="text-md-primary-text shrink-0" />
                           ) : (
-                            <XCircle size={20} className="text-gray-500 shrink-0" />
+                            <XCircle size={20} className="text-md-on-surface-muted shrink-0" />
                           )
                         ) : playable ? (
                           <button
                             onClick={() => setActiveBattleId(b.id)}
-                            className="px-4 py-2 rounded-full bg-md-primary text-black text-xs font-bold hover:opacity-90 transition shrink-0"
+                            className="px-4 py-2 rounded-full bg-md-primary text-md-on-primary text-xs font-bold hover:opacity-90 transition shrink-0"
                           >
                             Jogar turno
                           </button>

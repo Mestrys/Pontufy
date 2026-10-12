@@ -172,8 +172,8 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
           <div className={`flex items-center justify-between p-4 border-b border-md-outline ${navCollapsed ? 'justify-center' : ''}`}>
             {!navCollapsed && (
               <Link href="/admin" className="flex items-center gap-2 text-xl font-black tracking-tighter text-md-on-surface">
-                <span className="text-md-primary">Pontu</span>fy
-                <span className="text-md-primary">Admin</span>
+                <span className="text-md-primary-text">Pontu</span>fy
+                <span className="text-md-primary-text">Admin</span>
               </Link>
             )}
             <button
@@ -198,7 +198,7 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
           {!navCollapsed && tenant && (
             <div className="mx-3 mb-4 p-3 bg-md-primary-container/20 border border-md-primary-container/30 rounded-xl">
               <div className="flex items-center gap-2 text-body-sm">
-                <Building2 size={16} className="text-md-primary" />
+                <Building2 size={16} className="text-md-primary-text" />
                 <span className="font-semibold text-md-on-surface truncate">{tenant.name}</span>
               </div>
               <div className="mt-2 flex items-center gap-1.5">
@@ -214,7 +214,7 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
           <nav className="flex-1 overflow-y-auto p-2" aria-label="Menu principal">
             {NAV_SECTIONS.map((section) => (
               <div key={section.label} className={navCollapsed ? 'hidden' : 'block'}>
-                <h3 className="px-3 py-1 text-label-sm text-md-on-surface-variant/60 uppercase tracking-widest">
+                <h3 className="px-3 py-1 text-label-sm text-md-on-surface-muted uppercase tracking-widest">
                   {section.label}
                 </h3>
                 <div className="space-y-1">

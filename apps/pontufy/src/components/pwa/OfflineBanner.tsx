@@ -85,7 +85,7 @@ export default function OfflineBanner() {
     const tone = isError
       ? 'bg-red-500/10 border-red-500/20 text-red-400'
       : isDone
-        ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+        ? 'bg-md-tertiary/10 border-md-tertiary/20 text-md-tertiary'
         : 'bg-amber-500/10 border-amber-500/20 text-amber-400';
 
     return (

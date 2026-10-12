@@ -103,7 +103,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
   if (isLoading && !localCourse) {
     return (
       <div className="flex items-center justify-center h-dvh bg-md-surface-dim">
-        <Loader2 className="animate-spin text-md-primary" size={36} />
+        <Loader2 className="animate-spin text-md-primary-text" size={36} />
       </div>
     );
   }
@@ -111,9 +111,9 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
   if (!course) {
     return (
       <div className="flex flex-col items-center justify-center h-dvh bg-md-surface-dim gap-4">
-        <BookOpen size={48} className="text-gray-700" />
+        <BookOpen size={48} className="text-md-on-surface-muted" />
         <p className="text-white text-lg font-bold">Curso não encontrado.</p>
-        <Link href="/dashboard" className="text-md-primary-container font-bold hover:text-md-secondary transition-colors">
+        <Link href="/dashboard" className="text-md-primary-text font-bold hover:text-md-secondary transition-colors">
           ← Voltar ao Início
         </Link>
       </div>
@@ -148,7 +148,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
     return (
       <div className="flex flex-col items-center justify-center h-dvh bg-md-surface-dim gap-4">
         <p className="text-white text-lg font-bold">Este curso não possui aulas.</p>
-        <Link href="/dashboard" className="text-md-primary-container font-bold hover:text-md-secondary transition-colors">
+        <Link href="/dashboard" className="text-md-primary-text font-bold hover:text-md-secondary transition-colors">
           ← Voltar ao Início
         </Link>
       </div>
@@ -183,7 +183,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
           color: newTier.name === 'Mestre' ? 'text-purple-400' :
             newTier.name === 'Especialista' ? 'text-amber-400' :
             newTier.name === 'Analista Sénior' ? 'text-blue-400' :
-            newTier.name === 'Analista' ? 'text-emerald-400' : 'text-gray-400',
+            newTier.name === 'Analista' ? 'text-md-tertiary' : 'text-gray-400',
           icon: TierIcon,
           maxPoints: nextTier?.minPoints,
         },
@@ -317,7 +317,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
         </Link>
         <div className="h-5 w-px bg-md-outline" />
         <h1 className="text-sm font-bold text-white truncate flex-1">{course.title}</h1>
-        <div className="text-xs text-gray-500 hidden sm:block">
+        <div className="text-xs text-md-on-surface-muted hidden sm:block">
           {completedCount}/{lessons.length} aulas
         </div>
       </div>
@@ -359,7 +359,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
                     </div>
                     <div>
                       <p className="text-sm font-bold text-white">Quiz final disponível!</p>
-                      <p className="text-xs text-gray-500">Nota mínima: 70% · Bônus de +50 pts</p>
+                      <p className="text-xs text-md-on-surface-muted">Nota mínima: 70% · Bônus de +50 pts</p>
                     </div>
                   </div>
                   <button
@@ -377,7 +377,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
                     </div>
                     <div>
                       <p className="text-sm font-bold text-white">Curso concluído!</p>
-                      <p className="text-xs text-gray-500">Seu certificado com código de verificação está pronto.</p>
+                      <p className="text-xs text-md-on-surface-muted">Seu certificado com código de verificação está pronto.</p>
                     </div>
                   </div>
                   <button

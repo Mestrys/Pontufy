@@ -62,7 +62,7 @@ export function RewardCard({
 
         {category && (
           <div className="absolute bottom-3 left-3">
-            <span className="bg-md-tertiary/20 backdrop-blur-sm text-md-tertiary text-xs font-medium px-2 py-1 rounded-full border border-md-tertiary/30">
+            <span className="bg-black/80 backdrop-blur-sm text-md-on-tertiary-container text-xs font-medium px-2 py-1 rounded-full border border-md-tertiary/30">
               {category}
             </span>
           </div>
@@ -70,7 +70,7 @@ export function RewardCard({
       </div>
 
       <div className="p-4 space-y-3">
-        <h3 className="font-semibold text-white text-base line-clamp-2 group-hover:text-md-primary-container transition-colors">
+        <h3 className="font-semibold text-white text-base line-clamp-2 group-hover:text-md-on-surface transition-colors">
           {title}
         </h3>
 
@@ -79,7 +79,7 @@ export function RewardCard({
           <div className="flex items-center gap-2">
             <Gift size={16} className="text-md-tertiary" />
             <span className="font-bold text-md-tertiary text-lg">{pricePoints.toLocaleString('pt-BR')}</span>
-            <span className="text-gray-500 text-sm">pontos</span>
+            <span className="text-md-on-surface-muted text-sm">pontos</span>
           </div>
 
           <button
@@ -88,7 +88,7 @@ export function RewardCard({
             className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
               canAfford
                 ? 'bg-md-primary text-md-on-primary hover:bg-md-primary-container active:scale-[0.98]'
-                : 'bg-white/5 text-gray-500 border border-white/10 cursor-not-allowed'
+                : 'bg-white/5 text-md-on-surface-muted border border-white/10 cursor-not-allowed'
             }`}
           >
             {canAfford ? (
@@ -105,7 +105,7 @@ export function RewardCard({
           </button>
         </div>
 
-        <div className="flex items-center justify-between text-xs text-gray-500">
+        <div className="flex items-center justify-between text-xs text-md-on-surface-muted">
           <span>Saldo: <span className="font-medium text-white">{pointsBalance.toLocaleString('pt-BR')}</span> pts</span>
           <span className={canAfford ? 'text-md-tertiary' : 'text-md-error'}>
             {canAfford ? `Novo saldo: ${(pointsBalance - pricePoints).toLocaleString('pt-BR')}` : `Faltam ${missingPoints.toLocaleString('pt-BR')}`}

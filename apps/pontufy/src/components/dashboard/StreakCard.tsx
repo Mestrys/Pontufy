@@ -33,7 +33,7 @@ export default function StreakCard() {
   if (!streak) {
     return (
       <div className="flex items-center justify-center py-8 bg-md-surface border border-md-outline rounded-xl">
-        <Loader2 className="animate-spin text-md-primary" size={20} />
+        <Loader2 className="animate-spin text-md-primary-text" size={20} />
       </div>
     );
   }
@@ -49,7 +49,7 @@ export default function StreakCard() {
             <p className="text-2xl font-black text-white leading-none">
               {streak.current} {streak.current === 1 ? 'dia' : 'dias'}
             </p>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-md-on-surface-muted mt-1">
               {streak.atRisk
                 ? 'Streak em risco: conclua uma aula hoje!'
                 : streak.current === 0
@@ -64,7 +64,7 @@ export default function StreakCard() {
             <Trophy size={15} /> Recorde: {streak.best}
           </p>
           {rank && (
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-md-on-surface-muted mt-1">
               #{rank.position} no ranking · {rank.xp} XP
             </p>
           )}

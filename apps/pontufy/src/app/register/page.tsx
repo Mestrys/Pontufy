@@ -64,7 +64,7 @@ function RegisterForm() {
     return (
       <div className="md-card-outlined md-elevation-3 p-8 text-center">
         <Link href="/" className="inline-flex items-center gap-2 text-3xl font-black tracking-tight text-white mb-6">
-          <span className="text-md-primary">Pontu</span>fy
+          <span className="text-md-primary-text">Pontu</span>fy
         </Link>
         <div className="text-md-error mb-4" style={{fontSize: '48px'}}>📨</div>
         <h1 className="text-headline-sm font-bold text-md-on-surface mb-2">Convite necessário</h1>
@@ -75,7 +75,7 @@ function RegisterForm() {
           <Building2 size={18} className="mr-2" />
           Cadastrar minha empresa
         </Link>
-        <Link href="/login" className="text-label-lg text-md-primary hover:text-md-primary-container transition-colors inline-block">
+        <Link href="/login" className="text-label-lg text-md-primary-text hover:text-md-on-surface transition-colors inline-block">
           Já tenho uma conta
         </Link>
       </div>
@@ -86,12 +86,12 @@ function RegisterForm() {
     return (
       <div className="md-card-outlined md-elevation-3 p-8 text-center">
         <Link href="/" className="inline-flex items-center gap-2 text-3xl font-black tracking-tight text-white mb-6">
-          <span className="text-md-primary">Pontu</span>fy
+          <span className="text-md-primary-text">Pontu</span>fy
         </Link>
         <div className="text-md-error mb-4" style={{fontSize: '48px'}}>⚠️</div>
         <h1 className="text-headline-sm font-bold text-md-on-surface mb-2">Convite indisponível</h1>
         <p className="text-body-md text-md-on-surface-variant mb-4">{inviteError}</p>
-        <Link href="/login" className="text-label-lg text-md-primary hover:text-md-primary-container transition-colors inline-block">
+        <Link href="/login" className="text-label-lg text-md-primary-text hover:text-md-on-surface transition-colors inline-block">
           Ir para o login
         </Link>
       </div>
@@ -102,7 +102,7 @@ function RegisterForm() {
     return (
       <div className="md-card-outlined md-elevation-3 p-8 text-center">
         <Link href="/" className="inline-flex items-center gap-2 text-3xl font-black tracking-tight text-white mb-6">
-          <span className="text-md-primary">Pontu</span>fy
+          <span className="text-md-primary-text">Pontu</span>fy
         </Link>
         <CheckCircle2 size={48} className="text-md-tertiary mx-auto mb-4" />
         <h1 className="text-headline-sm font-bold text-md-on-surface mb-2">Conta criada com sucesso!</h1>
@@ -158,7 +158,7 @@ function RegisterForm() {
     <div className="md-card-outlined md-elevation-3 p-8">
       <form className="space-y-5" onSubmit={handleSubmit}>
         <Link href="/" className="inline-flex items-center gap-2 text-3xl font-black tracking-tight text-white mb-4 block text-center">
-          <span className="text-md-primary">Pontu</span>fy
+          <span className="text-md-primary-text">Pontu</span>fy
         </Link>
 
         <div className="text-center mb-6">
@@ -198,7 +198,7 @@ function RegisterForm() {
             Nome completo
           </label>
           <div className="relative">
-            <User className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-variant/60 size-5 pointer-events-none" aria-hidden="true" />
+            <User className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-muted size-5 pointer-events-none" aria-hidden="true" />
             <input
               id="name"
               type="text"
@@ -206,7 +206,7 @@ function RegisterForm() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Ex: Maria Silva"
-              className="w-full pl-12 pr-4 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-variant/50 focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
+              className="w-full pl-12 pr-4 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-muted focus:outline-none focus:border-md-focus focus:ring-2 focus:ring-md-focus/40 text-body-md transition-colors"
             />
           </div>
         </div>
@@ -216,7 +216,7 @@ function RegisterForm() {
             Criar senha
           </label>
           <div className="relative">
-            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-variant/60 size-5 pointer-events-none" aria-hidden="true" />
+            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-muted size-5 pointer-events-none" aria-hidden="true" />
             <input
               id="password"
               type={showPassword ? 'text' : 'password'}
@@ -224,12 +224,12 @@ function RegisterForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Mínimo 8 caracteres"
-              className="w-full pl-12 pr-14 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-variant/50 focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
+              className="w-full pl-12 pr-14 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-muted focus:outline-none focus:border-md-focus focus:ring-2 focus:ring-md-focus/40 text-body-md transition-colors"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-4 flex items-center text-md-on-surface-variant/60 hover:text-md-on-surface transition-colors"
+              className="absolute inset-y-0 right-0 pr-4 flex items-center text-md-on-surface-muted hover:text-md-on-surface transition-colors"
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
@@ -241,14 +241,14 @@ function RegisterForm() {
             Confirmar senha
           </label>
           <div className="relative">
-            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-variant/60 size-5 pointer-events-none" aria-hidden="true" />
+            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-muted size-5 pointer-events-none" aria-hidden="true" />
             <input
               id="confirmPassword"
               type={showPassword ? 'text' : 'password'}
               required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full pl-12 pr-4 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-variant/50 focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
+              className="w-full pl-12 pr-4 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-muted focus:outline-none focus:border-md-focus focus:ring-2 focus:ring-md-focus/40 text-body-md transition-colors"
               placeholder="Confirme a senha"
             />
           </div>
@@ -270,7 +270,7 @@ function RegisterForm() {
 
         <p className="text-center text-body-sm text-md-on-surface-variant pt-2">
           Já tem conta?{' '}
-          <Link href="/login" className="font-semibold text-md-primary hover:text-md-primary-container transition-colors">
+          <Link href="/login" className="font-semibold text-md-primary-text hover:text-md-on-surface transition-colors">
             Fazer login
           </Link>
         </p>

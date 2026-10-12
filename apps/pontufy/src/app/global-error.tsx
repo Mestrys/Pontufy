@@ -33,12 +33,12 @@ export default function GlobalError({
           </p>
           <button
             onClick={() => reset()}
-            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-6 rounded-full transition-all shadow-md hover:shadow-lg"
+            className="w-full bg-md-primary hover:bg-md-primary-container text-md-on-primary font-bold py-3 px-6 rounded-full transition-all shadow-md hover:shadow-lg"
           >
             Tentar Recarregar
           </button>
           {error.digest && (
-            <p className="mt-6 text-xs text-gray-500 font-mono">
+            <p className="mt-6 text-xs text-md-on-surface-muted font-mono">
               Digest: {error.digest}
             </p>
           )}

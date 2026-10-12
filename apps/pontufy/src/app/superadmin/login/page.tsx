@@ -57,7 +57,7 @@ export default function SuperAdminLoginPage() {
       <div className="w-full max-w-md">
         <div className="md-card-outlined md-elevation-3 p-8">
           <div className="flex items-center justify-center gap-3 mb-8">
-            <ShieldCheck className="text-md-primary" size={28} />
+            <ShieldCheck className="text-md-primary-text" size={28} />
             <span className="text-headline-sm font-black text-md-on-surface tracking-tight">Pontufy Staff</span>
           </div>
 
@@ -78,7 +78,7 @@ export default function SuperAdminLoginPage() {
                 E-mail corporativo
               </label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-variant/60 size-5 pointer-events-none" aria-hidden="true" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-muted size-5 pointer-events-none" aria-hidden="true" />
                 <input
                   id="email"
                   type="email"
@@ -86,7 +86,7 @@ export default function SuperAdminLoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="voce@pontufy.com"
-                  className="w-full pl-12 pr-4 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-variant/50 focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
+                  className="w-full pl-12 pr-4 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-muted focus:outline-none focus:border-md-focus focus:ring-2 focus:ring-md-focus/40 text-body-md transition-colors"
                 />
               </div>
             </div>
@@ -96,19 +96,19 @@ export default function SuperAdminLoginPage() {
                 Senha
               </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-variant/60 size-5 pointer-events-none" aria-hidden="true" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-muted size-5 pointer-events-none" aria-hidden="true" />
                 <input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-12 pr-14 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-variant/50 focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
+                  className="w-full pl-12 pr-14 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-muted focus:outline-none focus:border-md-focus focus:ring-2 focus:ring-md-focus/40 text-body-md transition-colors"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-md-on-surface-variant/60 hover:text-md-on-surface transition-colors"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-md-on-surface-muted hover:text-md-on-surface transition-colors"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -124,7 +124,7 @@ export default function SuperAdminLoginPage() {
             </button>
           </form>
 
-          <p className="mt-6 text-center text-body-sm text-md-on-surface-variant/60">
+          <p className="mt-6 text-center text-body-sm text-md-on-surface-muted">
             Acesso exclusivo para colaboradores da Pontufy S/A
           </p>
         </div>

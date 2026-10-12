@@ -48,7 +48,7 @@ export default function MarketplacePage() {
             <Gift size={24} className="text-md-secondary" />
             <h1 className="text-3xl font-black text-white tracking-tight">Clube de Benefícios</h1>
           </div>
-          <p className="text-gray-500 text-sm">Troque seu esforço por recompensas reais.</p>
+          <p className="text-md-on-surface-muted text-sm">Troque seu esforço por recompensas reais.</p>
         </div>
 
         <CategoryFilter
@@ -59,7 +59,7 @@ export default function MarketplacePage() {
 
         {isLoading ? (
           <div className="flex items-center justify-center py-24">
-            <Loader2 className="animate-spin text-md-primary" size={36} />
+            <Loader2 className="animate-spin text-md-primary-text" size={36} />
           </div>
         ) : (
           <ProductGrid

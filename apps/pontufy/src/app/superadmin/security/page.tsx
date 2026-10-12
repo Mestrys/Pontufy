@@ -20,12 +20,12 @@ export default async function SuperAdminSecurityPage() {
         <div>
           <Link
             href="/superadmin"
-            className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-300 transition-colors mb-2"
+            className="inline-flex items-center gap-1.5 text-sm text-md-on-surface-muted hover:text-gray-300 transition-colors mb-2"
           >
             ← Voltar ao console
           </Link>
           <h1 className="text-2xl font-bold text-white">IPs Bloqueados</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-md-on-surface-muted mt-1">
             Monitoramento de força bruta e abuso · {session.user.email}
           </p>
         </div>

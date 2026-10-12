@@ -74,7 +74,7 @@ export default function RewardsPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-                Clube de <span className="text-md-primary-container">Benefícios</span>
+                Clube de <span className="text-md-primary-text">Benefícios</span>
               </h1>
               <p className="mt-2 text-gray-400 text-lg">
                 Troque seus pontos por recompensas exclusivas nos melhores parceiros.
@@ -83,7 +83,7 @@ export default function RewardsPage() {
             <div className="flex items-center gap-3 bg-md-surface border border-md-outline rounded-xl px-5 py-3">
               <Gift size={24} className="text-md-tertiary" />
               <div className="text-right">
-                <p className="text-xs text-gray-500">Seu saldo</p>
+                <p className="text-xs text-md-on-surface-muted">Seu saldo</p>
                 <p className="text-2xl font-black text-md-tertiary">{pointsBalance.toLocaleString('pt-BR')}</p>
               </div>
             </div>
@@ -91,16 +91,16 @@ export default function RewardsPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="bg-md-surface border border-md-outline rounded-xl p-4">
-              <p className="text-xs text-gray-500">Total de recompensas</p>
+              <p className="text-xs text-md-on-surface-muted">Total de recompensas</p>
               <p className="text-2xl font-bold text-white">{totalRewards}</p>
             </div>
             <div className="bg-md-surface border border-md-outline rounded-xl p-4">
-              <p className="text-xs text-gray-500">Categorias disponíveis</p>
+              <p className="text-xs text-md-on-surface-muted">Categorias disponíveis</p>
               <p className="text-2xl font-bold text-white">{categories.length}</p>
             </div>
             <div className="bg-md-surface border border-md-highlight/30 rounded-xl p-4 relative overflow-hidden">
               <Sparkles size={24} className="text-md-highlight absolute top-2 right-2" />
-              <p className="text-xs text-gray-500">Parceiros premium</p>
+              <p className="text-xs text-md-on-surface-muted">Parceiros premium</p>
               <p className="text-2xl font-bold text-md-highlight">
                 {new Set(allRewards.map((r: Reward) => r.partnerStore)).size}
               </p>
@@ -136,7 +136,7 @@ export default function RewardsPage() {
 
         {!isLoading && sortedRewards.length === 0 && (
           <div className="text-center py-16">
-            <Package size={64} className="mx-auto text-gray-600 mb-4" />
+            <Package size={64} className="mx-auto text-md-on-surface-muted mb-4" />
             <h3 className="text-xl font-semibold text-white mb-2">Nenhuma recompensa encontrada</h3>
             <p className="text-gray-400">
               {category ? 'Tente remover os filtros ou escolha outra categoria.' : 'Nenhuma recompensa disponível no momento.'}
@@ -144,7 +144,7 @@ export default function RewardsPage() {
             {category && (
               <button
                 onClick={() => setCategory(null)}
-                className="mt-4 text-md-primary-container hover:text-md-secondary font-medium"
+                className="mt-4 text-md-primary-text hover:text-md-secondary font-medium"
               >
                 Limpar filtros
               </button>

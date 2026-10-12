@@ -45,13 +45,13 @@ export default function AchievementsCard() {
       <h3 className="font-bold text-white mb-1 flex items-center gap-2">
         <Trophy size={17} className="text-md-tertiary" /> Conquistas
       </h3>
-      <p className="text-sm text-gray-500 mb-4">
+      <p className="text-sm text-md-on-surface-muted mb-4">
         Desbloqueie marcos de aprendizado e mantenha seu streak de dias.
       </p>
 
       {!unlocked ? (
         <div className="flex justify-center py-6">
-          <Loader2 className="animate-spin text-md-primary" size={20} />
+          <Loader2 className="animate-spin text-md-primary-text" size={20} />
         </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -63,16 +63,16 @@ export default function AchievementsCard() {
                 className={`rounded-xl border p-3 text-center transition-colors ${
                   isUnlocked
                     ? 'bg-md-primary/10 border-md-primary/30'
-                    : 'bg-md-surface-container border-md-outline opacity-60'
+                    : 'bg-md-surface-container border-md-outline border-dashed'
                 }`}
                 title={a.description}
               >
                 <div className={`text-2xl mb-1 ${isUnlocked ? '' : 'grayscale'}`}>{a.emoji}</div>
-                <p className={`text-xs font-bold leading-tight ${isUnlocked ? 'text-white' : 'text-gray-500'}`}>
+                <p className={`text-xs font-bold leading-tight ${isUnlocked ? 'text-white' : 'text-md-on-surface-muted'}`}>
                   {a.title}
                 </p>
-                <p className="text-[10px] text-gray-500 mt-0.5 leading-tight">{a.description}</p>
-                {!isUnlocked && <Lock size={10} className="inline mt-1 text-gray-600" />}
+                <p className="text-xs text-md-on-surface-muted mt-0.5 leading-tight">{a.description}</p>
+                {!isUnlocked && <Lock size={10} className="inline mt-1 text-md-on-surface-muted" />}
               </div>
             );
           })}

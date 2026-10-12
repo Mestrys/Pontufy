@@ -66,8 +66,8 @@ export default function CoursesPage() {
 
   const statusConfig = {
     completed: {
-      icon: <CheckCircle2 size={16} className="text-emerald-400" />,
-      badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+      icon: <CheckCircle2 size={16} className="text-md-tertiary" />,
+      badge: 'bg-md-tertiary/10 text-md-tertiary border-md-tertiary/20',
       label: 'Concluído',
     },
     in_progress: {
@@ -76,7 +76,7 @@ export default function CoursesPage() {
       label: 'Em andamento',
     },
     available: {
-      icon: <BookOpen size={16} className="text-gray-500" />,
+      icon: <BookOpen size={16} className="text-md-on-surface-muted" />,
       badge: 'bg-white/5 text-gray-400 border-white/10',
       label: 'Disponível',
     },
@@ -85,7 +85,7 @@ export default function CoursesPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-[70vh] bg-[#0a0a0a]">
-        <Loader2 className="animate-spin text-emerald-500" size={36} />
+        <Loader2 className="animate-spin text-md-tertiary" size={36} />
       </div>
     );
   }
@@ -95,7 +95,7 @@ export default function CoursesPage() {
       <div className="max-w-[1200px] mx-auto px-6 md:px-16">
         <header className="mb-8">
           <h1 className="text-3xl font-black text-white tracking-tight">Meus Cursos & Trilhas</h1>
-          <p className="text-gray-500 mt-1.5 text-sm">Acompanhe seu progresso em todas as trilhas de aprendizagem.</p>
+          <p className="text-md-on-surface-muted mt-1.5 text-sm">Acompanhe seu progresso em todas as trilhas de aprendizagem.</p>
         </header>
 
         {/* Filters */}
@@ -106,7 +106,7 @@ export default function CoursesPage() {
               onClick={() => setFilter(f.key)}
               className={`px-4 py-2 rounded-full text-sm font-semibold transition-all border ${
                 filter === f.key
-                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-900/30'
+                  ? 'bg-md-primary text-md-on-primary border-md-primary'
                   : 'bg-[#1f1f1f] text-gray-400 border-[#2a2a2a] hover:border-[#3a3a3a] hover:text-white'
               }`}
             >
@@ -116,7 +116,7 @@ export default function CoursesPage() {
         </div>
 
         {filtered.length === 0 ? (
-          <div className="text-center py-24 text-gray-600">
+          <div className="text-center py-24 text-md-on-surface-muted">
             {searchQuery
               ? `Nenhum curso encontrado para "${searchQuery}".`
               : 'Nenhum curso nesta categoria.'}
@@ -135,27 +135,27 @@ export default function CoursesPage() {
                   {/* Progress bar at top */}
                   <div className="h-1 bg-[#1f1f1f]">
                     <div
-                      className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 transition-all duration-500"
+                      className="h-full bg-md-tertiary transition-all duration-500"
                       style={{ width: `${course.progress}%` }}
                     />
                   </div>
 
                   <div className="p-5">
                     <div className="flex items-start justify-between gap-3 mb-3">
-                      <h3 className="font-bold text-white text-base leading-tight group-hover:text-emerald-400 transition-colors">
+                      <h3 className="font-bold text-white text-base leading-tight group-hover:text-md-tertiary transition-colors">
                         {course.title}
                       </h3>
                       {cfg.icon}
                     </div>
 
                     {course.description && (
-                      <p className="text-xs text-gray-500 line-clamp-2 mb-4 leading-relaxed">
+                      <p className="text-xs text-md-on-surface-muted line-clamp-2 mb-4 leading-relaxed">
                         {course.description}
                       </p>
                     )}
 
                     <div className="flex items-center justify-between mt-auto">
-                      <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                      <div className="flex items-center gap-1.5 text-xs text-md-on-surface-muted">
                         <Clock size={12} />
                         <span>{course.completedLessons}/{course.totalLessons} aulas</span>
                       </div>

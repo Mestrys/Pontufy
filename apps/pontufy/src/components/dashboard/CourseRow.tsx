@@ -41,7 +41,7 @@ export default function CourseRow({ title, courses }: { title: string; courses: 
               <h3 className="text-xs sm:text-sm font-semibold text-gray-300 line-clamp-1 group-hover:text-white transition-colors">
                 {course.title}
               </h3>
-              <div className="flex items-center gap-1 mt-0.5 text-[11px] text-md-tertiary font-bold">
+              <div className="flex items-center gap-1 mt-0.5 text-xs text-md-tertiary font-bold">
                 <Coins size={10} /> +{course.pointsReward} pts
               </div>
             </div>
