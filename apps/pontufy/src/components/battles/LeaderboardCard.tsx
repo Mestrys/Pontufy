@@ -51,7 +51,7 @@ export default function LeaderboardCard() {
       </header>
 
       {error && (
-        <p className="text-red-400 text-sm text-center py-6">{error}</p>
+        <p className="text-md-error text-sm text-center py-6">{error}</p>
       )}
       {!ranking && !error && (
         <div className="flex justify-center py-10">

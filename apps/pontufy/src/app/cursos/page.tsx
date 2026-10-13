@@ -72,8 +72,8 @@ export default function CoursesPage() {
       label: 'Concluído',
     },
     in_progress: {
-      icon: <PlayCircle size={16} className="text-amber-400" />,
-      badge: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+      icon: <PlayCircle size={16} className="text-md-highlight" />,
+      badge: 'bg-md-highlight/10 text-md-highlight border-md-highlight/20',
       label: 'Em andamento',
     },
     available: {
@@ -164,7 +164,7 @@ export default function CoursesPage() {
                       </div>
                       <div className="flex items-center gap-1.5">
                         {hasCert && (
-                          <span className="flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full border bg-amber-500/10 text-amber-400 border-amber-500/20">
+                          <span className="flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full border bg-md-highlight/10 text-md-highlight border-md-highlight/20">
                             <Award size={11} /> Certificado
                           </span>
                         )}

@@ -188,7 +188,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
         newTier: {
           name: newTier.name,
           color: newTier.name === 'Mestre' ? 'text-purple-400' :
-            newTier.name === 'Especialista' ? 'text-amber-400' :
+            newTier.name === 'Especialista' ? 'text-md-highlight' :
             newTier.name === 'Analista Sênior' ? 'text-blue-400' :
             newTier.name === 'Analista' ? 'text-md-tertiary' : 'text-md-on-surface-variant',
           icon: TierIcon,

@@ -59,13 +59,17 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#0a0a0a",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f5f4f6" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
 };
 
-// Aplica a marca do tenant guardada na última visita antes da primeira pintura,
-// sem esperar o fetch do DynamicThemeProvider (evita o "flash" da cor Pontufy).
-// Só aceita nomes de token conhecidos e valores #RRGGBB.
-const BRAND_BOOTSTRAP = `try{var v=JSON.parse(localStorage.getItem('pontufy-brand-vars')||'null');if(v){for(var k in v){if(/^--color-md-[a-z-]+$/.test(k)&&/^#[0-9A-F]{6}$/i.test(v[k]))document.documentElement.style.setProperty(k,v[k]);}}}catch(e){}`;
+// Antes da primeira pintura: aplica a aparência escolhida no Perfil
+// (data-theme) e a marca do tenant guardada na última visita, sem esperar o
+// fetch do DynamicThemeProvider. Só aceita nomes de token e #RRGGBB.
+const THEME_BOOTSTRAP = `try{var t=localStorage.getItem('pontufy-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}
+try{var v=JSON.parse(localStorage.getItem('pontufy-brand-v2')||'null');if(v&&v.dark&&v.light){var b=function(o){var r='';for(var k in o){if(/^--color-md-[a-z-]+$/.test(k)&&/^#[0-9A-F]{6}$/i.test(o[k]))r+=k+':'+o[k]+';';}return r;};var s=document.createElement('style');s.id='pontufy-brand';s.textContent=':root:root{'+b(v.dark)+'}:root:root[data-theme="light"]{'+b(v.light)+'}@media (prefers-color-scheme: light){:root:root:not([data-theme="dark"]){'+b(v.light)+'}}';document.head.appendChild(s);}}catch(e){}`;
 
 export default function RootLayout({
   children,
@@ -76,11 +80,11 @@ export default function RootLayout({
     <html
       lang="pt-BR"
       className={`${roboto.variable} ${geistMono.variable} font-sans h-full antialiased`}
-      // O script de marca muda o style do <html> antes da hidratação.
+      // O script do <head> põe data-theme no <html> antes da hidratação.
       suppressHydrationWarning
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: BRAND_BOOTSTRAP }} />
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
       </head>
       <body className="min-h-full flex flex-col bg-md-surface-dim text-md-on-surface">
         <AuthProvider>

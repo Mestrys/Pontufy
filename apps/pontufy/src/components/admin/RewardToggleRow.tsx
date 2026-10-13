@@ -53,7 +53,7 @@ export default function RewardToggleRow({ catalog }: { catalog: RewardItem[] }) 
           <h2 className="text-title-lg font-bold text-md-on-surface">Catálogo de benefícios</h2>
         </div>
         <p className="text-body-sm text-md-on-surface-variant">
-          Gerencie quais prêmios estarão visíveis no Benefícios da sua empresa.
+          Escolha quais benefícios os colaboradores da sua empresa veem.
         </p>
       </div>
 

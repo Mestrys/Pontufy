@@ -20,7 +20,7 @@ interface AuditLogRow {
 const ACTION_STYLES: Record<string, string> = {
   BRANDING_UPDATED: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
   INVITATION_CREATED: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  INVITATION_REVOKED: 'bg-red-500/10 text-red-400 border-red-500/20',
+  INVITATION_REVOKED: 'bg-md-error/10 text-md-error border-md-error/20',
   REWARD_REDEEMED: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
   USER_IMPORT: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
   TENANT_ONBOARDED: 'bg-md-tertiary/10 text-md-tertiary border-md-tertiary/20',
@@ -180,7 +180,7 @@ export default function AuditLogsClient() {
         </section>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3 rounded-lg text-center font-medium">
+          <div className="bg-md-error/10 border border-md-error/20 text-md-error text-sm p-3 rounded-lg text-center font-medium">
             {error}
           </div>
         )}

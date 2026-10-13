@@ -10,11 +10,12 @@ export interface HeroCourseData {
   thumbnail: string;
 }
 
+// Fica sempre escuro (foto + véu preto, nos dois temas): o texto usa on-media.
 // Destaque de um curso novo, ainda não começado. Altura do conteúdo (sem vh)
 // e uma ação só: "Começar curso" serve para aula em texto e em vídeo.
 export default function HeroCourse({ course }: { course: HeroCourseData }) {
   return (
-    <section aria-labelledby="hero-heading" className="relative overflow-hidden rounded-2xl border border-md-outline bg-md-surface">
+    <section aria-labelledby="hero-heading" className="relative overflow-hidden rounded-2xl border border-md-outline bg-black">
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${course.thumbnail})` }}
@@ -30,15 +31,15 @@ export default function HeroCourse({ course }: { course: HeroCourseData }) {
         <h2 id="hero-heading" className="mt-4 text-2xl sm:text-4xl font-black tracking-tight text-on-media text-balance leading-tight">
           {course.title}
         </h2>
-        <p className="mt-3 flex flex-wrap items-center gap-x-2 text-sm font-semibold text-md-on-surface">
+        <p className="mt-3 flex flex-wrap items-center gap-x-2 text-sm font-semibold text-on-media">
           <span>{course.lessonsCount} {course.lessonsCount === 1 ? 'aula' : 'aulas'}</span>
-          <span aria-hidden="true" className="text-md-on-surface-muted">·</span>
-          <span className="inline-flex items-center gap-1 text-md-tertiary">
+          <span aria-hidden="true" className="text-on-media">·</span>
+          <span className="inline-flex items-center gap-1 text-on-media">
             <Coins size={14} aria-hidden="true" /> +{course.pointsReward.toLocaleString('pt-BR')} pontos
           </span>
         </p>
         {course.description && (
-          <p className="mt-3 max-w-lg text-sm sm:text-base leading-relaxed text-md-on-surface line-clamp-3">
+          <p className="mt-3 max-w-lg text-sm sm:text-base leading-relaxed text-on-media line-clamp-3">
             {course.description}
           </p>
         )}

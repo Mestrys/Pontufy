@@ -146,7 +146,7 @@ export default function Navbar() {
                     <span
                       aria-hidden="true"
                       className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-md-surface ${
-                        isOnline ? 'bg-md-tertiary' : 'bg-red-500'
+                        isOnline ? 'bg-md-tertiary' : 'bg-md-error'
                       }`}
                     />
                   </span>
@@ -183,7 +183,7 @@ export default function Navbar() {
                     <button
                       type="button"
                       onClick={() => signOut({ callbackUrl: '/login' })}
-                      className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition-colors font-medium"
+                      className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm text-md-error hover:bg-md-error/10 transition-colors font-medium"
                     >
                       <LogOut size={15} />
                       Sair da conta

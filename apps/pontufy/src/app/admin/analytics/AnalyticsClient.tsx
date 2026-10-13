@@ -73,7 +73,7 @@ export default function AnalyticsClient() {
   if (error || !data) {
     return (
       <div className="min-h-screen bg-md-surface-dim flex items-center justify-center px-4">
-        <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-4 rounded-lg text-center max-w-md font-medium">
+        <div className="bg-md-error/10 border border-md-error/20 text-md-error text-sm p-4 rounded-lg text-center max-w-md font-medium">
           {error || 'Dados indisponíveis.'}
         </div>
       </div>

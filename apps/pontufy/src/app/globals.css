@@ -98,6 +98,100 @@
   --ease-emphasized: cubic-bezier(0.05, 0.7, 0.1, 1);
 }
 
+/* ── Tema claro (M1) ───────────────────────────────────────────────────────
+   Mesmos papéis do escuro, valores medidos com contrastRatio (lib/branding):
+   texto ≥ 4,5:1 sobre a superfície mais escura do claro (#e7e4e9), foco e
+   borda de campo ≥ 3:1. Os preenchimentos de estado (tertiary, highlight,
+   error) escurecem e o texto sobre eles fica branco.
+   Vale com data-theme="light" (escolha no Perfil) ou, no modo automático,
+   quando o sistema está claro. A marca do cliente é aplicada por
+   DynamicThemeProvider depois destes valores. */
+:root {
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --color-md-surface-dim: #f5f4f6;
+  --color-md-surface: #ffffff;
+  --color-md-surface-container: #f0eef1;
+  --color-md-surface-container-high: #e7e4e9;
+  --color-md-surface-variant: #e7e4e9;
+  --color-md-outline: #e1dde3;
+  --color-md-outline-variant: #cbc6ce;
+  --color-md-on-surface: #1d1b1e;
+  --color-md-on-surface-strong: #121113;
+  --color-md-on-surface-variant: #4a454e;
+  --color-md-on-surface-muted: #5e5963;
+  --color-md-primary: #5c4152;
+  --color-md-on-primary: #ffffff;
+  --color-md-primary-container: #4a3342;
+  --color-md-on-primary-container: #ffffff;
+  --color-md-primary-text: #7a3d60;
+  --color-md-secondary: #9a4038;
+  --color-md-on-secondary: #ffffff;
+  --color-md-tertiary: #2b6648;
+  --color-md-on-tertiary: #ffffff;
+  --color-md-highlight: #855000;
+  --color-md-on-highlight: #ffffff;
+  --color-md-error: #b3261e;
+  --color-md-on-error: #ffffff;
+  --color-md-focus: #8a3d68;
+  --color-md-field-border: #8c8691;
+  --color-md-tertiary-container: #cfe6d8;
+  --color-md-on-tertiary-container: #0f3a25;
+  --color-md-secondary-container: #f6d9d5;
+  --color-md-on-secondary-container: #5a1e18;
+  --color-blue-300: #1d4ed8;
+  --color-blue-400: #1d4ed8;
+  --color-purple-300: #7e22ce;
+  --color-purple-400: #7e22ce;
+  --color-violet-300: #6d28d9;
+  --color-violet-400: #6d28d9;
+  --color-orange-400: #c2410c;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --color-md-surface-dim: #f5f4f6;
+    --color-md-surface: #ffffff;
+    --color-md-surface-container: #f0eef1;
+    --color-md-surface-container-high: #e7e4e9;
+    --color-md-surface-variant: #e7e4e9;
+    --color-md-outline: #e1dde3;
+    --color-md-outline-variant: #cbc6ce;
+    --color-md-on-surface: #1d1b1e;
+    --color-md-on-surface-strong: #121113;
+    --color-md-on-surface-variant: #4a454e;
+    --color-md-on-surface-muted: #5e5963;
+    --color-md-primary: #5c4152;
+    --color-md-on-primary: #ffffff;
+    --color-md-primary-container: #4a3342;
+    --color-md-on-primary-container: #ffffff;
+    --color-md-primary-text: #7a3d60;
+    --color-md-secondary: #9a4038;
+    --color-md-on-secondary: #ffffff;
+    --color-md-tertiary: #2b6648;
+    --color-md-on-tertiary: #ffffff;
+    --color-md-highlight: #855000;
+    --color-md-on-highlight: #ffffff;
+    --color-md-error: #b3261e;
+    --color-md-on-error: #ffffff;
+    --color-md-focus: #8a3d68;
+    --color-md-field-border: #8c8691;
+    --color-md-tertiary-container: #cfe6d8;
+    --color-md-on-tertiary-container: #0f3a25;
+    --color-md-secondary-container: #f6d9d5;
+    --color-md-on-secondary-container: #5a1e18;
+    --color-blue-300: #1d4ed8;
+    --color-blue-400: #1d4ed8;
+    --color-purple-300: #7e22ce;
+    --color-purple-400: #7e22ce;
+    --color-violet-300: #6d28d9;
+    --color-violet-400: #6d28d9;
+    --color-orange-400: #c2410c;
+  }
+}
+
 @layer base {
   *, *::before, *::after {
     border-color: var(--color-md-outline);

@@ -246,12 +246,12 @@ export default function QuizModal({
           ) : (
             /* ── Tela de reprovação ──────────────────────────── */
             <div className="text-center py-6">
-              <div className="w-16 h-16 mx-auto rounded-full bg-red-500/10 flex items-center justify-center mb-5">
-                <XCircle size={32} className="text-red-400" />
+              <div className="w-16 h-16 mx-auto rounded-full bg-md-error/10 flex items-center justify-center mb-5">
+                <XCircle size={32} className="text-md-error" />
               </div>
               <h2 id={titleId} className="text-2xl font-black text-md-on-surface-strong mb-1">Não foi dessa vez</h2>
               <p className="text-md-on-surface-variant text-sm mb-4">{courseTitle}</p>
-              <p className="text-5xl font-black text-red-400 mb-1">
+              <p className="text-5xl font-black text-md-error mb-1">
                 {result.score}/{result.total}
               </p>
               <p className="text-sm text-md-on-surface-variant mb-2">
@@ -285,7 +285,7 @@ export default function QuizModal({
               <div className="flex items-center gap-2">
                 <ClipboardCheck size={18} className="text-md-tertiary" />
                 <h2 id={titleId} className="text-base font-bold text-md-on-surface-strong">Avaliação final</h2>
-                <span className="text-xs font-bold text-amber-400 bg-amber-400/10 border border-amber-400/30 rounded-full px-2 py-0.5">
+                <span className="text-xs font-bold text-md-highlight bg-md-highlight/10 border border-md-highlight/30 rounded-full px-2 py-0.5">
                   +50 pts
                 </span>
               </div>
@@ -309,7 +309,7 @@ export default function QuizModal({
                 let cls = 'border-md-outline text-md-on-surface-variant hover:border-md-outline-variant hover:text-md-on-surface-strong';
                 if (confirmed) {
                   if (idx === q.correctIndex) cls = 'border-md-tertiary bg-md-tertiary/10 text-md-tertiary';
-                  else if (idx === selected) cls = 'border-red-500 bg-red-500/10 text-red-400';
+                  else if (idx === selected) cls = 'border-md-error bg-md-error/10 text-md-error';
                 } else if (idx === selected) {
                   cls = 'border-md-tertiary bg-md-tertiary/10 text-md-on-surface-strong';
                 }
@@ -331,7 +331,7 @@ export default function QuizModal({
                       <CheckCircle2 size={16} className="text-md-tertiary flex-shrink-0" />
                     )}
                     {confirmed && idx === selected && idx !== q.correctIndex && (
-                      <XCircle size={16} className="text-red-400 flex-shrink-0" />
+                      <XCircle size={16} className="text-md-error flex-shrink-0" />
                     )}
                   </button>
                 );

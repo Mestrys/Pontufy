@@ -6,7 +6,7 @@ const formatNumber = (value: number): string => new Intl.NumberFormat('pt-BR').f
 
 const STATUS_STYLES: Record<string, string> = {
   published: 'bg-md-tertiary/10 text-md-tertiary border-md-tertiary/20',
-  draft: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  draft: 'bg-md-highlight/10 text-md-highlight border-md-highlight/20',
   removed: 'bg-md-on-surface-variant/10 text-md-on-surface-variant border-md-on-surface-variant/20',
 };
 

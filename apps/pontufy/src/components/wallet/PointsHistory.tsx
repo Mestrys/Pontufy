@@ -29,7 +29,7 @@ export default function PointsHistory({ history }: PointsHistoryProps) {
                 className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${
                   tx.type === 'gain'
                     ? 'bg-md-tertiary/10 text-md-tertiary'
-                    : 'bg-red-500/10 text-red-400'
+                    : 'bg-md-error/10 text-md-error'
                 }`}
               >
                 {tx.type === 'gain' ? <ArrowUpRight size={18} /> : <ArrowDownRight size={18} />}
@@ -43,7 +43,7 @@ export default function PointsHistory({ history }: PointsHistoryProps) {
 
             <div
               className={`font-black text-base tabular-nums ${
-                tx.type === 'gain' ? 'text-md-tertiary' : 'text-red-400'
+                tx.type === 'gain' ? 'text-md-tertiary' : 'text-md-error'
               }`}
             >
               {tx.type === 'gain' ? '+' : '-'}

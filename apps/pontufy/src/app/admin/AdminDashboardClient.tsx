@@ -147,12 +147,6 @@ export default function AdminDashboardClient() {
           </section>
 
           <section id="recompensas" className="md-card-outlined md-elevation-1 overflow-hidden scroll-mt-20">
-            <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-md-outline flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-md-surface-container-high/50">
-              <div className="flex items-center gap-2">
-                <span style={{fontSize: '20px'}} aria-hidden="true">🎁</span>
-                <h2 className="text-title-lg font-bold text-md-on-surface">Catálogo de benefícios</h2>
-              </div>
-            </div>
             <RewardToggleRow catalog={rewards} />
           </section>
         </div>

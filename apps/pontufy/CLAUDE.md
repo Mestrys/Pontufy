@@ -209,9 +209,11 @@ export async function GET() {
 }
 ```
 
-### Tema Visual (Dark)
+### Tema visual (escuro e claro)
 
-Use sempre os tokens `md-*` de `src/app/globals.css`. Os contrastes abaixo foram medidos sobre `md-surface` (#141414). `npm run check:theme` roda no build e reprova as classes proibidas.
+Use sempre os tokens `md-*` de `src/app/globals.css`. O app tem **tema escuro e claro**: o padrão é automático (segue o sistema) e a pessoa pode fixar em Perfil → Preferências → Aparência (`lib/theme-pref.ts`, `data-theme` no `<html>`, aplicado antes da primeira pintura pelo script do `layout.tsx`). Os valores do claro ficam no bloco "Tema claro (M1)" do `globals.css` e foram medidos com `contrastRatio` (texto ≥ 4,5:1 sobre #e7e4e9; foco e borda de campo ≥ 3:1). Os contrastes abaixo são do escuro, sobre `md-surface` (#141414). `npm run check:theme` roda no build e reprova as classes proibidas.
+
+**Como testar**: rode os harness de contraste com `colorScheme: 'light'` e `'dark'` no Playwright; um tema verde não diz nada do outro.
 
 **Superfícies**
 
@@ -226,7 +228,9 @@ Borda de campo:      automática em input/select/textarea (#636363, 3,07:1)
 **Texto**
 
 ```
-Principal:           text-md-on-surface / text-white
+Principal:           text-md-on-surface
+Ênfase (título):     text-md-on-surface-strong (branco no escuro, quase preto no claro)
+Sobre foto/vídeo:    text-on-media (branco nos dois temas; só sobre imagem ou véu preto)
 Secundário:          text-md-on-surface-variant (#a3a3a3, 7,30:1)
 Metadados/legenda:   text-md-on-surface-muted (#949494, 6,07:1)
 Link / destaque:     text-md-primary-text (#d99bb8, 8,19:1)
@@ -250,7 +254,7 @@ Chip tonal:          bg-md-tertiary-container text-md-on-tertiary-container
 - Não use opacidade em texto (`text-.../60`, `opacity-50` em bloco de texto). Escolha o papel de texto mais fraco que ainda passa: `md-on-surface-muted`.
 - Piso tipográfico de **12px** (`text-xs`, `text-label-sm`). Nada de `text-[9px]`, `text-[10px]` ou `text-[11px]`.
 - Foco: o `:focus-visible` global desenha `outline` de 2px em `md-focus` (#f7d0a9). Não use `focus:outline-none`, exceto em campo com `focus:border-md-focus`.
-- **White-label**: a cor do cliente sobrescreve `md-primary`, `md-primary-container`, `md-on-primary(-container)`, `md-primary-text` e `md-secondary` no `<html>` (`DynamicThemeProvider` → `deriveBrandTheme` em `lib/branding.ts`, que ajusta a cor até 4,5:1). Por isso, nada de hex fixo da paleta em componente: sobre `bg-md-primary` o texto é `text-md-on-primary` (pode ser escuro), nunca `text-white`. Em fundo tingido da marca (`bg-md-primary/15`), use `text-md-on-surface`, não `muted`. Logo e nome da empresa vêm de `useBrand()` / `<BrandMark />`.
+- **White-label**: a cor do cliente sobrescreve `md-primary`, `md-primary-container`, `md-on-primary(-container)`, `md-primary-text` e `md-secondary` numa `<style id="pontufy-brand">`, com um bloco por tema (`DynamicThemeProvider` → `deriveBrandTheme(cor, destaque, 'dark' | 'light')` e `brandStylesheet` em `lib/branding.ts`, que ajustam a cor até 4,5:1). Nunca no `style` do `<html>`: inline venceria o tema claro. Por isso, nada de hex fixo da paleta em componente: sobre `bg-md-primary` o texto é `text-md-on-primary` (pode ser escuro), nunca `text-white`. Em fundo tingido da marca (`bg-md-primary/15`), use `text-md-on-surface`, não `muted`. Logo e nome da empresa vêm de `useBrand()` / `<BrandMark />`.
 
 **Proibido** (reprovado pelo `check:theme`)
 
@@ -261,6 +265,10 @@ emerald-*                                    → mapa semântico acima
 text-md-primary, text-md-primary-container   → text-md-primary-text
 text-md-on-surface-variant/NN                → text-md-on-surface-muted
 text-[<12px]                                 → text-xs
+text-white, text-gray-*                      → text-md-on-surface-strong / -on-surface / -on-surface-variant, ou text-on-media
+bg-white/NN, border-white/NN                 → bg-md-on-surface-strong/NN (camada de estado), border-md-outline
+bg-gray-*, bg-[#hex], border-[#hex]          → md-surface-*, md-outline, md-outline-variant
+(exceção consciente: comentário "check-theme: ok" na mesma linha)
 ```
 
 ### Diálogos, avisos e carregamento

@@ -41,7 +41,7 @@ export default function SkillsPage() {
         </header>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3 rounded-lg text-center font-medium mb-4">
+          <div className="bg-md-error/10 border border-md-error/20 text-md-error text-sm p-3 rounded-lg text-center font-medium mb-4">
             {error}
           </div>
         )}

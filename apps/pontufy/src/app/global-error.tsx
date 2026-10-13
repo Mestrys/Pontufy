@@ -11,7 +11,7 @@ export default function GlobalError({
     <html lang="en">
       <body className="min-h-screen flex items-center justify-center bg-md-surface-dim text-md-on-surface-strong p-6">
         <div className="max-w-md w-full bg-md-on-surface-strong/10 backdrop-blur-md p-8 rounded-2xl border border-md-on-surface-strong/20 text-center shadow-2xl">
-          <div className="w-16 h-16 mx-auto mb-6 bg-red-500/20 text-red-500 rounded-full flex items-center justify-center border border-red-500/30">
+          <div className="w-16 h-16 mx-auto mb-6 bg-md-error/20 text-md-error rounded-full flex items-center justify-center border border-md-error/30">
             <svg
               className="w-8 h-8"
               fill="none"

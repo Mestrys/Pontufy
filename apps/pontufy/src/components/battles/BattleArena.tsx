@@ -195,7 +195,7 @@ export default function BattleArena({ battleId, onClose, onFinished, onLockChang
     return (
       <div className="w-full max-w-md mx-auto mb-6">
         <div className="flex items-center justify-between text-xs font-semibold mb-1.5">
-          <span className={urgent ? 'text-red-400' : 'text-md-on-surface-variant'}>
+          <span className={urgent ? 'text-md-error' : 'text-md-on-surface-variant'}>
             <Timer size={14} className="inline mr-1" />
             {secondsLeft}s
             {extended && <span className="ml-1 font-normal text-md-on-surface-muted">(tempo estendido)</span>}
@@ -207,7 +207,7 @@ export default function BattleArena({ battleId, onClose, onFinished, onLockChang
         <div className="h-2 bg-md-surface-container-high rounded-full overflow-hidden">
           <div
             className={`h-full transition-all duration-1000 ease-linear ${
-              urgent ? 'bg-red-500' : 'bg-md-primary'
+              urgent ? 'bg-md-error' : 'bg-md-primary'
             }`}
             style={{ width: `${pct}%` }}
           />
@@ -245,9 +245,9 @@ export default function BattleArena({ battleId, onClose, onFinished, onLockChang
     return (
       <div className="py-10 text-center">
         {result.forfeited ? (
-          <AlertTriangle className="mx-auto text-amber-400 mb-4" size={48} />
+          <AlertTriangle className="mx-auto text-md-highlight mb-4" size={48} />
         ) : (
-          <Trophy className={`mx-auto mb-4 ${wins >= 3 ? 'text-amber-400' : 'text-md-on-surface-muted'}`} size={48} />
+          <Trophy className={`mx-auto mb-4 ${wins >= 3 ? 'text-md-highlight' : 'text-md-on-surface-muted'}`} size={48} />
         )}
         <h3 className="text-2xl font-black text-md-on-surface-strong mb-1">
           {result.forfeited ? 'Turno anulado' : `Você acertou ${wins} de ${questions.length}`}
@@ -275,7 +275,7 @@ export default function BattleArena({ battleId, onClose, onFinished, onLockChang
   return (
     <div className="py-6">
       {focusLost && (
-        <div className="mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-sm text-center font-semibold">
+        <div className="mb-4 p-3 rounded-lg bg-md-highlight/10 border border-md-highlight/30 text-md-highlight text-sm text-center font-semibold">
           Perda de foco detectada! O turno será anulado ao enviar.
         </div>
       )}

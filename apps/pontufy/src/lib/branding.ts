@@ -126,8 +126,9 @@ function shiftUntil(hex: string, against: string, min: number, direction: 1 | -1
   return { hex: direction === 1 ? '#FFFFFF' : '#000000', cost: 101 };
 }
 
-/** Superfície mais clara onde texto de marca aparece (md-surface-container-high). */
-const DARKEST_TEXT_BACKDROP = '#2A2A2A';
+/** Superfície onde texto de marca tem menos contraste (md-surface-container-high de cada tema). */
+const TEXT_BACKDROP = { dark: '#2A2A2A', light: '#E7E4E9' } as const;
+export type ColorScheme = keyof typeof TEXT_BACKDROP;
 const ON_LIGHT = '#141414';
 const ON_DARK = '#FFFFFF';
 const MIN_TEXT_CONTRAST = 4.5;
@@ -148,7 +149,11 @@ export interface BrandTheme {
  * - md-primary-text e md-secondary como texto sobre as superfícies escuras.
  * Escolhe texto branco ou escuro pelo que exige a menor mudança na cor.
  */
-export function deriveBrandTheme(primaryHex: string, accentHex?: string | null): BrandTheme {
+export function deriveBrandTheme(
+  primaryHex: string,
+  accentHex?: string | null,
+  scheme: ColorScheme = 'dark',
+): BrandTheme {
   const base = sanitizeHexColor(primaryHex) ?? DEFAULT_PRIMARY_COLOR;
 
   const withWhite = shiftUntil(base, ON_DARK, MIN_TEXT_CONTRAST, -1);
@@ -162,9 +167,12 @@ export function deriveBrandTheme(primaryHex: string, accentHex?: string | null):
   const hoverL = Math.min(1, Math.max(0, l + (useDarkText ? 0.08 : -0.08)));
   const primaryContainer = rgbToHex(hslToRgb([h, s, hoverL]));
 
-  const primaryText = shiftUntil(base, DARKEST_TEXT_BACKDROP, MIN_TEXT_CONTRAST, 1).hex;
+  // Texto de marca: clareia sobre o fundo escuro, escurece sobre o claro.
+  const backdrop = TEXT_BACKDROP[scheme];
+  const textDirection = scheme === 'dark' ? 1 : -1;
+  const primaryText = shiftUntil(base, backdrop, MIN_TEXT_CONTRAST, textDirection).hex;
   const accent = sanitizeHexColor(accentHex) ?? DEFAULT_ACCENT_COLOR;
-  const secondary = shiftUntil(accent, DARKEST_TEXT_BACKDROP, MIN_TEXT_CONTRAST, 1).hex;
+  const secondary = shiftUntil(accent, backdrop, MIN_TEXT_CONTRAST, textDirection).hex;
 
   return { primary, primaryContainer, onPrimary, primaryText, secondary, adjusted: primary !== base };
 }
@@ -181,6 +189,27 @@ export function brandThemeCssVars(theme: BrandTheme): Record<string, string> {
   };
 }
 
-export const BRAND_CSS_VARS = Object.keys(
-  brandThemeCssVars({ primary: '', primaryContainer: '', onPrimary: '', primaryText: '', secondary: '', adjusted: false }),
-);
+/**
+ * Folha de estilo da marca para os dois temas. Mesmos seletores do tema claro
+ * em globals.css, com especificidade maior (:root:root) para vencê-los.
+ */
+export function brandStylesheet(
+  dark: Record<string, string>,
+  light: Record<string, string>,
+  /** Restringe a um elemento (prévia da tela de marca); sem ele, vale para a página. */
+  scope?: string,
+): string {
+  const block = (vars: Record<string, string>) =>
+    Object.entries(vars)
+      .filter(([k, v]) => /^--color-md-[a-z-]+$/.test(k) && /^#[0-9A-F]{6}$/i.test(v))
+      .map(([k, v]) => `${k}:${v};`)
+      .join('');
+  const base = scope ? `:root ${scope}` : ':root:root';
+  const forced = scope ? `:root[data-theme="light"] ${scope}` : ':root:root[data-theme="light"]';
+  const auto = scope ? `:root:not([data-theme="dark"]) ${scope}` : ':root:root:not([data-theme="dark"])';
+  return (
+    `${base}{${block(dark)}}` +
+    `${forced}{${block(light)}}` +
+    `@media (prefers-color-scheme: light){${auto}{${block(light)}}}`
+  );
+}

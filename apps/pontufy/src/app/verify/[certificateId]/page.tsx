@@ -75,7 +75,7 @@ export default async function VerifyCertificatePage({ params }: Props) {
       <div className="w-full max-w-2xl bg-md-surface-dim border border-md-on-surface-strong/10 rounded-2xl p-8 md:p-12">
         <div className="text-center mb-8">
           <div className={`inline-flex items-center gap-3 px-6 py-3 rounded-full border ${
-            isValid ? 'border-md-tertiary/50 bg-md-tertiary/10 text-md-tertiary' : 'border-red-500/50 bg-red-500/10 text-red-400'
+            isValid ? 'border-md-tertiary/50 bg-md-tertiary/10 text-md-tertiary' : 'border-md-error/50 bg-md-error/10 text-md-error'
           }`}>
             {isValid ? (
               <>

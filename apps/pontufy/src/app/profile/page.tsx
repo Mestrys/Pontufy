@@ -9,8 +9,9 @@ import { isSoundEnabled, setSoundEnabled } from '@/lib/feedback';
 import AchievementsCard from '@/components/profile/AchievementsCard';
 import { useBrand } from '@/components/theme/DynamicThemeProvider';
 import { setExtendedTime, useExtendedTime } from '@/lib/accessibility-prefs';
+import { setThemePref, useThemePref } from '@/lib/theme-pref';
 import { AlertDialog } from '@/components/ui/AlertDialog';
-import { Loader2, User, Coins, Save, ShieldCheck, Building2, Volume2, VolumeX, LogOut, Wallet, Award, Network, Timer, type LucideIcon } from 'lucide-react';
+import { Loader2, User, Coins, Save, ShieldCheck, Building2, Volume2, VolumeX, LogOut, Wallet, Award, Network, Timer, Monitor, Sun, Moon, type LucideIcon } from 'lucide-react';
 import { ListSkeleton, LoadingRegion } from '@/components/ui/Skeleton';
 
 function PreferenceSwitch({
@@ -49,6 +50,7 @@ function PreferenceSwitch({
 export default function ProfilePage() {
   const brand = useBrand();
   const extendedTime = useExtendedTime();
+  const themePref = useThemePref();
   const { data: session, status } = useSession();
   const currentUser = useStore((s) => s.currentUser);
   const { currentPoints } = useUserStore();
@@ -203,6 +205,33 @@ export default function ProfilePage() {
           {/* Preferências deste aparelho: feedback sensorial (5.2) e tempo estendido (H13) */}
           <section className="bg-md-surface border border-md-outline rounded-xl p-6" aria-labelledby="prefs-heading">
             <h2 id="prefs-heading" className="font-bold text-md-on-surface-strong mb-4">Preferências</h2>
+            <fieldset className="mb-4">
+              <legend className="mb-2 text-sm font-semibold text-md-on-surface-strong">Aparência</legend>
+              <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Aparência">
+                {([
+                  ['system', 'Automático', Monitor],
+                  ['light', 'Claro', Sun],
+                  ['dark', 'Escuro', Moon],
+                ] as const).map(([value, label, Icon]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    role="radio"
+                    aria-checked={themePref === value}
+                    onClick={() => setThemePref(value)}
+                    className={`flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl border px-2 py-2 text-sm font-semibold transition-colors ${
+                      themePref === value
+                        ? 'border-md-primary-text bg-md-primary/15 text-md-on-surface-strong'
+                        : 'border-md-outline text-md-on-surface-variant hover:bg-md-on-surface-strong/5'
+                    }`}
+                  >
+                    <Icon size={18} aria-hidden="true" />
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-2 text-xs text-md-on-surface-muted">Automático segue o tema do seu aparelho.</p>
+            </fieldset>
             <div className="divide-y divide-md-outline">
               <PreferenceSwitch
                 label="Sons e vibração"
@@ -238,7 +267,7 @@ export default function ProfilePage() {
             <button
               type="button"
               onClick={() => setConfirmRevoke(true)}
-              className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 transition-colors text-sm"
+              className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-bold text-md-error bg-md-error/10 hover:bg-md-error/20 transition-colors text-sm"
             >
               <LogOut size={15} />
               Encerrar sessões em todos os dispositivos

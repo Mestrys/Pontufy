@@ -37,7 +37,7 @@ export default function StreakCard() {
     );
   }
 
-  const fireColor = streak.current >= 7 ? 'text-orange-400' : streak.current >= 3 ? 'text-amber-400' : 'text-md-on-surface-variant';
+  const fireColor = streak.current >= 7 ? 'text-orange-400' : streak.current >= 3 ? 'text-md-highlight' : 'text-md-on-surface-variant';
 
   return (
     <section className="bg-md-surface border border-md-outline rounded-xl p-5">
@@ -71,7 +71,7 @@ export default function StreakCard() {
       </div>
 
       {streak.atRisk && (
-        <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded-lg px-3 py-2">
+        <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-md-highlight bg-md-highlight/10 border border-md-highlight/20 rounded-lg px-3 py-2">
           <AlertTriangle size={14} />
           Não perca seu streak: complete pelo menos uma aula hoje.
         </div>

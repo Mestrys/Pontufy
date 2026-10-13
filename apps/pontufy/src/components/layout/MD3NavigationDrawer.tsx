@@ -123,7 +123,7 @@ export function MD3NavigationDrawer({ open, onClose, links, activeHref }: MD3Nav
                     </div>
                     <span
                       className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-md-surface ${
-                        isOnline ? 'bg-md-tertiary' : 'bg-red-500'
+                        isOnline ? 'bg-md-tertiary' : 'bg-md-error'
                       }`}
                       title={isOnline ? 'Conectado' : 'Offline'}
                     />
@@ -144,7 +144,7 @@ export function MD3NavigationDrawer({ open, onClose, links, activeHref }: MD3Nav
                 <button
                   type="button"
                   onClick={() => signOut({ callbackUrl: '/login' })}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-md-error bg-md-error/10 hover:bg-md-error/20 transition-colors"
                 >
                   <LogOut size={15} />
                   Sair da conta

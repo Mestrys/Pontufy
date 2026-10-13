@@ -40,9 +40,9 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 const STATUS_STYLES: Record<string, string> = {
-  pending: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  pending: 'bg-md-highlight/10 text-md-highlight border-md-highlight/20',
   accepted: 'bg-md-tertiary/10 text-md-tertiary border-md-tertiary/20',
-  expired: 'bg-red-500/10 text-red-400 border-red-500/20',
+  expired: 'bg-md-error/10 text-md-error border-md-error/20',
 };
 
 function statusLabel(status: string): string {
@@ -163,7 +163,7 @@ export default function TeamClient() {
         </div>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3 rounded-lg text-center font-medium">
+          <div className="bg-md-error/10 border border-md-error/20 text-md-error text-sm p-3 rounded-lg text-center font-medium">
             {error}
           </div>
         )}
@@ -274,7 +274,7 @@ export default function TeamClient() {
                         <button
                           type="button"
                           onClick={() => handleRevoke(invite.id)}
-                          className="flex items-center gap-1.5 text-xs font-bold text-red-400 hover:text-red-300 transition-colors"
+                          className="flex items-center gap-1.5 text-xs font-bold text-md-error hover:text-md-error transition-colors"
                         >
                           <XCircle size={14} /> Revogar
                         </button>

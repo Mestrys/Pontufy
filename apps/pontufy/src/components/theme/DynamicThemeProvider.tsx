@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import {
-  BRAND_CSS_VARS,
+  brandStylesheet,
   brandThemeCssVars,
   customBrandColor,
   deriveBrandTheme,
@@ -30,16 +30,30 @@ const BrandContext = createContext<BrandInfo>({ name: null, logoUrl: null, refre
 
 export const useBrand = () => useContext(BrandContext);
 
-/** Chave do cache local dos tokens, lida também pelo script do <head> (layout.tsx). */
-export const BRAND_CACHE_KEY = 'pontufy-brand-vars';
+/**
+ * Chave do cache local da marca ({ dark, light }), lida também pelo script do
+ * <head> (layout.tsx). v2: a v1 guardava só os valores do tema escuro.
+ */
+export const BRAND_CACHE_KEY = 'pontufy-brand-v2';
+const STYLE_ID = 'pontufy-brand';
 
-function applyVars(vars: Record<string, string> | null) {
-  const root = document.documentElement;
-  for (const name of BRAND_CSS_VARS) {
-    if (vars?.[name]) root.style.setProperty(name, vars[name]);
-    else root.style.removeProperty(name);
+type BrandVars = { dark: Record<string, string>; light: Record<string, string> };
+
+/** Escreve a marca numa <style> (por tema), nunca no style do <html>: inline venceria o tema claro. */
+function applyBrand(vars: BrandVars | null) {
+  let tag = document.getElementById(STYLE_ID) as HTMLStyleElement | null;
+  if (vars) {
+    if (!tag) {
+      tag = document.createElement('style');
+      tag.id = STYLE_ID;
+      document.head.appendChild(tag);
+    }
+    tag.textContent = brandStylesheet(vars.dark, vars.light);
+  } else {
+    tag?.remove();
   }
   try {
+    localStorage.removeItem('pontufy-brand-vars');
     if (vars) localStorage.setItem(BRAND_CACHE_KEY, JSON.stringify(vars));
     else localStorage.removeItem(BRAND_CACHE_KEY);
   } catch {
@@ -66,7 +80,7 @@ export default function DynamicThemeProvider({ children }: { children: React.Rea
     if (status === 'loading') return;
     if (status !== 'authenticated' || !tenantId) {
       // Sem sessão (login, landing): volta à marca Pontufy.
-      applyVars(null);
+      applyBrand(null);
       return;
     }
 
@@ -78,7 +92,14 @@ export default function DynamicThemeProvider({ children }: { children: React.Rea
 
         const primary = customBrandColor(branding.primaryColor);
         const accent = customBrandColor(branding.accentColor);
-        applyVars(primary ? brandThemeCssVars(deriveBrandTheme(primary, accent)) : null);
+        applyBrand(
+          primary
+            ? {
+                dark: brandThemeCssVars(deriveBrandTheme(primary, accent, 'dark')),
+                light: brandThemeCssVars(deriveBrandTheme(primary, accent, 'light')),
+              }
+            : null,
+        );
 
         setBrand({
           tenantId,

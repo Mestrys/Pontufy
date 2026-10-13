@@ -38,7 +38,7 @@ const TYPE_STYLES: Record<NotificationType, { icon: typeof Coins; badge: string;
   LEVEL_UP: { icon: TrendingUp, badge: 'bg-violet-500/20 text-violet-400 border-violet-500/30', iconColor: 'text-violet-400' },
   SYSTEM: { icon: Megaphone, badge: 'bg-md-on-surface-variant/20 text-md-on-surface-variant border-md-on-surface-variant/30', iconColor: 'text-md-on-surface-variant' },
   BATTLE_CHALLENGE: { icon: Swords, badge: 'bg-orange-500/20 text-orange-400 border-orange-500/30', iconColor: 'text-orange-400' },
-  BATTLE_RESULT: { icon: Trophy, badge: 'bg-amber-500/20 text-amber-400 border-amber-500/30', iconColor: 'text-amber-400' },
+  BATTLE_RESULT: { icon: Trophy, badge: 'bg-md-highlight/20 text-md-highlight border-md-highlight/30', iconColor: 'text-md-highlight' },
   CERTIFICATE_READY: { icon: Award, badge: 'bg-md-primary/20 text-md-primary-text border-md-primary/30', iconColor: 'text-md-primary-text' },
   DEPT_BONUS_AWARDED: { icon: Gift, badge: 'bg-md-tertiary/20 text-md-tertiary border-md-tertiary/30', iconColor: 'text-md-tertiary' },
 };

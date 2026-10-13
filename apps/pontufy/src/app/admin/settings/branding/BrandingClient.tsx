@@ -8,6 +8,7 @@ import {
   customBrandColor,
   deriveBrandTheme,
   brandThemeCssVars,
+  brandStylesheet,
   DEFAULT_PRIMARY_COLOR,
   DEFAULT_ACCENT_COLOR,
 } from '@/lib/branding';
@@ -124,8 +125,14 @@ export default function BrandingClient() {
   const accentHex = sanitizeHexColor(accentColor) ?? DEFAULT_ACCENT_COLOR;
   const isCustom = customBrandColor(primaryHex) !== null;
   const theme = deriveBrandTheme(primaryHex, customBrandColor(accentHex));
-  // A prévia usa os mesmos tokens que o app vai usar; sem cor própria, a paleta Pontufy.
-  const previewVars = (isCustom ? brandThemeCssVars(theme) : {}) as React.CSSProperties;
+  // A prévia usa os mesmos tokens que o app vai usar, nos dois temas; sem cor própria, a paleta Pontufy.
+  const previewCss = isCustom
+    ? brandStylesheet(
+        brandThemeCssVars(theme),
+        brandThemeCssVars(deriveBrandTheme(primaryHex, customBrandColor(accentHex), 'light')),
+        '.brand-preview',
+      )
+    : '';
 
   return (
     <div className="space-y-8">
@@ -281,7 +288,8 @@ export default function BrandingClient() {
             </p>
           )}
 
-          <div style={previewVars} className="rounded-xl border border-md-outline bg-md-surface-dim overflow-hidden" aria-label="Prévia da marca" role="group">
+          {previewCss && <style>{previewCss}</style>}
+          <div className="brand-preview rounded-xl border border-md-outline bg-md-surface-dim overflow-hidden" aria-label="Prévia da marca" role="group">
             <div className="flex items-center justify-between gap-3 border-b border-md-outline bg-md-surface px-4 py-3">
               {sanitizeBrandingUrl(logoUrl) ? (
                 // eslint-disable-next-line @next/next/no-img-element -- prévia de URL externa digitada pelo RH

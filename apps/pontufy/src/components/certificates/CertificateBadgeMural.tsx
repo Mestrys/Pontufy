@@ -19,7 +19,7 @@ const RARITY_CONFIG: Record<Rarity, { label: string; color: string; bg: string; 
   common: { label: 'Comum', color: 'text-md-on-surface-variant', bg: 'bg-md-surface-container', border: 'border-md-outline-variant', icon: <Star className="w-5 h-5 text-md-on-surface-variant" /> },
   rare: { label: 'Raro', color: 'text-md-primary-text', bg: 'bg-md-primary/10', border: 'border-md-primary/30', icon: <Star className="w-5 h-5 text-md-primary-text" fill="currentColor" /> },
   epic: { label: 'Épico', color: 'text-purple-400', bg: 'bg-purple-900/20', border: 'border-purple-500/30', icon: <Sparkles className="w-5 h-5 text-purple-400" /> },
-  legendary: { label: 'Lendário', color: 'text-amber-400', bg: 'bg-amber-900/20', border: 'border-amber-500/30', icon: <Trophy className="w-5 h-5 text-amber-400" /> },
+  legendary: { label: 'Lendário', color: 'text-md-highlight', bg: 'bg-md-highlight/20', border: 'border-md-highlight/30', icon: <Trophy className="w-5 h-5 text-md-highlight" /> },
 };
 
 function getRarityFromHash(hash: string): Rarity {

@@ -16,7 +16,7 @@ export default function BalanceCard({ data }: BalanceCardProps) {
       {/* Balance Info */}
       <div>
         <div className="flex items-center gap-2 text-xs font-bold text-md-on-surface-muted uppercase tracking-widest mb-2">
-          <Coins size={13} className="text-amber-400" />
+          <Coins size={13} className="text-md-highlight" />
           Seu saldo
         </div>
         <div className="flex items-end gap-3">
