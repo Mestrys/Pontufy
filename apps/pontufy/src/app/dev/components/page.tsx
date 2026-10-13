@@ -11,7 +11,7 @@ export default function DevComponentsCatalog() {
   return (
     <main className="min-h-screen bg-md-surface-dim pt-24 pb-16 px-4 sm:px-8">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-black text-white tracking-tight mb-2">
+        <h1 className="text-3xl font-black text-md-on-surface-strong tracking-tight mb-2">
           Catálogo de Componentes <span className="text-md-primary-text">MD3</span>
         </h1>
         <p className="text-md-on-surface-muted text-sm mb-10">
@@ -20,7 +20,7 @@ export default function DevComponentsCatalog() {
 
         {/* Buttons */}
         <section className="mb-10">
-          <h2 className="text-title-md text-white mb-4">Button (4 variantes, pill 40dp)</h2>
+          <h2 className="text-title-md text-md-on-surface-strong mb-4">Button (4 variantes, pill 40dp)</h2>
           <div className="flex flex-wrap items-center gap-3">
             <Button variant="filled">Filled</Button>
             <Button variant="tonal">Tonal</Button>
@@ -37,7 +37,7 @@ export default function DevComponentsCatalog() {
 
         {/* TextField */}
         <section className="mb-10">
-          <h2 className="text-title-md text-white mb-4">TextField (floating label + erro inline)</h2>
+          <h2 className="text-title-md text-md-on-surface-strong mb-4">TextField (floating label + erro inline)</h2>
           <div className="grid sm:grid-cols-2 gap-4">
             <TextField id="cat-nome" label="Nome completo" value={value} onChange={(e) => setValue(e.target.value)} />
             <TextField id="cat-email" label="E-mail corporativo" type="email" aria-invalid={!!value && !value.includes('@')} />
@@ -54,18 +54,18 @@ export default function DevComponentsCatalog() {
 
         {/* Cards */}
         <section className="mb-10">
-          <h2 className="text-title-md text-white mb-4">Card (elevated · outlined · filled)</h2>
+          <h2 className="text-title-md text-md-on-surface-strong mb-4">Card (elevated · outlined · filled)</h2>
           <div className="grid sm:grid-cols-3 gap-4">
             <Card variant="elevated" className="p-5">
-              <p className="font-semibold text-white">Elevated</p>
+              <p className="font-semibold text-md-on-surface-strong">Elevated</p>
               <p className="text-sm text-md-on-surface-muted mt-1">shadow-md (M3 2dp)</p>
             </Card>
             <Card variant="outlined" className="p-5">
-              <p className="font-semibold text-white">Outlined</p>
+              <p className="font-semibold text-md-on-surface-strong">Outlined</p>
               <p className="text-sm text-md-on-surface-muted mt-1">border-md-outline</p>
             </Card>
             <Card variant="filled" className="p-5">
-              <p className="font-semibold text-white">Filled</p>
+              <p className="font-semibold text-md-on-surface-strong">Filled</p>
               <p className="text-sm text-md-on-surface-muted mt-1">surface-container</p>
             </Card>
           </div>
@@ -73,7 +73,7 @@ export default function DevComponentsCatalog() {
 
         {/* Chips & Badges */}
         <section className="mb-10">
-          <h2 className="text-title-md text-white mb-4">Chip / Badge (pontos SEMPRE terciário)</h2>
+          <h2 className="text-title-md text-md-on-surface-strong mb-4">Chip / Badge (pontos SEMPRE terciário)</h2>
           <div className="flex flex-wrap items-center gap-3">
             <Chip>Padrão</Chip>
             <Chip tone="primary">Primary</Chip>
@@ -90,20 +90,20 @@ export default function DevComponentsCatalog() {
 
         {/* Elevações e superfícies */}
         <section className="mb-10">
-          <h2 className="text-title-md text-white mb-4">Elevações M3 (0–5) e containers tonais</h2>
+          <h2 className="text-title-md text-md-on-surface-strong mb-4">Elevações M3 (0–5) e containers tonais</h2>
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
             {(['md-elevation-1', 'md-elevation-2', 'md-elevation-3', 'md-elevation-4', 'md-elevation-5'] as const).map(
               (el) => (
                 <div key={el} className={`${el} bg-md-surface rounded-xl p-4 text-center`}>
-                  <p className="text-xs text-gray-400 font-mono">{el}</p>
+                  <p className="text-xs text-md-on-surface-variant font-mono">{el}</p>
                 </div>
               )
             )}
           </div>
           <div className="mt-3 flex flex-wrap gap-3">
-            <div className="surface-container rounded-xl px-4 py-3 text-sm text-gray-300">surface-container</div>
-            <div className="surface-container-high rounded-xl px-4 py-3 text-sm text-gray-300">surface-container-high</div>
-            <div className="surface-variant rounded-xl px-4 py-3 text-sm text-gray-300">surface-variant</div>
+            <div className="surface-container rounded-xl px-4 py-3 text-sm text-md-on-surface">surface-container</div>
+            <div className="surface-container-high rounded-xl px-4 py-3 text-sm text-md-on-surface">surface-container-high</div>
+            <div className="surface-variant rounded-xl px-4 py-3 text-sm text-md-on-surface">surface-variant</div>
           </div>
         </section>
       </div>

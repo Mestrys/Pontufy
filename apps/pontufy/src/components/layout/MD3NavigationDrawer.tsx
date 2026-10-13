@@ -62,7 +62,7 @@ export function MD3NavigationDrawer({ open, onClose, links, activeHref }: MD3Nav
                 type="button"
                 onClick={onClose}
                 aria-label="Fechar menu"
-                className="-mr-2 size-11 flex items-center justify-center text-gray-400 hover:text-white transition-colors rounded-full"
+                className="-mr-2 size-11 flex items-center justify-center text-md-on-surface-variant hover:text-md-on-surface-strong transition-colors rounded-full"
               >
                 <X size={20} aria-hidden="true" />
               </button>
@@ -83,8 +83,8 @@ export function MD3NavigationDrawer({ open, onClose, links, activeHref }: MD3Nav
                   onClick={onClose}
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                     isActive(link.href)
-                      ? 'bg-md-primary/20 text-white font-bold'
-                      : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                      ? 'bg-md-primary/20 text-md-on-surface-strong font-bold'
+                      : 'text-md-on-surface-variant hover:bg-md-on-surface-strong/5 hover:text-md-on-surface-strong'
                   }`}
                 >
                   {link.label}
@@ -129,14 +129,14 @@ export function MD3NavigationDrawer({ open, onClose, links, activeHref }: MD3Nav
                     />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-white truncate">{session?.user?.name}</p>
+                    <p className="text-sm font-semibold text-md-on-surface-strong truncate">{session?.user?.name}</p>
                     <p className="text-xs text-md-on-surface-muted truncate">{session?.user?.email}</p>
                   </div>
                 </div>
                 <Link
                   href="/profile"
                   onClick={onClose}
-                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
+                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-md-on-surface hover:bg-md-on-surface-strong/5 hover:text-md-on-surface-strong transition-colors"
                 >
                   <User size={15} />
                   Meu perfil

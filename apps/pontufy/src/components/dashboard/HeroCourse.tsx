@@ -27,10 +27,10 @@ export default function HeroCourse({ course }: { course: HeroCourseData }) {
         <p className="inline-flex items-center rounded-full bg-md-tertiary-container px-3 py-1 text-xs font-bold text-md-on-tertiary-container">
           Novo curso
         </p>
-        <h2 id="hero-heading" className="mt-4 text-2xl sm:text-4xl font-black tracking-tight text-white text-balance leading-tight">
+        <h2 id="hero-heading" className="mt-4 text-2xl sm:text-4xl font-black tracking-tight text-on-media text-balance leading-tight">
           {course.title}
         </h2>
-        <p className="mt-3 flex flex-wrap items-center gap-x-2 text-sm font-semibold text-gray-300">
+        <p className="mt-3 flex flex-wrap items-center gap-x-2 text-sm font-semibold text-md-on-surface">
           <span>{course.lessonsCount} {course.lessonsCount === 1 ? 'aula' : 'aulas'}</span>
           <span aria-hidden="true" className="text-md-on-surface-muted">·</span>
           <span className="inline-flex items-center gap-1 text-md-tertiary">
@@ -38,7 +38,7 @@ export default function HeroCourse({ course }: { course: HeroCourseData }) {
           </span>
         </p>
         {course.description && (
-          <p className="mt-3 max-w-lg text-sm sm:text-base leading-relaxed text-gray-300 line-clamp-3">
+          <p className="mt-3 max-w-lg text-sm sm:text-base leading-relaxed text-md-on-surface line-clamp-3">
             {course.description}
           </p>
         )}

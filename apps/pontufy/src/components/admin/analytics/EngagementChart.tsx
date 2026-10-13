@@ -12,15 +12,16 @@ import {
 import type { TooltipContentProps } from 'recharts';
 import type { EngagementPoint } from './types';
 
-const EMERALD = '#10B981';
-const PURPLE = '#8B5CF6';
+// Tokens do tema: seguem o tema claro/escuro e a marca do cliente.
+const EMERALD = 'var(--color-md-tertiary)';
+const PURPLE = 'var(--color-md-secondary)';
 
 function ChartTooltip({ active, payload, label }: TooltipContentProps) {
   if (!active || !payload?.length) return null;
 
   return (
-    <div className="bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg px-4 py-3 shadow-xl">
-      <p className="text-xs font-bold text-white mb-2">{label}</p>
+    <div className="bg-md-surface-container border border-md-outline rounded-lg px-4 py-3 shadow-xl">
+      <p className="text-xs font-bold text-md-on-surface-strong mb-2">{label}</p>
       <div className="space-y-1.5">
         {payload.map((entry) => (
           <div key={String(entry.dataKey)} className="flex items-center gap-2">
@@ -28,8 +29,8 @@ function ChartTooltip({ active, payload, label }: TooltipContentProps) {
               className="h-2.5 w-2.5 rounded-full"
               style={{ backgroundColor: entry.color ?? EMERALD }}
             />
-            <span className="text-xs text-gray-400">{entry.name ?? '—'}:</span>
-            <span className="text-xs font-bold text-white">
+            <span className="text-xs text-md-on-surface-variant">{entry.name ?? '—'}:</span>
+            <span className="text-xs font-bold text-md-on-surface-strong">
               {new Intl.NumberFormat('pt-BR').format(Number(entry.value ?? 0))}
             </span>
           </div>
@@ -67,12 +68,12 @@ export default function EngagementChart({ data }: EngagementChartProps) {
                 <stop offset="100%" stopColor={PURPLE} stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2a" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-md-outline-variant)" vertical={false} />
             <XAxis
               dataKey="date"
               tick={{ fill: 'var(--color-md-on-surface-muted)', fontSize: 12 }}
               tickLine={false}
-              axisLine={{ stroke: '#2a2a2a' }}
+              axisLine={{ stroke: 'var(--color-md-outline-variant)' }}
               minTickGap={24}
             />
             <YAxis
@@ -84,7 +85,7 @@ export default function EngagementChart({ data }: EngagementChartProps) {
             />
             <Tooltip
               content={(props) => <ChartTooltip {...props} />}
-              cursor={{ stroke: '#3f3f46', strokeDasharray: '4 4' }}
+              cursor={{ stroke: 'var(--color-md-outline-variant)', strokeDasharray: '4 4' }}
             />
             <Area
               type="monotone"
@@ -107,11 +108,11 @@ export default function EngagementChart({ data }: EngagementChartProps) {
       </div>
 
       <div className="mt-4 flex items-center gap-6">
-        <span className="flex items-center gap-2 text-xs text-gray-400">
+        <span className="flex items-center gap-2 text-xs text-md-on-surface-variant">
           <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: EMERALD }} />
           Conclusões de aulas
         </span>
-        <span className="flex items-center gap-2 text-xs text-gray-400">
+        <span className="flex items-center gap-2 text-xs text-md-on-surface-variant">
           <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: PURPLE }} />
           Resgates de benefícios
         </span>

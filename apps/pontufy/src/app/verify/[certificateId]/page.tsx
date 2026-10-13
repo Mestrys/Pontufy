@@ -72,7 +72,7 @@ export default async function VerifyCertificatePage({ params }: Props) {
 
   return (
     <main className="min-h-screen bg-md-surface-dim flex items-center justify-center p-6">
-      <div className="w-full max-w-2xl bg-black/20 border border-white/10 rounded-2xl p-8 md:p-12">
+      <div className="w-full max-w-2xl bg-md-surface-dim border border-md-on-surface-strong/10 rounded-2xl p-8 md:p-12">
         <div className="text-center mb-8">
           <div className={`inline-flex items-center gap-3 px-6 py-3 rounded-full border ${
             isValid ? 'border-md-tertiary/50 bg-md-tertiary/10 text-md-tertiary' : 'border-red-500/50 bg-red-500/10 text-red-400'
@@ -91,40 +91,40 @@ export default async function VerifyCertificatePage({ params }: Props) {
           </div>
         </div>
 
-        <div className="bg-black/30 border border-white/5 rounded-xl p-6 space-y-4">
+        <div className="bg-md-surface-container border border-md-outline rounded-xl p-6 space-y-4">
           <div>
             <p className="text-xs text-md-on-surface-muted uppercase tracking-wider">Colaborador</p>
-            <p className="text-xl font-bold text-white mt-1">{certificate.user?.name || 'Desconhecido'}</p>
+            <p className="text-xl font-bold text-md-on-surface-strong mt-1">{certificate.user?.name || 'Desconhecido'}</p>
           </div>
 
-          <div className="border-t border-white/10 pt-4">
+          <div className="border-t border-md-on-surface-strong/10 pt-4">
             <p className="text-xs text-md-on-surface-muted uppercase tracking-wider">Curso</p>
             <p className="text-lg font-semibold text-md-primary-text mt-1">{certificate.courseName}</p>
           </div>
 
-          <div className="border-t border-white/10 pt-4">
+          <div className="border-t border-md-on-surface-strong/10 pt-4">
             <p className="text-xs text-md-on-surface-muted uppercase tracking-wider">Empresa</p>
-            <p className="text-lg text-gray-300 mt-1">{tenant?.name || 'Desconhecida'}</p>
+            <p className="text-lg text-md-on-surface mt-1">{tenant?.name || 'Desconhecida'}</p>
           </div>
 
-          <div className="border-t border-white/10 pt-4">
+          <div className="border-t border-md-on-surface-strong/10 pt-4">
             <p className="text-xs text-md-on-surface-muted uppercase tracking-wider">Data de emissão</p>
-            <p className="text-lg text-gray-300 mt-1">{issuedDate}</p>
+            <p className="text-lg text-md-on-surface mt-1">{issuedDate}</p>
           </div>
 
-          <div className="border-t border-white/10 pt-4">
+          <div className="border-t border-md-on-surface-strong/10 pt-4">
             <p className="text-xs text-md-on-surface-muted uppercase tracking-wider">Código de verificação</p>
-            <p className="font-mono text-sm text-gray-400 mt-1 break-all">{certificate.verificationHash || 'Não disponível'}</p>
+            <p className="font-mono text-sm text-md-on-surface-variant mt-1 break-all">{certificate.verificationHash || 'Não disponível'}</p>
           </div>
 
           {certificate.signature && (
-            <div className="border-t border-white/10 pt-4">
+            <div className="border-t border-md-on-surface-strong/10 pt-4">
               <p className="text-xs text-md-on-surface-muted uppercase tracking-wider">Assinatura criptográfica</p>
               <p className="font-mono text-xs text-md-on-surface-muted mt-1 break-all">{certificate.signature.slice(0, 32)}…</p>
             </div>
           )}
 
-          <div className="border-t border-white/10 pt-4 text-center">
+          <div className="border-t border-md-on-surface-strong/10 pt-4 text-center">
             <p className="text-xs text-md-on-surface-muted">
               {isValid
                 ? 'Este certificado foi verificado criptograficamente e é autêntico.'

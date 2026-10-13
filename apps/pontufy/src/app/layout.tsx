@@ -82,7 +82,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: BRAND_BOOTSTRAP }} />
       </head>
-      <body className="min-h-full flex flex-col bg-brand-gray">
+      <body className="min-h-full flex flex-col bg-md-surface-dim text-md-on-surface">
         <AuthProvider>
           <DynamicThemeProvider>
             <ToastProvider>

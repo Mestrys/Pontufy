@@ -18,10 +18,10 @@ function Skeleton() {
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="h-[130px] rounded-2xl bg-[#141414] border border-[#2a2a2a] animate-pulse" />
+          <div key={i} className="h-[130px] rounded-2xl bg-md-surface border border-md-outline animate-pulse" />
         ))}
       </div>
-      <div className="h-96 rounded-2xl bg-[#141414] border border-[#2a2a2a] animate-pulse" />
+      <div className="h-96 rounded-2xl bg-md-surface border border-md-outline animate-pulse" />
     </div>
   );
 }
@@ -61,9 +61,9 @@ export default function AnalyticsClient() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] px-4 py-8">
+      <div className="min-h-screen bg-md-surface-dim px-4 py-8">
         <div className="max-w-6xl mx-auto">
-          <div className="h-6 w-64 bg-[#141414] rounded-lg animate-pulse mb-8" />
+          <div className="h-6 w-64 bg-md-surface rounded-lg animate-pulse mb-8" />
           <Skeleton />
         </div>
       </div>
@@ -72,7 +72,7 @@ export default function AnalyticsClient() {
 
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4">
+      <div className="min-h-screen bg-md-surface-dim flex items-center justify-center px-4">
         <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-4 rounded-lg text-center max-w-md font-medium">
           {error || 'Dados indisponíveis.'}
         </div>
@@ -81,11 +81,11 @@ export default function AnalyticsClient() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] px-4 py-8">
+    <div className="min-h-screen bg-md-surface-dim px-4 py-8">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-md-on-surface-strong flex items-center gap-2">
               <BarChart3 size={22} className="text-md-tertiary" /> Painel de Analytics
             </h1>
             <p className="text-sm text-md-on-surface-muted mt-1">
@@ -103,16 +103,16 @@ export default function AnalyticsClient() {
 
         <MetricsCards summary={data.summary} />
 
-        <section className="bg-[#141414] border border-[#2a2a2a] rounded-2xl p-6">
-          <h2 className="text-sm font-bold text-white uppercase tracking-wide mb-1 flex items-center gap-2">
+        <section className="bg-md-surface border border-md-outline rounded-2xl p-6">
+          <h2 className="text-sm font-bold text-md-on-surface-strong uppercase tracking-wide mb-1 flex items-center gap-2">
             <TrendingUp size={16} className="text-md-tertiary" /> Engajamento Diário
           </h2>
           <p className="text-xs text-md-on-surface-muted mb-4">Conclusões de aulas vs. resgates de benefícios</p>
           <EngagementChart data={data.engagement} />
         </section>
 
-        <section className="bg-[#141414] border border-[#2a2a2a] rounded-2xl p-6">
-          <h2 className="text-sm font-bold text-white uppercase tracking-wide mb-4">
+        <section className="bg-md-surface border border-md-outline rounded-2xl p-6">
+          <h2 className="text-sm font-bold text-md-on-surface-strong uppercase tracking-wide mb-4">
             Cursos mais concluídos
           </h2>
           <TopCoursesTable courses={data.topCourses} />

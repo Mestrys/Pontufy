@@ -24,34 +24,34 @@ function Section({
 }) {
   return (
     <section id={id} className="scroll-mt-28">
-      <h2 className="text-headline-sm font-bold text-white">{title}</h2>
-      <div className="mt-4 space-y-4 text-body-md text-gray-400">{children}</div>
+      <h2 className="text-headline-sm font-bold text-md-on-surface-strong">{title}</h2>
+      <div className="mt-4 space-y-4 text-body-md text-md-on-surface-variant">{children}</div>
     </section>
   );
 }
 
 export default function TermosPage() {
   return (
-    <main className="min-h-screen bg-[#0a0a0a] py-20 px-6">
+    <main className="min-h-screen bg-md-surface-dim py-20 px-6">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center gap-3">
           <div className="flex size-12 items-center justify-center rounded-md bg-md-tertiary/15 text-md-tertiary">
             <ScrollText className="size-6" aria-hidden="true" />
           </div>
-          <span className="rounded-full border border-[#2a2a2a] bg-[#141414] px-3 py-1 text-label-sm text-gray-400">
+          <span className="rounded-full border border-md-outline bg-md-surface px-3 py-1 text-label-sm text-md-on-surface-variant">
             Termos de Uso
           </span>
         </div>
 
-        <h1 className="mt-6 text-display-sm font-black text-white">
+        <h1 className="mt-6 text-display-sm font-black text-md-on-surface-strong">
           Termos de <span className="text-md-tertiary">Uso</span>
         </h1>
         <p className="mt-4 text-body-sm text-md-on-surface-muted">Última atualização: {LAST_UPDATED}</p>
 
-        <div className="mt-8 md-card-elevated p-5 text-body-sm text-gray-400 border border-[#2a2a2a]">
+        <div className="mt-8 md-card-elevated p-5 text-body-sm text-md-on-surface-variant border border-md-outline">
           Este documento estabelece as condições gerais de uso da plataforma Pontufy, um
           serviço B2B SaaS de gamificação corporativa operado pela{' '}
-          <strong className="text-white">Mestry&apos;s Tecnologia e Consultoria em TI LTDA</strong>{' '}
+          <strong className="text-md-on-surface-strong">Mestry&apos;s Tecnologia e Consultoria em TI LTDA</strong>{' '}
           ("Pontufy", "nós", "nosso"). Ele respeita a Lei Geral de Proteção de Dados (LGPD, Lei
           nº 13.709/2018) e, quando aplicável a usuários na União Europeia, o Regulamento Geral
           de Proteção de Dados (GDPR, Regulamento (UE) 2016/679). Este material é informativo;

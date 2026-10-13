@@ -41,7 +41,7 @@ export function AlertDialog({
       zIndexClassName="z-[130]"
       className="w-full max-w-sm bg-md-surface rounded-3xl border border-md-outline shadow-2xl p-6"
     >
-      <h2 id={titleId} className="text-lg font-bold text-white">
+      <h2 id={titleId} className="text-lg font-bold text-md-on-surface-strong">
         {title}
       </h2>
       {description && (

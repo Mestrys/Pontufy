@@ -24,7 +24,7 @@ export default function BrandMark({ className = 'h-8 max-w-[140px]' }: { classNa
   }
 
   return (
-    <span className="text-xl font-black tracking-tight text-white">
+    <span className="text-xl font-black tracking-tight text-md-on-surface-strong">
       <span className="text-md-primary-text">Pontu</span>fy
     </span>
   );

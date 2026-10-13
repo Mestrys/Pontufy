@@ -169,13 +169,13 @@ export default function QuizModal({
         labelledBy={titleId}
         zIndexClassName="z-[90]"
         backdropClassName="bg-black/70 backdrop-blur-sm"
-        className="w-full max-w-2xl max-h-[85dvh] overflow-y-auto bg-[#141414] border border-[#2a2a2a] rounded-2xl p-6 sm:p-8"
+        className="w-full max-w-2xl max-h-[85dvh] overflow-y-auto bg-md-surface border border-md-outline rounded-2xl p-6 sm:p-8"
       >
         <button
           type="button"
           onClick={requestClose}
           disabled={submitting}
-          className="absolute top-2 right-2 size-11 flex items-center justify-center rounded-lg text-md-on-surface-muted hover:text-white hover:bg-white/5 transition-colors"
+          className="absolute top-2 right-2 size-11 flex items-center justify-center rounded-lg text-md-on-surface-muted hover:text-md-on-surface-strong hover:bg-md-on-surface-strong/5 transition-colors"
           aria-label="Fechar quiz"
         >
           <X size={20} aria-hidden="true" />
@@ -188,13 +188,13 @@ export default function QuizModal({
               <div className="w-16 h-16 mx-auto rounded-full bg-md-tertiary/10 flex items-center justify-center mb-5">
                 <Trophy size={32} className="text-md-tertiary" />
               </div>
-              <h2 id={titleId} className="text-2xl font-black text-white mb-1">
+              <h2 id={titleId} className="text-2xl font-black text-md-on-surface-strong mb-1">
                 {openedAlreadyPassed ? 'Avaliação já aprovada' : 'Avaliação aprovada!'}
               </h2>
-              <p className="text-gray-400 text-sm mb-2">{courseTitle}</p>
+              <p className="text-md-on-surface-variant text-sm mb-2">{courseTitle}</p>
 
               {openedAlreadyPassed ? (
-                <p className="text-sm text-gray-400 mb-6">
+                <p className="text-sm text-md-on-surface-variant mb-6">
                   Você já havia aprovado o quiz final deste curso.
                 </p>
               ) : (
@@ -202,7 +202,7 @@ export default function QuizModal({
                   <p className="text-5xl font-black text-md-tertiary mb-1">
                     {result.score}/{result.total}
                   </p>
-                  <p className="text-sm text-gray-400 mb-6">
+                  <p className="text-sm text-md-on-surface-variant mb-6">
                     {Math.round((result.score / Math.max(1, result.total)) * 100)}% de acertos — nota mínima: 70%
                   </p>
                 </>
@@ -232,7 +232,7 @@ export default function QuizModal({
                 )}
                 <button
                   onClick={onClose}
-                  className="px-6 py-3 rounded-lg font-bold text-sm bg-[#1f1f1f] text-white hover:bg-[#2a2a2a] border border-[#2a2a2a] transition-colors"
+                  className="px-6 py-3 rounded-lg font-bold text-sm bg-md-surface-container text-md-on-surface-strong hover:bg-md-surface-container-high border border-md-outline transition-colors"
                 >
                   Fechar
                 </button>
@@ -249,16 +249,16 @@ export default function QuizModal({
               <div className="w-16 h-16 mx-auto rounded-full bg-red-500/10 flex items-center justify-center mb-5">
                 <XCircle size={32} className="text-red-400" />
               </div>
-              <h2 id={titleId} className="text-2xl font-black text-white mb-1">Não foi dessa vez</h2>
-              <p className="text-gray-400 text-sm mb-4">{courseTitle}</p>
+              <h2 id={titleId} className="text-2xl font-black text-md-on-surface-strong mb-1">Não foi dessa vez</h2>
+              <p className="text-md-on-surface-variant text-sm mb-4">{courseTitle}</p>
               <p className="text-5xl font-black text-red-400 mb-1">
                 {result.score}/{result.total}
               </p>
-              <p className="text-sm text-gray-400 mb-2">
+              <p className="text-sm text-md-on-surface-variant mb-2">
                 {Math.round((result.score / Math.max(1, result.total)) * 100)}% de acertos
               </p>
               <p className="text-sm text-md-on-surface-muted mb-6 leading-relaxed max-w-md mx-auto">
-                A nota mínima para aprovação é <span className="text-white font-bold">70%</span>. Revise o conteúdo
+                A nota mínima para aprovação é <span className="text-md-on-surface-strong font-bold">70%</span>. Revise o conteúdo
                 das aulas e tente novamente — você consegue!
               </p>
               <div className="flex flex-wrap items-center justify-center gap-3">
@@ -270,7 +270,7 @@ export default function QuizModal({
                 </button>
                 <button
                   onClick={onClose}
-                  className="px-6 py-3 rounded-lg font-bold text-sm bg-[#1f1f1f] text-white hover:bg-[#2a2a2a] border border-[#2a2a2a] transition-colors"
+                  className="px-6 py-3 rounded-lg font-bold text-sm bg-md-surface-container text-md-on-surface-strong hover:bg-md-surface-container-high border border-md-outline transition-colors"
                 >
                   Voltar ao curso
                 </button>
@@ -284,7 +284,7 @@ export default function QuizModal({
             <div className="flex items-center justify-between mb-1 pr-10">
               <div className="flex items-center gap-2">
                 <ClipboardCheck size={18} className="text-md-tertiary" />
-                <h2 id={titleId} className="text-base font-bold text-white">Avaliação final</h2>
+                <h2 id={titleId} className="text-base font-bold text-md-on-surface-strong">Avaliação final</h2>
                 <span className="text-xs font-bold text-amber-400 bg-amber-400/10 border border-amber-400/30 rounded-full px-2 py-0.5">
                   +50 pts
                 </span>
@@ -294,7 +294,7 @@ export default function QuizModal({
               </span>
             </div>
 
-            <div className="h-0.5 bg-[#2a2a2a] rounded-full mb-5 mt-3">
+            <div className="h-0.5 bg-md-surface-container-high rounded-full mb-5 mt-3">
               <div
                 className="h-full bg-md-tertiary rounded-full transition-all duration-300"
                 style={{ width: `${(answeredCount / Math.max(1, questions.length)) * 100}%` }}
@@ -302,16 +302,16 @@ export default function QuizModal({
             </div>
 
             <p className="text-xs font-bold uppercase tracking-wide text-md-on-surface-muted mb-2">{q.module}</p>
-            <p className="text-white font-semibold text-sm mb-5 leading-relaxed">{q.question}</p>
+            <p className="text-md-on-surface-strong font-semibold text-sm mb-5 leading-relaxed">{q.question}</p>
 
             <div className="space-y-2">
               {q.options.map((opt, idx) => {
-                let cls = 'border-[#2a2a2a] text-gray-400 hover:border-[#3a3a3a] hover:text-white';
+                let cls = 'border-md-outline text-md-on-surface-variant hover:border-md-outline-variant hover:text-md-on-surface-strong';
                 if (confirmed) {
                   if (idx === q.correctIndex) cls = 'border-md-tertiary bg-md-tertiary/10 text-md-tertiary';
                   else if (idx === selected) cls = 'border-red-500 bg-red-500/10 text-red-400';
                 } else if (idx === selected) {
-                  cls = 'border-md-tertiary bg-md-tertiary/10 text-white';
+                  cls = 'border-md-tertiary bg-md-tertiary/10 text-md-on-surface-strong';
                 }
 
                 return (
@@ -319,7 +319,7 @@ export default function QuizModal({
                     key={idx}
                     onClick={() => !confirmed && !submitting && setSelected(idx)}
                     disabled={confirmed || submitting}
-                    className={`w-full text-left px-4 py-3 rounded-lg border text-sm transition-all bg-[#0f0f0f] ${cls} ${
+                    className={`w-full text-left px-4 py-3 rounded-lg border text-sm transition-all bg-md-surface-dim ${cls} ${
                       confirmed ? 'cursor-default' : 'cursor-pointer'
                     } flex items-center gap-3`}
                   >
@@ -357,7 +357,7 @@ export default function QuizModal({
                 <button
                   onClick={handleSubmit}
                   disabled={submitting}
-                  className="flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold text-sm bg-white text-black hover:bg-gray-200 transition-colors disabled:opacity-50"
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-lg font-bold text-sm bg-md-primary text-md-on-primary hover:bg-md-primary-container transition-colors disabled:opacity-50"
                 >
                   {submitting ? (
                     <>
@@ -370,7 +370,7 @@ export default function QuizModal({
               ) : (
                 <button
                   onClick={handleNext}
-                  className="px-6 py-2.5 rounded-lg font-bold text-sm bg-white text-black hover:bg-gray-200 transition-colors"
+                  className="px-6 py-2.5 rounded-lg font-bold text-sm bg-md-primary text-md-on-primary hover:bg-md-primary-container transition-colors"
                 >
                   Próxima →
                 </button>

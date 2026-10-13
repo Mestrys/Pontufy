@@ -20,7 +20,7 @@ export default function BalanceCard({ data }: BalanceCardProps) {
           Seu saldo
         </div>
         <div className="flex items-end gap-3">
-          <span className="text-5xl md:text-6xl font-black text-white tracking-tighter">
+          <span className="text-5xl md:text-6xl font-black text-md-on-surface-strong tracking-tighter">
             {data.pointsBalance.toLocaleString('pt-BR')}
           </span>
           <span className="text-lg text-md-tertiary font-bold mb-1">pts</span>
@@ -32,7 +32,7 @@ export default function BalanceCard({ data }: BalanceCardProps) {
         <div className="flex justify-between items-end mb-2">
           <div>
             <div className="text-xs font-bold text-md-on-surface-muted uppercase tracking-wider mb-0.5">Nível atual</div>
-            <div className="text-base font-black text-white flex items-center gap-1.5">
+            <div className="text-base font-black text-md-on-surface-strong flex items-center gap-1.5">
               <TrendingUp size={15} className="text-md-tertiary" />
               {data.currentLevel}
             </div>

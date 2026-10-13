@@ -62,15 +62,15 @@ export default function CertificatesPage() {
         <header className="mb-8 flex items-center gap-3">
           <Award size={28} className="text-md-primary-text" />
           <div>
-            <h1 className="text-3xl font-black text-white tracking-tight">Meus certificados</h1>
+            <h1 className="text-3xl font-black text-md-on-surface-strong tracking-tight">Meus certificados</h1>
             <p className="text-md-on-surface-muted mt-0.5 text-sm">Certificados emitidos pelos cursos que você concluiu — cada um com raridade única e verificação criptográfica.</p>
           </div>
         </header>
 
         {certificates.length === 0 ? (
-          <div className="text-center py-24 bg-black/20 border border-white/10 rounded-2xl">
+          <div className="text-center py-24 bg-md-surface-dim border border-md-on-surface-strong/10 rounded-2xl">
             <BookOpen size={40} className="mx-auto text-md-on-surface-muted mb-4" />
-            <p className="text-white font-semibold mb-1">Nenhum certificado ainda</p>
+            <p className="text-md-on-surface-strong font-semibold mb-1">Nenhum certificado ainda</p>
             <p className="text-md-on-surface-muted text-sm mb-6">Conclua um curso para receber seu certificado com badge de raridade.</p>
             <a
               href="/cursos"

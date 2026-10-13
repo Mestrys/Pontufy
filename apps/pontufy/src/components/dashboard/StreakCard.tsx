@@ -37,7 +37,7 @@ export default function StreakCard() {
     );
   }
 
-  const fireColor = streak.current >= 7 ? 'text-orange-400' : streak.current >= 3 ? 'text-amber-400' : 'text-gray-400';
+  const fireColor = streak.current >= 7 ? 'text-orange-400' : streak.current >= 3 ? 'text-amber-400' : 'text-md-on-surface-variant';
 
   return (
     <section className="bg-md-surface border border-md-outline rounded-xl p-5">
@@ -45,7 +45,7 @@ export default function StreakCard() {
         <div className="flex items-center gap-3">
           <Flame className={fireColor} size={28} />
           <div>
-            <p className="text-2xl font-black text-white leading-none">
+            <p className="text-2xl font-black text-md-on-surface-strong leading-none">
               {streak.current} {streak.current === 1 ? 'dia' : 'dias'}
             </p>
             <p className="text-xs text-md-on-surface-muted mt-1">

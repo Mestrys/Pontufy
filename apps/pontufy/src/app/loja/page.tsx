@@ -62,7 +62,7 @@ export default function MarketplacePage() {
           <div>
             <div className="flex items-center gap-3 mb-2">
               <Gift size={24} className="text-md-secondary" aria-hidden="true" />
-              <h1 className="text-3xl font-black text-white tracking-tight">Benefícios</h1>
+              <h1 className="text-3xl font-black text-md-on-surface-strong tracking-tight">Benefícios</h1>
             </div>
             <p className="text-md-on-surface-muted text-sm">Troque seus pontos por benefícios reais.</p>
           </div>
@@ -108,7 +108,7 @@ export default function MarketplacePage() {
               type="button"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
-              className="h-11 px-5 rounded-full border border-md-outline text-md-on-surface-variant hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm font-semibold"
+              className="h-11 px-5 rounded-full border border-md-outline text-md-on-surface-variant hover:text-md-on-surface-strong disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm font-semibold"
             >
               Anterior
             </button>
@@ -119,7 +119,7 @@ export default function MarketplacePage() {
               type="button"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page >= totalPages}
-              className="h-11 px-5 rounded-full border border-md-outline text-md-on-surface-variant hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm font-semibold"
+              className="h-11 px-5 rounded-full border border-md-outline text-md-on-surface-variant hover:text-md-on-surface-strong disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-sm font-semibold"
             >
               Próxima
             </button>

@@ -113,7 +113,7 @@ export default function BattlesPage() {
     <div className="min-h-screen pb-20 pt-8 bg-md-surface-dim">
       <div className="max-w-5xl mx-auto px-6 md:px-8">
         <header className="mb-8">
-          <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
+          <h1 className="text-3xl font-black text-md-on-surface-strong tracking-tight flex items-center gap-3">
             <Swords className="text-md-primary-text" size={28} />
             Batalhas de conhecimento
           </h1>
@@ -139,8 +139,8 @@ export default function BattlesPage() {
           {/* Coluna principal: criar desafio + lista */}
           <div className="lg:col-span-3 space-y-6">
             {/* Criação de desafio */}
-            <section className="bg-black/20 border border-white/10 rounded-2xl p-5">
-              <h2 className="text-lg font-black text-white tracking-tight flex items-center gap-2 mb-4">
+            <section className="bg-md-surface-dim border border-md-on-surface-strong/10 rounded-2xl p-5">
+              <h2 className="text-lg font-black text-md-on-surface-strong tracking-tight flex items-center gap-2 mb-4">
                 <Users size={20} className="text-md-primary-text" />
                 Novo duelo
               </h2>
@@ -149,7 +149,7 @@ export default function BattlesPage() {
                   aria-label="Colega para desafiar"
                   value={selectedOpponent}
                   onChange={(e) => setSelectedOpponent(e.target.value)}
-                  className="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-md-focus"
+                  className="flex-1 bg-md-surface-container border rounded-xl px-4 py-3 text-sm text-md-on-surface-strong focus:outline-none focus:border-md-focus"
                 >
                   <option value="">Escolha um colega…</option>
                   {colleagues.map((c) => (
@@ -174,8 +174,8 @@ export default function BattlesPage() {
             </section>
 
             {/* Lista de batalhas */}
-            <section className="bg-black/20 border border-white/10 rounded-2xl p-5">
-              <h2 className="text-lg font-black text-white tracking-tight flex items-center gap-2 mb-4">
+            <section className="bg-md-surface-dim border border-md-on-surface-strong/10 rounded-2xl p-5">
+              <h2 className="text-lg font-black text-md-on-surface-strong tracking-tight flex items-center gap-2 mb-4">
                 <Hourglass size={20} className="text-md-primary-text" />
                 Meus duelos
               </h2>
@@ -195,10 +195,10 @@ export default function BattlesPage() {
                     return (
                       <div
                         key={b.id}
-                        className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3"
+                        className="flex items-center gap-3 rounded-xl border border-md-on-surface-strong/10 bg-md-on-surface-strong/5 px-4 py-3"
                       >
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm font-bold text-white truncate">
+                          <p className="text-sm font-bold text-md-on-surface-strong truncate">
                             {b.challengerName}
                             <span className="text-md-on-surface-muted font-normal mx-2">vs</span>
                             {b.opponentName}
@@ -248,7 +248,7 @@ export default function BattlesPage() {
         ariaLabel="Duelo"
         zIndexClassName="z-50"
         backdropClassName="bg-black/80 backdrop-blur-sm"
-        className="w-full max-w-3xl max-h-[90dvh] overflow-y-auto bg-md-surface-dim border border-white/10 rounded-2xl p-6"
+        className="w-full max-w-3xl max-h-[90dvh] overflow-y-auto bg-md-surface-dim border border-md-on-surface-strong/10 rounded-2xl p-6"
       >
         {activeBattleId && (
           <BattleArena

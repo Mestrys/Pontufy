@@ -69,7 +69,7 @@ export function LoginForm() {
   return (
     <div className="md-card-outlined md-elevation-3 p-8 w-full max-w-md mx-auto">
       <div className="text-center mb-8">
-        <Link href="/" className="inline-flex items-center min-h-11 text-3xl font-black tracking-tight text-white mb-6">
+        <Link href="/" className="inline-flex items-center min-h-11 text-3xl font-black tracking-tight text-md-on-surface-strong mb-6">
           <span className="text-md-primary-text">Pontu</span>fy
         </Link>
         <h1 className="text-headline-sm font-bold text-md-on-surface mb-2">Entrar</h1>

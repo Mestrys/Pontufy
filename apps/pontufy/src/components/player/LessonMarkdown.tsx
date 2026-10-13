@@ -30,7 +30,7 @@ function formatInline(text: string): ReactNode[] {
       );
     }
     if ((part.startsWith('**') && part.endsWith('**')) || (part.startsWith('__') && part.endsWith('__'))) {
-      return <strong key={i} className="font-semibold text-white">{formatInline(part.slice(2, -2))}</strong>;
+      return <strong key={i} className="font-semibold text-md-on-surface-strong">{formatInline(part.slice(2, -2))}</strong>;
     }
     const link = /^\[([^\]]+)\]\(([^)\s]+)\)$/.exec(part);
     if (link) {
@@ -41,7 +41,7 @@ function formatInline(text: string): ReactNode[] {
         <a
           key={i}
           href={href}
-          className="text-md-primary-text underline underline-offset-2 hover:text-white"
+          className="text-md-primary-text underline underline-offset-2 hover:text-md-on-surface-strong"
           {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
         >
           {link[1]}
@@ -140,7 +140,7 @@ export default function LessonMarkdown({ content }: { content: string }) {
             <thead className="bg-md-surface-container">
               <tr>
                 {header.map((h, c) => (
-                  <th key={c} scope="col" className="px-3 py-2 font-semibold text-white border-b border-md-outline">{formatInline(h)}</th>
+                  <th key={c} scope="col" className="px-3 py-2 font-semibold text-md-on-surface-strong border-b border-md-outline">{formatInline(h)}</th>
                 ))}
               </tr>
             </thead>
@@ -166,11 +166,11 @@ export default function LessonMarkdown({ content }: { content: string }) {
       const level = heading[1].length;
       elements.push(
         level <= 2 ? (
-          <h3 key={key++} className="text-[1.25em] font-bold text-white pt-4 first:pt-0 border-b border-md-outline pb-2">
+          <h3 key={key++} className="text-[1.25em] font-bold text-md-on-surface-strong pt-4 first:pt-0 border-b border-md-outline pb-2">
             {formatInline(heading[2])}
           </h3>
         ) : (
-          <h4 key={key++} className="text-[1.05em] font-bold text-white pt-2">
+          <h4 key={key++} className="text-[1.05em] font-bold text-md-on-surface-strong pt-2">
             {formatInline(heading[2])}
           </h4>
         ),

@@ -42,7 +42,7 @@ export default function AchievementsCard() {
 
   return (
     <section className="bg-md-surface border border-md-outline rounded-xl p-6">
-      <h2 className="font-bold text-white mb-1 flex items-center gap-2">
+      <h2 className="font-bold text-md-on-surface-strong mb-1 flex items-center gap-2">
         <Trophy size={17} className="text-md-tertiary" /> Conquistas
       </h2>
       <p className="text-sm text-md-on-surface-muted mb-4">
@@ -68,7 +68,7 @@ export default function AchievementsCard() {
                 title={a.description}
               >
                 <div className={`text-2xl mb-1 ${isUnlocked ? '' : 'grayscale'}`}>{a.emoji}</div>
-                <p className={`text-xs font-bold leading-tight ${isUnlocked ? 'text-white' : 'text-md-on-surface-muted'}`}>
+                <p className={`text-xs font-bold leading-tight ${isUnlocked ? 'text-md-on-surface-strong' : 'text-md-on-surface-muted'}`}>
                   {a.title}
                 </p>
                 <p className="text-xs text-md-on-surface-muted mt-0.5 leading-tight">{a.description}</p>

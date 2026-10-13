@@ -63,7 +63,7 @@ export default function CourseSidebar({
           aria-expanded={!collapsed}
           aria-controls={listId}
         >
-          <h2 className="font-bold text-white text-sm">Conteúdo do curso</h2>
+          <h2 className="font-bold text-md-on-surface-strong text-sm">Conteúdo do curso</h2>
           <ChevronDown
             size={16}
             className={`text-md-on-surface-muted transition-transform ${collapsed ? '-rotate-90' : ''}`}
@@ -114,7 +114,7 @@ export default function CourseSidebar({
                   <div className="flex-1 min-w-0">
                     <p
                       className={`text-xs leading-snug ${
-                        isActive ? 'text-white font-bold' : lesson.completed ? 'text-md-on-surface-muted font-medium' : 'text-gray-400 font-medium'
+                        isActive ? 'text-md-on-surface-strong font-bold' : lesson.completed ? 'text-md-on-surface-muted font-medium' : 'text-md-on-surface-variant font-medium'
                       }`}
                     >
                       <span className={`mr-1 ${isActive ? 'text-md-on-surface' : 'text-md-on-surface-muted'}`}>{index + 1}.</span>

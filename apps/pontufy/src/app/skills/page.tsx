@@ -31,7 +31,7 @@ export default function SkillsPage() {
     <div className="min-h-screen pb-20 pt-8 bg-md-surface-dim">
       <div className="max-w-5xl mx-auto px-6 md:px-8">
         <header className="mb-6">
-          <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
+          <h1 className="text-3xl font-black text-md-on-surface-strong tracking-tight flex items-center gap-3">
             <TreePine className="text-md-primary-text" size={28} />
             Trilhas
           </h1>

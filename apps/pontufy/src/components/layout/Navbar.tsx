@@ -59,10 +59,10 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`fixed top-0 w-full z-50 px-4 sm:px-8 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:pl-8 sm:pr-8 transition-all duration-500 ${
+        className={`fixed top-0 w-full z-50 px-4 sm:px-8 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:pl-8 sm:pr-8 transition-colors duration-200 ${
           isScrolled || isMobileMenuOpen
-            ? 'bg-md-surface/96 backdrop-blur-sm shadow-lg shadow-black/50'
-            : 'bg-gradient-to-b from-black/80 via-black/40 to-transparent'
+            ? 'bg-md-surface/95 backdrop-blur-sm shadow-lg shadow-black/30'
+            : 'bg-md-surface-dim'
         }`}
       >
         <div className="flex items-center justify-between">
@@ -80,8 +80,8 @@ export default function Navbar() {
                   aria-current={pathname === link.href ? 'page' : undefined}
                   className={`px-3 py-1.5 text-sm font-medium transition-colors rounded-full ${
                     isActive(link.href)
-                      ? 'text-white font-bold bg-md-primary/20'
-                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                      ? 'text-md-on-surface-strong font-bold bg-md-primary/20'
+                      : 'text-md-on-surface-variant hover:text-md-on-surface-strong hover:bg-md-on-surface-strong/5'
                   }`}
                 >
                   {link.label}
@@ -155,7 +155,7 @@ export default function Navbar() {
                 {isDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-md-surface-container rounded-xl shadow-2xl border border-md-outline py-1 overflow-hidden">
                     <div className="px-4 py-3 border-b border-md-outline">
-                      <p className="text-sm font-semibold text-white truncate">
+                      <p className="text-sm font-semibold text-md-on-surface-strong truncate">
                         {session?.user?.name}
                       </p>
                       <p className="text-xs text-md-on-surface-muted truncate">
@@ -165,7 +165,7 @@ export default function Navbar() {
                     <Link
                       href="/profile"
                       onClick={() => setIsDropdownOpen(false)}
-                      className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm text-gray-200 hover:bg-white/5 transition-colors font-medium"
+                      className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm text-md-on-surface hover:bg-md-on-surface-strong/5 transition-colors font-medium"
                     >
                       <User size={15} />
                       Meu perfil
@@ -174,7 +174,7 @@ export default function Navbar() {
                       <Link
                         href="/superadmin/tenants"
                         onClick={() => setIsDropdownOpen(false)}
-                        className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm text-violet-300 hover:bg-white/5 transition-colors font-medium"
+                        className="w-full text-left flex items-center gap-3 px-4 py-2.5 text-sm text-violet-300 hover:bg-md-on-surface-strong/5 transition-colors font-medium"
                       >
                         <Building2 size={15} />
                         Trocar de locatário
@@ -199,7 +199,7 @@ export default function Navbar() {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label="Abrir menu de navegação"
               aria-expanded={isMobileMenuOpen}
-              className="md:hidden -mr-2 size-11 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+              className="md:hidden -mr-2 size-11 flex items-center justify-center text-md-on-surface-variant hover:text-md-on-surface-strong transition-colors"
             >
               {isMobileMenuOpen ? <X size={22} aria-hidden="true" /> : <Menu size={22} aria-hidden="true" />}
             </button>

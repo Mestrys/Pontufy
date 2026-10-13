@@ -34,7 +34,7 @@ export default function MobileTabBar() {
                 href={href}
                 aria-current={current ? 'page' : undefined}
                 className={`flex h-16 flex-col items-center justify-center gap-1 text-xs font-medium transition-colors ${
-                  active ? 'text-white' : 'text-md-on-surface-variant hover:text-white'
+                  active ? 'text-md-on-surface-strong' : 'text-md-on-surface-variant hover:text-md-on-surface-strong'
                 }`}
               >
                 <span

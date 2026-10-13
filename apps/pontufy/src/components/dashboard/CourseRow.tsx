@@ -44,14 +44,14 @@ export default function CourseRow({ title, courses }: { title: string; courses: 
   return (
     <section aria-labelledby={headingId} className="px-4 sm:px-8 md:px-16 mb-10">
       <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 id={headingId} className="text-base sm:text-lg font-bold text-white tracking-tight">{title}</h2>
+        <h2 id={headingId} className="text-base sm:text-lg font-bold text-md-on-surface-strong tracking-tight">{title}</h2>
         <div className="hidden md:flex items-center gap-1">
           <button
             type="button"
             onClick={() => page(-1)}
             disabled={edges.start}
             aria-label={`Cursos anteriores em ${title}`}
-            className="size-11 flex items-center justify-center rounded-full text-md-on-surface-variant hover:bg-white/5 hover:text-white disabled:opacity-40 disabled:hover:bg-transparent"
+            className="size-11 flex items-center justify-center rounded-full text-md-on-surface-variant hover:bg-md-on-surface-strong/5 hover:text-md-on-surface-strong disabled:opacity-40 disabled:hover:bg-transparent"
           >
             <ChevronLeft size={20} aria-hidden="true" />
           </button>
@@ -60,7 +60,7 @@ export default function CourseRow({ title, courses }: { title: string; courses: 
             onClick={() => page(1)}
             disabled={edges.end}
             aria-label={`Mais cursos em ${title}`}
-            className="size-11 flex items-center justify-center rounded-full text-md-on-surface-variant hover:bg-white/5 hover:text-white disabled:opacity-40 disabled:hover:bg-transparent"
+            className="size-11 flex items-center justify-center rounded-full text-md-on-surface-variant hover:bg-md-on-surface-strong/5 hover:text-md-on-surface-strong disabled:opacity-40 disabled:hover:bg-transparent"
           >
             <ChevronRight size={20} aria-hidden="true" />
           </button>
@@ -80,7 +80,7 @@ export default function CourseRow({ title, courses }: { title: string; courses: 
                 )}
               </div>
               <div className="mt-2 px-0.5">
-                <h3 className="text-xs sm:text-sm font-semibold text-gray-300 line-clamp-1 group-hover:text-white transition-colors">
+                <h3 className="text-xs sm:text-sm font-semibold text-md-on-surface line-clamp-1 group-hover:text-md-on-surface-strong transition-colors">
                   {course.title}
                 </h3>
                 {course.subtitle ? (

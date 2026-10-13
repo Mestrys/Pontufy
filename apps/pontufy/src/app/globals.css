@@ -8,7 +8,7 @@
  *   quando "Google Sans Flex"/"Google Sans" estiverem disponíveis.
  * - Shape scale M3: xs 4dp · sm 8dp · md/lg 12dp · xl 16dp · 2xl/3xl 28dp · full (pill)
  * - Elevação M3: níveis 0–5 (0dp = shadow-none) mapeados nos tokens shadow-* do Tailwind
- * - Cores: paleta MD3 (tokens md-*) + dark surfaces; white-label via --brand-*
+ * - Cores: paleta MD3 (tokens md-*) (tema escuro e claro); white-label sobrescreve md-primary*, md-primary-text e md-secondary
  */
 
 @theme {
@@ -40,6 +40,10 @@
   --color-md-surface-variant: #2a2a2a;
   --color-md-on-surface: #e5e5e5;
   --color-md-on-surface-variant: #a3a3a3;
+  /* Texto de maior ênfase (títulos, valores); branco no escuro, quase preto no claro. */
+  --color-md-on-surface-strong: #ffffff;
+  /* Texto sobre foto, vídeo ou véu escuro: branco nos dois temas. */
+  --color-on-media: #ffffff;
   --color-md-outline: #2a2a2a;
   --color-md-outline-variant: #3a3a3a;
   --color-md-error: #f87171;
@@ -67,17 +71,6 @@
   --md-elevation-4: 0 2px 3px 0 rgb(0 0 0 / 0.30), 0 6px 10px 4px rgb(0 0 0 / 0.15);
   --md-elevation-5: 0 4px 4px 0 rgb(0 0 0 / 0.30), 0 8px 12px 6px rgb(0 0 0 / 0.15);
 
-  --color-brand-bg: #0a0a0a;
-  --color-brand-surface: #141414;
-  --color-brand-raised: #1f1f1f;
-  --color-brand-border: #2a2a2a;
-  --color-brand-gray: #0a0a0a;
-  --color-brand-slate: #f1f5f9;
-  --color-brand-text: #737373;
-  --color-brand-muted: #525252;
-  --color-brand-accent: #10b981;
-  --color-brand-lavender: #10b981;
-  --color-brand-mint: #34d399;
 
   /* M3 shape scale (corner radius) */
   --radius: 0.5rem;
@@ -107,11 +100,11 @@
 
 @layer base {
   *, *::before, *::after {
-    border-color: #2a2a2a;
+    border-color: var(--color-md-outline);
   }
   body {
-    background-color: #0a0a0a;
-    color: #e5e5e5;
+    background-color: var(--color-md-surface-dim);
+    color: var(--color-md-on-surface);
     @apply font-sans antialiased;
   }
   ::selection {
@@ -182,17 +175,17 @@
 
   /* Cards M3 sobre a paleta atual */
   .md-card-elevated {
-    background-color: #141414;
+    background-color: var(--color-md-surface);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
   }
   .md-card-outlined {
-    background-color: #141414;
-    border: 1px solid #2a2a2a;
+    background-color: var(--color-md-surface);
+    border: 1px solid var(--color-md-outline);
     border-radius: var(--radius-md);
   }
   .md-card-filled {
-    background-color: #1f1f1f;
+    background-color: var(--color-md-surface-container);
     border-radius: var(--radius-md);
   }
 }
@@ -232,38 +225,6 @@
   .text-label-md { font-size: 0.75rem; line-height: 1rem; letter-spacing: 0.041666em; font-weight: 600; }
   .text-label-sm { font-size: 0.75rem; line-height: 1rem; letter-spacing: 0.041666em; font-weight: 600; }
 
-  .bg-gradient-pontufy {
-    background: linear-gradient(135deg, var(--brand-primary, #10b981) 0%, #059669 100%);
-  }
-  /* Gradiente de marca (white-label). Antes referenciado por
-     SurpriseRewardToast e marketplace/CheckoutDrawer sem definição — agora
-     resolvido; falha silenciosa eliminada. */
-  .bg-gradient-brand {
-    background: linear-gradient(
-      135deg,
-      var(--brand-primary, #10b981) 0%,
-      var(--brand-accent, #8b5cf6) 100%
-    );
-  }
-  .text-gradient-pontufy {
-    background-image: linear-gradient(135deg, var(--brand-primary, #10b981) 0%, var(--brand-accent, #8b5cf6) 100%);
-    @apply bg-clip-text text-transparent;
-  }
-  .bg-brand-primary {
-    background-color: var(--brand-primary, #10b981);
-  }
-  .bg-brand-accent {
-    background-color: var(--brand-accent, #8b5cf6);
-  }
-  .text-brand-primary {
-    color: var(--brand-primary, #10b981);
-  }
-  .text-brand-accent {
-    color: var(--brand-accent, #8b5cf6);
-  }
-  .border-brand-primary {
-    border-color: var(--brand-primary, #10b981);
-  }
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
   }
@@ -290,7 +251,7 @@
     -webkit-backdrop-filter: blur(12px);
   }
   .card-dark {
-    background: #141414;
-    border: 1px solid #2a2a2a;
+    background: var(--color-md-surface);
+    border: 1px solid var(--color-md-outline);
   }
 }

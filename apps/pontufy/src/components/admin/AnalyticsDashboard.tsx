@@ -27,12 +27,6 @@ interface SummaryData {
   totalPointsRedeemed: number;
 }
 
-const CHART_COLORS = {
-  primary: '#5c4152',
-  secondary: '#d97f76',
-  tertiary: '#a1c0ae',
-  highlight: '#f7d0a9',
-};
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (

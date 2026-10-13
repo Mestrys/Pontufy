@@ -79,7 +79,7 @@ export function ResetPasswordForm() {
         />
 
         <div className="md-card-outlined md-elevation-3 p-8 w-full max-w-md mx-auto text-center">
-          <Link href="/" className="inline-flex items-center min-h-11 text-3xl font-black tracking-tight text-white mb-8">
+          <Link href="/" className="inline-flex items-center min-h-11 text-3xl font-black tracking-tight text-md-on-surface-strong mb-8">
             <span className="text-md-primary-text">Pontu</span>fy
           </Link>
 
@@ -113,7 +113,7 @@ export function ResetPasswordForm() {
         />
 
         <div className="md-card-outlined md-elevation-3 p-8 w-full max-w-md mx-auto text-center">
-          <Link href="/" className="inline-flex items-center min-h-11 text-3xl font-black tracking-tight text-white mb-8">
+          <Link href="/" className="inline-flex items-center min-h-11 text-3xl font-black tracking-tight text-md-on-surface-strong mb-8">
             <span className="text-md-primary-text">Pontu</span>fy
           </Link>
 
@@ -147,7 +147,7 @@ export function ResetPasswordForm() {
       />
 
       <div className="w-full max-w-md">
-        <Link href="/" className="inline-flex items-center min-h-11 text-3xl font-black tracking-tight text-white mb-8">
+        <Link href="/" className="inline-flex items-center min-h-11 text-3xl font-black tracking-tight text-md-on-surface-strong mb-8">
           <span className="text-md-primary-text">Pontu</span>fy
         </Link>
 

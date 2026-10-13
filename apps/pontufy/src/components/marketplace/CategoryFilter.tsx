@@ -23,7 +23,7 @@ export default function CategoryFilter({ categories, activeCategory, onSelect }:
           className={`flex-none h-11 px-5 rounded-full font-semibold text-sm transition-all border ${
             activeCategory === cat.id
               ? 'bg-md-primary text-md-on-primary border-md-primary'
-              : 'bg-md-surface-container text-gray-400 border-md-outline hover:border-md-primary/40 hover:text-white'
+              : 'bg-md-surface-container text-md-on-surface-variant border-md-outline hover:border-md-primary/40 hover:text-md-on-surface-strong'
           }`}
         >
           {cat.name}

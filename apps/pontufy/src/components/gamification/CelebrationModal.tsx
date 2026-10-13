@@ -32,7 +32,7 @@ const TIER_ICONS: Record<string, typeof Trophy | typeof Crown | typeof Medal> = 
 };
 
 const TIER_COLORS: Record<string, string> = {
-  Aprendiz: 'text-gray-400',
+  Aprendiz: 'text-md-on-surface-variant',
   Analista: 'text-md-tertiary',
   'Analista Sênior': 'text-blue-400',
   Especialista: 'text-amber-400',
@@ -40,7 +40,7 @@ const TIER_COLORS: Record<string, string> = {
 };
 
 const TIER_BG: Record<string, string> = {
-  Aprendiz: 'bg-gray-400/10 border-gray-400/30',
+  Aprendiz: 'bg-md-on-surface-variant/10 border-md-on-surface-variant/30',
   Analista: 'bg-md-tertiary/10 border-md-tertiary/30',
   'Analista Sênior': 'bg-blue-500/10 border-blue-500/30',
   Especialista: 'bg-amber-500/10 border-amber-500/30',
@@ -82,7 +82,7 @@ export default function CelebrationModal({
       initialFocus={continueRef}
       returnFocus={returnFocus}
       backdropClassName="bg-black/60"
-      className="bg-[#141414] px-10 py-8 rounded-2xl shadow-2xl border border-[#2a2a2a] flex flex-col items-center gap-4 max-w-md w-full"
+      className="bg-md-surface px-10 py-8 rounded-2xl shadow-2xl border border-md-outline flex flex-col items-center gap-4 max-w-md w-full"
     >
             {/* Animated background glow */}
             <motion.div
@@ -95,7 +95,7 @@ export default function CelebrationModal({
             <button
               type="button"
               onClick={onComplete}
-              className="absolute top-2 right-2 size-11 flex items-center justify-center rounded-lg hover:bg-white/5 transition-colors text-md-on-surface-muted hover:text-white"
+              className="absolute top-2 right-2 size-11 flex items-center justify-center rounded-lg hover:bg-md-on-surface-strong/5 transition-colors text-md-on-surface-muted hover:text-md-on-surface-strong"
               aria-label="Fechar"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -137,8 +137,8 @@ export default function CelebrationModal({
 
             {/* Content */}
             <div className="text-center relative z-10">
-              <h2 id={titleId} className="text-2xl font-black text-white mb-1">{title}</h2>
-              <p id={subtitleId} className="text-gray-400 text-sm mb-4">{subtitle}</p>
+              <h2 id={titleId} className="text-2xl font-black text-md-on-surface-strong mb-1">{title}</h2>
+              <p id={subtitleId} className="text-md-on-surface-variant text-sm mb-4">{subtitle}</p>
 
               {type === 'levelUp' && newTier && (
                 <div className={`mb-4 p-4 rounded-xl ${tierBg} flex items-center justify-center gap-3`}>
@@ -153,7 +153,7 @@ export default function CelebrationModal({
                     <p className="text-xs text-md-on-surface-muted uppercase tracking-wider mb-0.5">
                       {newTier.maxPoints ? 'Para o próximo nível' : 'Você chegou ao'}
                     </p>
-                    <p className="text-lg font-black text-gray-300">
+                    <p className="text-lg font-black text-md-on-surface">
                       {newTier.maxPoints
                         ? `Faltam ${Math.max(0, newTier.maxPoints - (points ?? 0)).toLocaleString('pt-BR')} pts`
                         : 'Nível máximo'}
@@ -184,7 +184,7 @@ export default function CelebrationModal({
                 ref={continueRef}
                 type="button"
                 onClick={onComplete}
-                className="mt-2 h-11 px-6 rounded-full font-bold text-sm bg-[#1f1f1f] text-white hover:bg-[#2a2a2a] border border-[#2a2a2a] transition-colors"
+                className="mt-2 h-11 px-6 rounded-full font-bold text-sm bg-md-surface-container text-md-on-surface-strong hover:bg-md-surface-container-high border border-md-outline transition-colors"
               >
                 Continuar
               </button>

@@ -223,7 +223,7 @@ function LessonCard({
         className="w-full max-w-lg rounded-2xl border border-md-outline bg-md-surface p-6"
       >
         <div className="flex items-start justify-between gap-3">
-          <h2 id={ids.regenTitle} className="text-lg font-bold text-white">
+          <h2 id={ids.regenTitle} className="text-lg font-bold text-md-on-surface-strong">
             Gerar a aula {index + 1} de novo
           </h2>
           <button
@@ -231,7 +231,7 @@ function LessonCard({
             onClick={() => setRegenOpen(false)}
             disabled={regenerating}
             aria-label="Fechar"
-            className="-mr-2 -mt-2 flex size-11 items-center justify-center rounded-full text-md-on-surface-variant hover:text-white"
+            className="-mr-2 -mt-2 flex size-11 items-center justify-center rounded-full text-md-on-surface-variant hover:text-md-on-surface-strong"
           >
             <X size={20} aria-hidden="true" />
           </button>

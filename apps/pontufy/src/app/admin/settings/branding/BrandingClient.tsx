@@ -287,11 +287,11 @@ export default function BrandingClient() {
                 // eslint-disable-next-line @next/next/no-img-element -- prévia de URL externa digitada pelo RH
                 <img src={sanitizeBrandingUrl(logoUrl)!} alt={branding?.name ?? 'Logo'} className="h-8 max-w-[140px] w-auto object-contain" />
               ) : (
-                <span className="text-xl font-black tracking-tight text-white">
+                <span className="text-xl font-black tracking-tight text-md-on-surface-strong">
                   <span className="text-md-primary-text">Pontu</span>fy
                 </span>
               )}
-              <span className="rounded-full bg-md-primary/20 px-3 py-1.5 text-sm font-bold text-white">Início</span>
+              <span className="rounded-full bg-md-primary/20 px-3 py-1.5 text-sm font-bold text-md-on-surface-strong">Início</span>
             </div>
             <div className="space-y-4 p-5">
               <p className="text-body-md text-md-on-surface">

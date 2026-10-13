@@ -22,7 +22,7 @@ export function EmptyState({ icon: Icon, title, description, actionLabel, onActi
       <div className="w-16 h-16 rounded-full bg-md-tertiary/15 flex items-center justify-center">
         <Icon size={28} className="text-md-tertiary" aria-hidden="true" />
       </div>
-      <h2 className="text-title-lg text-white font-bold">{title}</h2>
+      <h2 className="text-title-lg text-md-on-surface-strong font-bold">{title}</h2>
       <p className="text-sm text-md-on-surface-muted max-w-sm">{description}</p>
       {actionLabel && actionHref && (
         <Link

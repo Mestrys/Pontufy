@@ -59,7 +59,7 @@ export default function LessonContent({
               </span>
             )}
           </div>
-          <h2 className="max-w-[34ch] text-2xl sm:text-3xl font-black text-white text-balance">{lessonTitle}</h2>
+          <h2 className="max-w-[34ch] text-2xl sm:text-3xl font-black text-md-on-surface-strong text-balance">{lessonTitle}</h2>
         </div>
 
         {/* Conteúdo markdown DA AULA ATIVA */}
@@ -92,7 +92,7 @@ export default function LessonContent({
             onClick={() => onPrevious?.()}
             disabled={!onPrevious}
             aria-label="Aula anterior"
-            className="h-11 min-w-11 px-3 sm:px-4 rounded-lg font-bold transition-colors text-sm flex items-center justify-center gap-2 border border-md-outline text-gray-300 hover:border-md-outline-variant hover:text-white disabled:text-md-on-surface/40 disabled:cursor-not-allowed disabled:hover:border-md-outline"
+            className="h-11 min-w-11 px-3 sm:px-4 rounded-lg font-bold transition-colors text-sm flex items-center justify-center gap-2 border border-md-outline text-md-on-surface hover:border-md-outline-variant hover:text-md-on-surface-strong disabled:text-md-on-surface/40 disabled:cursor-not-allowed disabled:hover:border-md-outline"
           >
             <ArrowLeft size={16} aria-hidden="true" />
             <span className="hidden sm:inline">Anterior</span>

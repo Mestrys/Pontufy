@@ -8,6 +8,8 @@
 //   text-md-on-surface-muted   metadados (6,07:1)
 //   text-md-primary-text       links e destaques na cor da marca (8,19:1)
 // md-primary (#5c4152) e md-primary-container (#b4585d) são preenchimentos.
+// Fase 5: cor fixa (white, gray-*, hex) não acompanha o tema claro nem a
+// marca. Exceção consciente: comentário "check-theme: ok" na mesma linha.
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -38,6 +40,22 @@ const RULES = [
     msg: 'texto abaixo de 12px; o piso é text-xs (12px)',
   },
   {
+    re: new RegExp(V + String.raw`(?:text|placeholder|fill|stroke)-(?:white|gray-\d+)(?![\w/-])`, 'g'),
+    msg: 'cor fixa não muda no tema claro; use text-md-on-surface-strong / -on-surface / -on-surface-variant, ou text-on-media sobre foto e vídeo',
+  },
+  {
+    re: new RegExp(V + String.raw`(?:bg|border|divide|ring|from|via|to)-(?:white|gray-\d+)\/\d+(?![\w-])`, 'g'),
+    msg: 'camada branca/cinza some no tema claro; use bg-md-on-surface-strong/NN (camada de estado) ou um token md-surface-*',
+  },
+  {
+    re: new RegExp(V + String.raw`(?:bg|border|divide|ring)-gray-\d+(?![\w/-])`, 'g'),
+    msg: 'cinza fixo; use md-surface-*, md-outline ou md-outline-variant',
+  },
+  {
+    re: new RegExp(V + String.raw`(?:bg|text|border|divide|ring|from|via|to|fill|stroke)-\[#[0-9a-fA-F]{3,8}\]`, 'g'),
+    msg: 'hex fixo não acompanha tema nem marca; use o token md-* equivalente',
+  },
+  {
     re: /(?<![\w.$])(?:window\.)?(?:alert|confirm|prompt)\(/g,
     msg: 'diálogo nativo do navegador; use useToast (aviso), erro inline perto do controle ou AlertDialog (confirmação)',
   },
@@ -55,6 +73,8 @@ let failures = 0;
 for (const file of walk(SRC)) {
   const lines = readFileSync(file, 'utf8').split('\n');
   lines.forEach((line, i) => {
+    // Exceção consciente e comentada na mesma linha (ex.: cores de medalha).
+    if (line.includes('check-theme: ok')) return;
     for (const { re, msg } of RULES) {
       for (const m of line.matchAll(re)) {
         failures++;

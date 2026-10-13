@@ -36,7 +36,7 @@ const TYPE_STYLES: Record<NotificationType, { icon: typeof Coins; badge: string;
   REWARD_REDEEMED: { icon: Gift, badge: 'bg-purple-500/20 text-purple-400 border-purple-500/30', iconColor: 'text-purple-400' },
   COURSE_ASSIGNED: { icon: GraduationCap, badge: 'bg-blue-500/20 text-blue-400 border-blue-500/30', iconColor: 'text-blue-400' },
   LEVEL_UP: { icon: TrendingUp, badge: 'bg-violet-500/20 text-violet-400 border-violet-500/30', iconColor: 'text-violet-400' },
-  SYSTEM: { icon: Megaphone, badge: 'bg-gray-500/20 text-gray-400 border-gray-500/30', iconColor: 'text-gray-400' },
+  SYSTEM: { icon: Megaphone, badge: 'bg-md-on-surface-variant/20 text-md-on-surface-variant border-md-on-surface-variant/30', iconColor: 'text-md-on-surface-variant' },
   BATTLE_CHALLENGE: { icon: Swords, badge: 'bg-orange-500/20 text-orange-400 border-orange-500/30', iconColor: 'text-orange-400' },
   BATTLE_RESULT: { icon: Trophy, badge: 'bg-amber-500/20 text-amber-400 border-amber-500/30', iconColor: 'text-amber-400' },
   CERTIFICATE_READY: { icon: Award, badge: 'bg-md-primary/20 text-md-primary-text border-md-primary/30', iconColor: 'text-md-primary-text' },
@@ -113,10 +113,10 @@ export function NotificationDrawer({ isOpen, onClose }: NotificationDrawerProps)
       onClose={onClose}
       variant="right"
       labelledBy={titleId}
-      className="w-full max-w-md h-full bg-[#141414] border-l border-[#2a2a2a] shadow-2xl flex flex-col"
+      className="w-full max-w-md h-full bg-md-surface border-l border-md-outline shadow-2xl flex flex-col"
     >
-            <div className="flex items-center justify-between p-4 border-b border-[#2a2a2a]">
-              <h2 id={titleId} className="text-lg font-bold text-white flex items-center gap-2">
+            <div className="flex items-center justify-between p-4 border-b border-md-outline">
+              <h2 id={titleId} className="text-lg font-bold text-md-on-surface-strong flex items-center gap-2">
                 <Bell size={18} className="text-md-tertiary" aria-hidden="true" />
                 Notificações
                 {unreadNotifications > 0 && (
@@ -130,7 +130,7 @@ export function NotificationDrawer({ isOpen, onClose }: NotificationDrawerProps)
                   type="button"
                   onClick={markAllRead}
                   disabled={unreadNotifications === 0}
-                  className="flex items-center gap-1.5 px-3 h-11 rounded-lg text-xs font-semibold text-gray-400 hover:text-md-tertiary hover:bg-white/5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="flex items-center gap-1.5 px-3 h-11 rounded-lg text-xs font-semibold text-md-on-surface-variant hover:text-md-tertiary hover:bg-md-on-surface-strong/5 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <CheckCheck size={14} aria-hidden="true" />
                   Marcar todas
@@ -139,7 +139,7 @@ export function NotificationDrawer({ isOpen, onClose }: NotificationDrawerProps)
                   type="button"
                   aria-label="Fechar notificações"
                   onClick={onClose}
-                  className="size-11 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition-colors"
+                  className="size-11 flex items-center justify-center text-md-on-surface-variant hover:text-md-on-surface-strong hover:bg-md-on-surface-strong/10 rounded-xl transition-colors"
                 >
                   <X size={20} aria-hidden="true" />
                 </button>
@@ -150,9 +150,9 @@ export function NotificationDrawer({ isOpen, onClose }: NotificationDrawerProps)
               {isLoading && (
                 <div className="space-y-3">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="bg-[#0a0a0a] border border-[#2a2a2a] rounded-xl p-4 animate-pulse space-y-2">
-                      <div className="h-3 bg-[#2a2a2a] rounded w-1/2" />
-                      <div className="h-2 bg-[#2a2a2a] rounded w-3/4" />
+                    <div key={i} className="bg-md-surface-dim border border-md-outline rounded-xl p-4 animate-pulse space-y-2">
+                      <div className="h-3 bg-md-surface-container-high rounded w-1/2" />
+                      <div className="h-2 bg-md-surface-container-high rounded w-3/4" />
                     </div>
                   ))}
                 </div>
@@ -161,7 +161,7 @@ export function NotificationDrawer({ isOpen, onClose }: NotificationDrawerProps)
               {!isLoading && items.length === 0 && (
                 <div className="text-center py-16">
                   <Bell size={48} className="mx-auto text-md-on-surface-muted mb-3" />
-                  <p className="text-gray-400">Nenhuma notificação por aqui.</p>
+                  <p className="text-md-on-surface-variant">Nenhuma notificação por aqui.</p>
                   <p className="text-sm text-md-on-surface-muted mt-1">Conclua aulas e resgate recompensas para receber avisos.</p>
                 </div>
               )}
@@ -179,9 +179,9 @@ export function NotificationDrawer({ isOpen, onClose }: NotificationDrawerProps)
                       onClick={() => {
                         if (!item.read) markRead(item.id);
                       }}
-                      className={`w-full text-left bg-[#0a0a0a] border rounded-xl p-4 transition-colors ${
+                      className={`w-full text-left bg-md-surface-dim border rounded-xl p-4 transition-colors ${
                         item.read
-                          ? 'border-[#2a2a2a] hover:border-[#3a3a3a]'
+                          ? 'border-md-outline hover:border-md-outline-variant'
                           : 'border-md-tertiary/25 hover:border-md-tertiary/40'
                       }`}
                     >
@@ -191,14 +191,14 @@ export function NotificationDrawer({ isOpen, onClose }: NotificationDrawerProps)
                         </span>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
-                            <p className={`text-sm font-semibold ${item.read ? 'text-gray-300' : 'text-white'}`}>
+                            <p className={`text-sm font-semibold ${item.read ? 'text-md-on-surface' : 'text-md-on-surface-strong'}`}>
                               {item.title}
                             </p>
                             <span className="text-xs text-md-on-surface-muted flex-shrink-0">
                               {timeAgo(item.createdAt)}
                             </span>
                           </div>
-                          <p className="text-sm text-gray-400 mt-0.5">{item.message}</p>
+                          <p className="text-sm text-md-on-surface-variant mt-0.5">{item.message}</p>
                         </div>
                         {!item.read && (
                           <span className="w-2 h-2 rounded-full bg-md-tertiary mt-2 flex-shrink-0">

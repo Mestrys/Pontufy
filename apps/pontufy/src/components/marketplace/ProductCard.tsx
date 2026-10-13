@@ -41,7 +41,7 @@ export default function ProductCard({ product, userPoints, onRedeem }: ProductCa
             loading="lazy"
           />
         ) : (
-          <div className="flex flex-col items-center gap-2 text-gray-400">
+          <div className="flex flex-col items-center gap-2 text-md-on-surface-variant">
             <Coins size={32} aria-hidden="true" />
             <span className="text-xs font-semibold">{partner}</span>
           </div>
@@ -54,14 +54,14 @@ export default function ProductCard({ product, userPoints, onRedeem }: ProductCa
         </div>
 
         {/* Partner Name Badge - Top Right */}
-        <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm px-2 py-0.5 rounded text-xs font-bold text-white">
+        <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm px-2 py-0.5 rounded text-xs font-bold text-on-media">
           {partner}
         </div>
       </div>
 
       {/* Product Details */}
       <div className="p-4 flex flex-col flex-1">
-        <h3 className="font-semibold text-white text-sm leading-snug mb-3 flex-1 line-clamp-2">
+        <h3 className="font-semibold text-md-on-surface-strong text-sm leading-snug mb-3 flex-1 line-clamp-2">
           {product.title}
         </h3>
 

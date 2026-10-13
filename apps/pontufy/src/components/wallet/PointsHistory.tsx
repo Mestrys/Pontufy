@@ -12,17 +12,17 @@ interface PointsHistoryProps {
 
 export default function PointsHistory({ history }: PointsHistoryProps) {
   return (
-    <div className="bg-[#141414] rounded-2xl border border-[#2a2a2a] overflow-hidden mb-12">
-      <div className="px-6 py-4 border-b border-[#2a2a2a]">
-        <h2 className="text-base font-bold text-white">Extrato</h2>
+    <div className="bg-md-surface rounded-2xl border border-md-outline overflow-hidden mb-12">
+      <div className="px-6 py-4 border-b border-md-outline">
+        <h2 className="text-base font-bold text-md-on-surface-strong">Extrato</h2>
         <p className="text-xs text-md-on-surface-muted mt-0.5">Histórico cronológico de movimentações.</p>
       </div>
 
-      <div className="divide-y divide-[#1f1f1f]">
+      <div className="divide-y divide-md-surface-container">
         {history.map((tx) => (
           <div
             key={tx.id}
-            className="p-4 sm:p-5 flex items-center justify-between hover:bg-[#1a1a1a] transition-colors"
+            className="p-4 sm:p-5 flex items-center justify-between hover:bg-md-surface transition-colors"
           >
             <div className="flex items-center gap-3.5">
               <div
@@ -36,7 +36,7 @@ export default function PointsHistory({ history }: PointsHistoryProps) {
               </div>
 
               <div>
-                <div className="font-semibold text-white text-sm">{tx.description}</div>
+                <div className="font-semibold text-md-on-surface-strong text-sm">{tx.description}</div>
                 <div className="text-xs text-md-on-surface-muted mt-0.5">{tx.date}</div>
               </div>
             </div>

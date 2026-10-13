@@ -16,7 +16,7 @@ export interface CertificateWithMeta {
 type Rarity = 'common' | 'rare' | 'epic' | 'legendary';
 
 const RARITY_CONFIG: Record<Rarity, { label: string; color: string; bg: string; border: string; icon: React.ReactNode }> = {
-  common: { label: 'Comum', color: 'text-gray-400', bg: 'bg-gray-800/50', border: 'border-gray-700', icon: <Star className="w-5 h-5 text-gray-400" /> },
+  common: { label: 'Comum', color: 'text-md-on-surface-variant', bg: 'bg-md-surface-container', border: 'border-md-outline-variant', icon: <Star className="w-5 h-5 text-md-on-surface-variant" /> },
   rare: { label: 'Raro', color: 'text-md-primary-text', bg: 'bg-md-primary/10', border: 'border-md-primary/30', icon: <Star className="w-5 h-5 text-md-primary-text" fill="currentColor" /> },
   epic: { label: 'Épico', color: 'text-purple-400', bg: 'bg-purple-900/20', border: 'border-purple-500/30', icon: <Sparkles className="w-5 h-5 text-purple-400" /> },
   legendary: { label: 'Lendário', color: 'text-amber-400', bg: 'bg-amber-900/20', border: 'border-amber-500/30', icon: <Trophy className="w-5 h-5 text-amber-400" /> },
@@ -67,9 +67,9 @@ export default function CertificateBadgeMural({ certificates }: { certificates: 
 
   if (enriched.length === 0) {
     return (
-      <div className="bg-black/20 border border-white/10 rounded-2xl p-8 text-center">
+      <div className="bg-md-surface-dim border border-md-on-surface-strong/10 rounded-2xl p-8 text-center">
         <Award className="mx-auto text-md-on-surface-muted mb-4" size={48} />
-        <p className="text-gray-400">Nenhum certificado emitido ainda.</p>
+        <p className="text-md-on-surface-variant">Nenhum certificado emitido ainda.</p>
         <p className="text-xs text-md-on-surface-muted mt-1">Complete cursos para ganhar badges de raridade única!</p>
       </div>
     );
@@ -82,7 +82,7 @@ export default function CertificateBadgeMural({ certificates }: { certificates: 
     <section className="space-y-6">
       <header className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
+          <h2 className="text-xl font-black text-md-on-surface-strong tracking-tight flex items-center gap-2">
             <Award className="text-md-primary-text" size={24} />
             Meus certificados
           </h2>
@@ -112,13 +112,13 @@ export default function CertificateBadgeMural({ certificates }: { certificates: 
                   <Award className={cfg.color} size={28} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-white truncate">{cert.courseName}</p>
+                  <p className="font-bold text-md-on-surface-strong truncate">{cert.courseName}</p>
                   <p className="text-xs text-md-on-surface-muted mt-0.5">Emitido em {cert.issuedDate}</p>
                 </div>
               </div>
 
               {/* Actions */}
-              <div className="mt-4 flex items-center justify-between pt-4 border-t border-white/5">
+              <div className="mt-4 flex items-center justify-between pt-4 border-t border-md-on-surface-strong/5">
                 <button
                   onClick={() => shareOnLinkedIn(cert, employeeName, tenantName)}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-600/20 border border-blue-500/30 text-blue-400 text-xs font-medium hover:bg-blue-600/30 transition"
@@ -132,7 +132,7 @@ export default function CertificateBadgeMural({ certificates }: { certificates: 
                   href={`/verify/${cert.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-gray-400 text-xs font-medium hover:bg-white/10 transition"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-md-on-surface-strong/5 border border-md-on-surface-strong/10 text-md-on-surface-variant text-xs font-medium hover:bg-md-on-surface-strong/10 transition"
                 >
                   Verificar
                 </a>
@@ -153,7 +153,7 @@ export default function CertificateBadgeMural({ certificates }: { certificates: 
                 {cfg.icon}
                 <span className={`font-bold ${cfg.color} text-sm`}>{cfg.label}</span>
               </div>
-              <p className="text-2xl font-black text-white">{count}</p>
+              <p className="text-2xl font-black text-md-on-surface-strong">{count}</p>
             </div>
           );
         })}

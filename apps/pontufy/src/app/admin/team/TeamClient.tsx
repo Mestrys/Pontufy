@@ -145,17 +145,17 @@ export default function TeamClient() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] px-4 py-8">
+    <div className="min-h-screen bg-md-surface-dim px-4 py-8">
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div>
             <Link
               href="/admin"
-              className="inline-flex items-center min-h-11 gap-1.5 text-sm text-md-on-surface-muted hover:text-gray-300 transition-colors"
+              className="inline-flex items-center min-h-11 gap-1.5 text-sm text-md-on-surface-muted hover:text-md-on-surface transition-colors"
             >
               <ArrowLeft size={15} /> Voltar ao painel
             </Link>
-            <h1 className="text-2xl font-bold text-white">Equipe</h1>
+            <h1 className="text-2xl font-bold text-md-on-surface-strong">Equipe</h1>
             <p className="text-sm text-md-on-surface-muted mt-1">
               Convide colaboradores e gerencie o acesso à plataforma
             </p>
@@ -169,8 +169,8 @@ export default function TeamClient() {
         )}
 
         {/* ── Convite ─────────────────────────────────────────────────── */}
-        <section className="bg-[#141414] border border-[#2a2a2a] rounded-2xl p-6">
-          <h2 className="text-sm font-bold text-white uppercase tracking-wide mb-4 flex items-center gap-2">
+        <section className="bg-md-surface border border-md-outline rounded-2xl p-6">
+          <h2 className="text-sm font-bold text-md-on-surface-strong uppercase tracking-wide mb-4 flex items-center gap-2">
             <UserPlus size={16} className="text-md-tertiary" /> Convidar colaborador
           </h2>
 
@@ -184,14 +184,14 @@ export default function TeamClient() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="email@empresa.com"
-                className="w-full pl-10 pr-4 py-3 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg text-white placeholder:text-md-on-surface-muted focus:outline-none focus:border-md-focus focus:ring-1 focus:ring-md-focus/40 text-sm transition-colors"
+                className="w-full pl-10 pr-4 py-3 bg-md-surface-container border border-md-outline rounded-lg text-md-on-surface-strong placeholder:text-md-on-surface-muted focus:outline-none focus:border-md-focus focus:ring-1 focus:ring-md-focus/40 text-sm transition-colors"
               />
             </div>
             <select
               aria-label="Perfil de acesso"
               value={inviteRole}
               onChange={(e) => setInviteRole(e.target.value)}
-              className="px-4 py-3 bg-[#1f1f1f] border border-[#2a2a2a] rounded-lg text-white focus:outline-none focus:border-md-focus text-sm transition-colors"
+              className="px-4 py-3 bg-md-surface-container border border-md-outline rounded-lg text-md-on-surface-strong focus:outline-none focus:border-md-focus text-sm transition-colors"
             >
               <option value="employee">Colaborador</option>
               <option value="admin_rh">Administrador</option>
@@ -225,8 +225,8 @@ export default function TeamClient() {
         </section>
 
         {/* ── Convites pendentes ──────────────────────────────────────── */}
-        <section className="bg-[#141414] border border-[#2a2a2a] rounded-2xl p-6">
-          <h2 className="text-sm font-bold text-white uppercase tracking-wide mb-4 flex items-center gap-2">
+        <section className="bg-md-surface border border-md-outline rounded-2xl p-6">
+          <h2 className="text-sm font-bold text-md-on-surface-strong uppercase tracking-wide mb-4 flex items-center gap-2">
             <Mail size={16} className="text-md-tertiary" /> Convites
           </h2>
 
@@ -247,10 +247,10 @@ export default function TeamClient() {
                 return (
                   <div
                     key={invite.id}
-                    className="flex flex-col sm:flex-row sm:items-center gap-3 bg-[#1f1f1f] border border-[#2a2a2a] rounded-xl p-4"
+                    className="flex flex-col sm:flex-row sm:items-center gap-3 bg-md-surface-container border border-md-outline rounded-xl p-4"
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-white truncate">{invite.email}</p>
+                      <p className="text-sm font-semibold text-md-on-surface-strong truncate">{invite.email}</p>
                       <p className="text-xs text-md-on-surface-muted mt-0.5">
                         {ROLE_LABELS[invite.role] ?? invite.role} · Expira em{' '}
                         {new Date(invite.expiresAt).toLocaleDateString('pt-BR')}
@@ -288,8 +288,8 @@ export default function TeamClient() {
         </section>
 
         {/* ── Membros ─────────────────────────────────────────────────── */}
-        <section className="bg-[#141414] border border-[#2a2a2a] rounded-2xl p-6">
-          <h2 className="text-sm font-bold text-white uppercase tracking-wide mb-4 flex items-center gap-2">
+        <section className="bg-md-surface border border-md-outline rounded-2xl p-6">
+          <h2 className="text-sm font-bold text-md-on-surface-strong uppercase tracking-wide mb-4 flex items-center gap-2">
             <Users size={16} className="text-md-tertiary" /> Membros da equipe
           </h2>
 
@@ -305,7 +305,7 @@ export default function TeamClient() {
             <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Membros da equipe">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left text-xs text-md-on-surface-muted uppercase tracking-wide border-b border-[#2a2a2a]">
+                  <tr className="text-left text-xs text-md-on-surface-muted uppercase tracking-wide border-b border-md-outline">
                     <th className="pb-3 pr-4 font-semibold">Nome</th>
                     <th className="pb-3 pr-4 font-semibold">Email</th>
                     <th className="pb-3 pr-4 font-semibold">Perfil</th>
@@ -314,13 +314,13 @@ export default function TeamClient() {
                 </thead>
                 <tbody>
                   {users.map((user) => (
-                    <tr key={user.id} className="border-b border-[#1f1f1f] last:border-0">
-                      <td className="py-3 pr-4 text-white font-medium whitespace-nowrap">
+                    <tr key={user.id} className="border-b border-md-surface-container last:border-0">
+                      <td className="py-3 pr-4 text-md-on-surface-strong font-medium whitespace-nowrap">
                         {user.name}
                       </td>
-                      <td className="py-3 pr-4 text-gray-400">{user.email}</td>
+                      <td className="py-3 pr-4 text-md-on-surface-variant">{user.email}</td>
                       <td className="py-3 pr-4">
-                        <span className="text-xs font-bold px-3 py-1 rounded-full border border-[#2a2a2a] bg-[#1f1f1f] text-gray-300">
+                        <span className="text-xs font-bold px-3 py-1 rounded-full border border-md-outline bg-md-surface-container text-md-on-surface">
                           {ROLE_LABELS[user.role] ?? user.role}
                         </span>
                       </td>

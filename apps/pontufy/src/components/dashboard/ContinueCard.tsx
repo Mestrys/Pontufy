@@ -20,7 +20,7 @@ export default function ContinueCard({ course }: { course: ContinueCourse }) {
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-xs font-bold uppercase tracking-wider text-md-on-surface-muted">Continue de onde parou</p>
-          <h2 id="continue-heading" className="mt-1 text-lg sm:text-xl font-bold text-white text-balance">
+          <h2 id="continue-heading" className="mt-1 text-lg sm:text-xl font-bold text-md-on-surface-strong text-balance">
             {course.nextLessonTitle ?? course.title}
           </h2>
           {course.nextLessonTitle && (

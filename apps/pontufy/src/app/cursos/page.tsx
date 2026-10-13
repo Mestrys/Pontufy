@@ -78,7 +78,7 @@ export default function CoursesPage() {
     },
     available: {
       icon: <BookOpen size={16} className="text-md-on-surface-muted" />,
-      badge: 'bg-white/5 text-gray-400 border-white/10',
+      badge: 'bg-md-on-surface-strong/5 text-md-on-surface-variant border-md-on-surface-strong/10',
       label: 'Disponível',
     },
   };
@@ -97,7 +97,7 @@ export default function CoursesPage() {
     <div className="min-h-screen pb-20 pt-8 bg-md-surface-dim">
       <div className="max-w-[1200px] mx-auto px-6 md:px-16">
         <header className="mb-8">
-          <h1 className="text-3xl font-black text-white tracking-tight">Cursos</h1>
+          <h1 className="text-3xl font-black text-md-on-surface-strong tracking-tight">Cursos</h1>
           <p className="text-md-on-surface-muted mt-1.5 text-sm">Acompanhe seu progresso em todas as trilhas de aprendizagem.</p>
         </header>
 
@@ -110,7 +110,7 @@ export default function CoursesPage() {
               className={`h-11 px-4 rounded-full text-sm font-semibold transition-all border ${
                 filter === f.key
                   ? 'bg-md-primary text-md-on-primary border-md-primary'
-                  : 'bg-[#1f1f1f] text-gray-400 border-[#2a2a2a] hover:border-[#3a3a3a] hover:text-white'
+                  : 'bg-md-surface-container text-md-on-surface-variant border-md-outline hover:border-md-outline-variant hover:text-md-on-surface-strong'
               }`}
             >
               {f.label}
@@ -133,10 +133,10 @@ export default function CoursesPage() {
                 <Link
                   key={course.id}
                   href={`/player/${course.id}`}
-                  className="bg-[#141414] border border-[#2a2a2a] rounded-xl overflow-hidden hover:border-[#3a3a3a] hover:bg-[#1a1a1a] transition-all duration-200 group block"
+                  className="bg-md-surface border border-md-outline rounded-xl overflow-hidden hover:border-md-outline-variant hover:bg-md-surface transition-all duration-200 group block"
                 >
                   {/* Progress bar at top */}
-                  <div className="h-1 bg-[#1f1f1f]">
+                  <div className="h-1 bg-md-surface-container">
                     <div
                       className="h-full bg-md-tertiary transition-all duration-500"
                       style={{ width: `${course.progress}%` }}
@@ -145,7 +145,7 @@ export default function CoursesPage() {
 
                   <div className="p-5">
                     <div className="flex items-start justify-between gap-3 mb-3">
-                      <h3 className="font-bold text-white text-base leading-tight group-hover:text-md-tertiary transition-colors">
+                      <h3 className="font-bold text-md-on-surface-strong text-base leading-tight group-hover:text-md-tertiary transition-colors">
                         {course.title}
                       </h3>
                       {cfg.icon}
