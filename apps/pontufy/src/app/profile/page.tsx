@@ -1,21 +1,62 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useStore } from '@/store/useStore';
 import { useUserStore } from '@/store/useUserStore';
 import { isSoundEnabled, setSoundEnabled } from '@/lib/feedback';
 import AchievementsCard from '@/components/profile/AchievementsCard';
-import { Loader2, User, Coins, Save, ShieldCheck, Building2, Volume2, VolumeX, LogOut } from 'lucide-react';
+import { useBrand } from '@/components/theme/DynamicThemeProvider';
+import { setExtendedTime, useExtendedTime } from '@/lib/accessibility-prefs';
+import { setThemePref, useThemePref } from '@/lib/theme-pref';
+import { AlertDialog } from '@/components/ui/AlertDialog';
+import { Loader2, User, Coins, Save, ShieldCheck, Building2, Volume2, VolumeX, LogOut, Wallet, Award, Network, Timer, Monitor, Sun, Moon, type LucideIcon } from 'lucide-react';
+import { ListSkeleton, LoadingRegion } from '@/components/ui/Skeleton';
+
+function PreferenceSwitch({
+  label,
+  description,
+  icon: Icon,
+  checked,
+  onChange,
+}: {
+  label: string;
+  description: string;
+  icon: LucideIcon;
+  checked: boolean;
+  onChange: (next: boolean) => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className="flex w-full items-center gap-3 py-3 text-left"
+    >
+      <Icon size={20} className={checked ? 'text-md-tertiary' : 'text-md-on-surface-muted'} aria-hidden="true" />
+      <span className="min-w-0 flex-1">
+        <span className="block text-sm font-semibold text-md-on-surface-strong">{label}</span>
+        <span className="block text-xs text-md-on-surface-muted">{description}</span>
+      </span>
+      <span aria-hidden="true" className={`relative h-6 w-10 flex-none rounded-full transition-colors ${checked ? 'bg-md-primary' : 'bg-md-outline-variant'}`}>
+        <span className={`absolute top-0.5 h-5 w-5 rounded-full transition-all ${checked ? 'left-[18px] bg-md-on-primary' : 'left-0.5 bg-white'}`} />
+      </span>
+    </button>
+  );
+}
 
 export default function ProfilePage() {
+  const brand = useBrand();
+  const extendedTime = useExtendedTime();
+  const themePref = useThemePref();
   const { data: session, status } = useSession();
   const currentUser = useStore((s) => s.currentUser);
   const { currentPoints } = useUserStore();
   const [name, setName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  const [soundEnabled, setSound] = useState(true);
+  const [soundEnabled, setSound] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
@@ -25,6 +66,17 @@ export default function ProfilePage() {
 
   const roleLabel =
     currentUser?.role === 'admin_rh' ? 'Administrador RH' : 'Colaborador';
+
+  const [confirmRevoke, setConfirmRevoke] = useState(false);
+
+  const handleRevokeAll = async () => {
+    const res = await fetch('/api/auth/revoke-all', { method: 'POST' }).catch(() => null);
+    if (res?.ok) {
+      await signOut({ callbackUrl: '/login' });
+    } else {
+      setMessage({ type: 'error', text: 'Não foi possível encerrar as sessões. Tente de novo em instantes.' });
+    }
+  };
 
   const handleSaveName = async () => {
     if (!name.trim() || name.trim().length < 2) {
@@ -54,21 +106,42 @@ export default function ProfilePage() {
 
   if (status === 'loading') {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-md-surface-dim">
-        <Loader2 className="animate-spin text-md-primary" size={36} />
-      </main>
+      <div className="min-h-screen bg-md-surface-dim pt-8 pb-12 px-4">
+        <LoadingRegion label="Carregando o perfil…" className="max-w-2xl mx-auto">
+          <ListSkeleton rows={3} />
+        </LoadingRegion>
+      </div>
     );
   }
 
   return (
-    <main className="min-h-screen pb-20 pt-24 bg-md-surface-dim">
+    <div className="min-h-screen pb-20 pt-8 bg-md-surface-dim">
       <div className="max-w-[720px] mx-auto px-6 md:px-8">
         <header className="mb-8">
-          <h1 className="text-3xl font-black text-white tracking-tight">Meu Perfil</h1>
-          <p className="text-gray-500 mt-1.5 text-sm">Gerencie suas informações pessoais.</p>
+          <h1 className="text-3xl font-black text-md-on-surface-strong tracking-tight">Meu perfil</h1>
+          <p className="text-md-on-surface-muted mt-1.5 text-sm">Gerencie suas informações pessoais.</p>
         </header>
 
         <div className="space-y-6">
+          {/* Atalhos: no celular a barra inferior leva ao Perfil, e daqui à Carteira,
+              aos Certificados e às Trilhas. */}
+          <nav aria-label="Atalhos do perfil" className="grid grid-cols-3 gap-3">
+            {[
+              { href: '/wallet', label: 'Carteira', icon: Wallet },
+              { href: '/certificados', label: 'Certificados', icon: Award },
+              { href: '/skills', label: 'Trilhas', icon: Network },
+            ].map(({ href, label, icon: Icon }) => (
+              <Link
+                key={href}
+                href={href}
+                className="flex min-h-20 flex-col items-center justify-center gap-2 rounded-xl border border-md-outline bg-md-surface p-3 text-sm font-semibold text-md-on-surface-strong transition-colors hover:bg-md-surface-container"
+              >
+                <Icon size={20} className="text-md-primary-text" aria-hidden="true" />
+                {label}
+              </Link>
+            ))}
+          </nav>
+
           {/* Identity card */}
           <section className="bg-md-surface border border-md-outline rounded-xl p-6">
             <div className="flex items-center gap-4 mb-6">
@@ -76,9 +149,9 @@ export default function ProfilePage() {
                 {session?.user?.name?.[0]?.toUpperCase() ?? <User size={28} />}
               </div>
               <div className="min-w-0">
-                <h2 className="text-lg font-bold text-white truncate">{session?.user?.name}</h2>
-                <p className="text-sm text-gray-500 truncate">{session?.user?.email}</p>
-                <span className="inline-flex items-center gap-1.5 mt-1 text-xs font-bold px-2 py-0.5 rounded-full border bg-white/5 text-gray-300 border-white/10">
+                <h2 className="text-lg font-bold text-md-on-surface-strong truncate">{session?.user?.name}</h2>
+                <p className="text-sm text-md-on-surface-muted truncate">{session?.user?.email}</p>
+                <span className="inline-flex items-center gap-1.5 mt-1 text-xs font-bold px-2 py-0.5 rounded-full border bg-md-on-surface-strong/5 text-md-on-surface border-md-on-surface-strong/10">
                   <ShieldCheck size={11} className="text-md-tertiary" />
                   {roleLabel}
                 </span>
@@ -87,36 +160,36 @@ export default function ProfilePage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="bg-md-surface-container border border-md-outline rounded-lg p-4">
-                <div className="flex items-center gap-2 text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">
-                  <Coins size={13} className="text-md-tertiary" /> Saldo de Pontos
+                <div className="flex items-center gap-2 text-md-on-surface-variant text-xs font-bold uppercase tracking-wider mb-1">
+                  <Coins size={13} className="text-md-tertiary" /> Saldo de pontos
                 </div>
                 <div className="text-2xl font-black text-md-tertiary">{currentPoints}</div>
               </div>
               <div className="bg-md-surface-container border border-md-outline rounded-lg p-4">
-                <div className="flex items-center gap-2 text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">
+                <div className="flex items-center gap-2 text-md-on-surface-variant text-xs font-bold uppercase tracking-wider mb-1">
                   <Building2 size={13} className="text-md-tertiary" /> Empresa
                 </div>
-                <div className="text-sm font-semibold text-white mt-1.5">{session?.user?.tenantId ? 'Conta corporativa' : '—'}</div>
+                <div className="text-sm font-semibold text-md-on-surface-strong mt-1.5">{brand.name ?? '—'}</div>
               </div>
             </div>
           </section>
 
           {/* Edit name */}
           <section className="bg-md-surface border border-md-outline rounded-xl p-6">
-            <h3 className="font-bold text-white mb-4">Editar Nome</h3>
+            <h2 className="font-bold text-md-on-surface-strong mb-4">Editar nome</h2>
             <div className="flex flex-col sm:flex-row gap-3">
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Seu nome completo"
-                className="flex-1 px-4 py-2.5 rounded-lg bg-md-surface-container border border-md-outline text-white placeholder-gray-600 focus:outline-none focus:border-md-primary text-sm"
+                className="flex-1 px-4 py-3 rounded-lg bg-md-surface-container border border-md-outline text-md-on-surface-strong placeholder:text-md-on-surface-muted focus:outline-none focus:border-md-focus text-sm"
               />
               <button
                 type="button"
                 onClick={handleSaveName}
                 disabled={isSaving}
-                className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg font-bold text-md-on-primary bg-md-primary hover:bg-md-primary-container transition-colors text-sm disabled:opacity-50"
+                className="flex items-center justify-center gap-2 px-5 py-3 rounded-lg font-bold text-md-on-primary bg-md-primary hover:bg-md-primary-container transition-colors text-sm disabled:opacity-50"
               >
                 {isSaving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
                 Salvar
@@ -129,42 +202,56 @@ export default function ProfilePage() {
             )}
           </section>
 
-          {/* Preferências de feedback sensorial (5.2) */}
-          <section className="bg-md-surface border border-md-outline rounded-xl p-6">
-            <h3 className="font-bold text-white mb-1">Feedback Sonoro</h3>
-            <p className="text-sm text-gray-500 mb-4">
-              Sons sutis e vibração háptica ao ganhar pontos, acertar quizzes e concluir cursos.
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                const next = !soundEnabled;
-                setSoundEnabled(next);
-                setSound(next);
-              }}
-              aria-pressed={soundEnabled}
-              className={`flex items-center justify-between w-full px-4 py-3 rounded-xl border transition-colors ${
-                soundEnabled
-                  ? 'bg-md-primary/15 border-md-primary/40 text-white'
-                  : 'bg-md-surface-container border-md-outline text-gray-400'
-              }`}
-            >
-              <span className="flex items-center gap-2 font-medium text-sm">
-                {soundEnabled ? <Volume2 size={18} className="text-md-tertiary" /> : <VolumeX size={18} />}
-                {soundEnabled ? 'Sons e vibração ativados' : 'Mudo'}
-              </span>
-              <span
-                className={`w-10 h-6 rounded-full transition-colors relative ${
-                  soundEnabled ? 'bg-md-primary' : 'bg-md-outline'
-                }`}
-              >
-                <span
-                  className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all ${
-                    soundEnabled ? 'left-[18px]' : 'left-0.5'
-                  }`}
-                />
-              </span>
-            </button>
+          {/* Preferências deste aparelho: feedback sensorial (5.2) e tempo estendido (H13) */}
+          <section className="bg-md-surface border border-md-outline rounded-xl p-6" aria-labelledby="prefs-heading">
+            <h2 id="prefs-heading" className="font-bold text-md-on-surface-strong mb-4">Preferências</h2>
+            <fieldset className="mb-4">
+              <legend className="mb-2 text-sm font-semibold text-md-on-surface-strong">Aparência</legend>
+              <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Aparência">
+                {([
+                  ['system', 'Automático', Monitor],
+                  ['light', 'Claro', Sun],
+                  ['dark', 'Escuro', Moon],
+                ] as const).map(([value, label, Icon]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    role="radio"
+                    aria-checked={themePref === value}
+                    onClick={() => setThemePref(value)}
+                    className={`flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl border px-2 py-2 text-sm font-semibold transition-colors ${
+                      themePref === value
+                        ? 'border-md-primary-text bg-md-primary/15 text-md-on-surface-strong'
+                        : 'border-md-outline text-md-on-surface-variant hover:bg-md-on-surface-strong/5'
+                    }`}
+                  >
+                    <Icon size={18} aria-hidden="true" />
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-2 text-xs text-md-on-surface-muted">Automático segue o tema do seu aparelho.</p>
+            </fieldset>
+            <div className="divide-y divide-md-outline">
+              <PreferenceSwitch
+                label="Sons e vibração"
+                description="Ao ganhar pontos, acertar quizzes e concluir cursos."
+                icon={soundEnabled ? Volume2 : VolumeX}
+                checked={soundEnabled}
+                onChange={(next) => {
+                  setSoundEnabled(next);
+                  setSound(next);
+                }}
+              />
+              <PreferenceSwitch
+                label="Tempo estendido nas batalhas"
+                description="Dobra o tempo por questão (30 segundos em vez de 15)."
+                icon={Timer}
+                checked={extendedTime}
+                onChange={setExtendedTime}
+              />
+            </div>
+            <p className="mt-3 text-xs text-md-on-surface-muted">Valem para este aparelho.</p>
           </section>
 
           {/* Conquistas (11.4) */}
@@ -172,35 +259,45 @@ export default function ProfilePage() {
 
           {/* Segurança (7.3) — revogação instantânea de sessões */}
           <section className="bg-md-surface border border-md-outline rounded-xl p-6">
-            <h3 className="font-bold text-white mb-1">Sessões Ativas</h3>
-            <p className="text-sm text-gray-500 mb-4">
+            <h2 className="font-bold text-md-on-surface-strong mb-1">Sessões ativas</h2>
+            <p className="text-sm text-md-on-surface-muted mb-4">
               Encerra todas as sessões em outros dispositivos imediatamente (útil se seu
               dispositivo for perdido ou roubado).
             </p>
             <button
               type="button"
-              onClick={async () => {
-                const res = await fetch('/api/auth/revoke-all', { method: 'POST' });
-                if (res.ok) {
-                  setMessage({ type: 'success', text: 'Todas as sessões foram encerradas.' });
-                } else {
-                  setMessage({ type: 'error', text: 'Erro ao encerrar sessões.' });
-                }
-              }}
-              className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 transition-colors text-sm"
+              onClick={() => setConfirmRevoke(true)}
+              className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-bold text-md-error bg-md-error/10 hover:bg-md-error/20 transition-colors text-sm"
             >
               <LogOut size={15} />
               Encerrar sessões em todos os dispositivos
             </button>
           </section>
 
-          <div className="text-center">
-            <Link href="/wallet" className="text-sm text-gray-400 hover:text-white transition-colors font-medium">
-              ← Ver histórico de pontos na Carteira
-            </Link>
-          </div>
+          <AlertDialog
+            open={confirmRevoke}
+            onClose={() => setConfirmRevoke(false)}
+            onConfirm={handleRevokeAll}
+            title="Encerrar todas as sessões?"
+            description="Você sai da conta em todos os dispositivos, inclusive neste. Para continuar usando o Pontufy, será preciso entrar de novo."
+            confirmLabel="Encerrar sessões"
+            destructive
+          />
+
+          {/* Ajuda e informações legais: saíram do rodapé de todas as telas (M9). */}
+          <section className="bg-md-surface border border-md-outline rounded-xl p-6" aria-labelledby="about-heading">
+            <h2 id="about-heading" className="font-bold text-md-on-surface-strong mb-2">Ajuda e termos</h2>
+            <ul className="text-sm">
+              <li><a href="mailto:ajuda@pontufy.com" className="inline-flex min-h-11 items-center text-md-primary-text hover:underline">Falar com a ajuda: ajuda@pontufy.com</a></li>
+              <li><Link href="/termos" className="inline-flex min-h-11 items-center text-md-primary-text hover:underline">Termos de uso</Link></li>
+              <li><Link href="/privacidade" className="inline-flex min-h-11 items-center text-md-primary-text hover:underline">Política de privacidade</Link></li>
+            </ul>
+            <p className="mt-3 text-xs text-md-on-surface-muted">
+              Pontufy é operado pela Mestry&apos;s Tecnologia e Consultoria em TI LTDA · CNPJ 68.027.889/0001-34
+            </p>
+          </section>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

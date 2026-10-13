@@ -69,8 +69,8 @@ export function LoginForm() {
   return (
     <div className="md-card-outlined md-elevation-3 p-8 w-full max-w-md mx-auto">
       <div className="text-center mb-8">
-        <Link href="/" className="inline-flex items-center gap-2 text-3xl font-black tracking-tight text-white mb-6">
-          <span className="text-md-primary">Pontu</span>fy
+        <Link href="/" className="inline-flex items-center min-h-11 text-3xl font-black tracking-tight text-md-on-surface-strong mb-6">
+          <span className="text-md-primary-text">Pontu</span>fy
         </Link>
         <h1 className="text-headline-sm font-bold text-md-on-surface mb-2">Entrar</h1>
         <p className="text-body-md text-md-on-surface-variant">Acesse sua conta corporativa</p>
@@ -91,7 +91,7 @@ export function LoginForm() {
             E-mail corporativo
           </label>
           <div className="relative">
-            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-variant/60 size-5 pointer-events-none" aria-hidden="true" />
+            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-muted size-5 pointer-events-none" aria-hidden="true" />
             <input
               id="email"
               name="email"
@@ -101,7 +101,7 @@ export function LoginForm() {
               disabled={isLoading}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full pl-12 pr-4 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-variant/50 focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full pl-12 pr-4 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-muted focus:outline-none focus:border-md-focus focus:ring-2 focus:ring-md-focus/40 text-body-md transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               placeholder="voce@empresa.com"
             />
           </div>
@@ -112,7 +112,7 @@ export function LoginForm() {
             Senha
           </label>
           <div className="relative">
-            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-variant/60 size-5 pointer-events-none" aria-hidden="true" />
+            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-muted size-5 pointer-events-none" aria-hidden="true" />
             <input
               id="password"
               name="password"
@@ -122,14 +122,14 @@ export function LoginForm() {
               disabled={isLoading}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full pl-12 pr-14 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-variant/50 focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full pl-12 pr-14 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-muted focus:outline-none focus:border-md-focus focus:ring-2 focus:ring-md-focus/40 text-body-md transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               placeholder="••••••••"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-              className="absolute inset-y-0 right-0 pr-4 flex items-center text-md-on-surface-variant/60 hover:text-md-on-surface transition-colors"
+              className="absolute inset-y-0 right-0 w-12 flex items-center justify-center text-md-on-surface-muted hover:text-md-on-surface transition-colors"
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
@@ -139,7 +139,7 @@ export function LoginForm() {
         <div className="flex justify-end pt-1">
           <Link
             href="/forgot-password"
-            className="text-label-lg text-md-primary hover:text-md-primary-container transition-colors"
+            className="inline-flex items-center min-h-11 text-label-lg text-md-primary-text hover:text-md-on-surface transition-colors"
           >
             Esqueceu a senha?
           </Link>
@@ -163,9 +163,13 @@ export function LoginForm() {
 
       <p className="mt-6 text-center text-body-sm text-md-on-surface-variant">
         Recebeu um convite?{' '}
-        <Link href="/register" className="font-semibold text-md-primary hover:text-md-primary-container transition-colors">
+        <Link href="/register" className="font-semibold text-md-primary-text hover:text-md-on-surface transition-colors">
           Criar minha conta
         </Link>
+      </p>
+      <p className="mt-4 flex justify-center gap-4 text-xs">
+        <Link href="/termos" className="inline-flex min-h-11 items-center text-md-on-surface-muted hover:text-md-on-surface">Termos de uso</Link>
+        <Link href="/privacidade" className="inline-flex min-h-11 items-center text-md-on-surface-muted hover:text-md-on-surface">Privacidade</Link>
       </p>
     </div>
   );

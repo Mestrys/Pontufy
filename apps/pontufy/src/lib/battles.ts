@@ -4,7 +4,7 @@ import { getTenantDb } from '@/backend/db';
 import { buildProviderChain } from '@/lib/ai-providers';
 
 // ═══════════════════════════════════════════════════════════════════════════
-// TAREFA 13 — Batalhas de Conhecimento
+// TAREFA 13 — Batalhas de conhecimento
 //  • 13.1: 5 perguntas geradas por IA sobre a trilha da empresa (fallback
 //    determinístico local se nenhum provedor estiver configurado).
 //  • 13.4: cronômetro estrito de 15s POR QUESTÃO — o servidor re-scora as
@@ -12,10 +12,13 @@ import { buildProviderChain } from '@/lib/ai-providers';
 //    rede 5s/questão). Perda de foco é reportada pelo cliente e anula o turno.
 // ═══════════════════════════════════════════════════════════════════════════
 
-export const BATTLE_QUESTIONS = 5;
-export const QUESTION_TIME_LIMIT_SECONDS = 15;
-// Tolerância total para latência de rede/UI (5s extras por questão).
-export const TURN_TIME_LIMIT_SECONDS = BATTLE_QUESTIONS * (QUESTION_TIME_LIMIT_SECONDS + 5);
+export {
+  BATTLE_QUESTIONS,
+  QUESTION_TIME_LIMIT_SECONDS,
+  TURN_TIME_LIMIT_SECONDS,
+  EXTENDED_TIME_FACTOR,
+} from '@/lib/battle-rules';
+import { BATTLE_QUESTIONS } from '@/lib/battle-rules';
 export const BATTLE_TTL_HOURS = 72;
 
 const battleQuestionSchema = z.object({

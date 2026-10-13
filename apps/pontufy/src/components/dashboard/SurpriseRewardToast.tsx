@@ -3,6 +3,12 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { triggerRewardRedemption } from "@/hooks/useApi";
+import { useToast } from '@/components/ui/Toast';
+import { friendlyApiError } from '@/lib/api-errors';
+
+// Botão de teste do Autopilot: ferramenta de review do MVP, nunca visível
+// para colaboradores. Só aparece com NEXT_PUBLIC_AUTOPILOT_DEBUG=1.
+const SHOW_AUTOPILOT_DEBUG = process.env.NEXT_PUBLIC_AUTOPILOT_DEBUG === '1';
 
 type AutopilotResponse = {
   recommendedRewardId: string;
@@ -11,6 +17,7 @@ type AutopilotResponse = {
 };
 
 export default function SurpriseRewardToast() {
+  const { toast } = useToast();
   const [data, setData] = useState<AutopilotResponse | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -39,16 +46,17 @@ export default function SurpriseRewardToast() {
 
   return (
     <>
-      {/* Botão flutuante para forçar o Autopilot (Apenas no MVP para Review) —
+      {/* Botão flutuante para forçar o Autopilot (apenas review, via flag) —
           container tonal MD3 #f7d0a9 com texto escuro (AA 9:1) */}
+      {SHOW_AUTOPILOT_DEBUG && (
       <button
         type="button"
         onClick={triggerAutopilot}
         disabled={isLoading}
-        className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-50 bg-md-highlight text-md-on-highlight px-3 sm:px-4 py-2 rounded-full font-medium shadow-lg hover:shadow-xl hover:bg-md-highlight/90 transition-all flex items-center space-x-2 text-sm"
+        className="fixed bottom-24 md:bottom-6 right-4 sm:right-6 z-50 bg-md-highlight text-md-on-highlight px-3 sm:px-4 py-2 rounded-full font-medium shadow-lg hover:shadow-xl hover:bg-md-highlight/90 transition-all flex items-center space-x-2 text-sm"
       >
         {isLoading ? (
-          <span className="animate-pulse">Analisando Perfil...</span>
+          <span className="animate-pulse">Analisando seu perfil…</span>
         ) : (
           <>
             <span>✨</span>
@@ -56,6 +64,7 @@ export default function SurpriseRewardToast() {
           </>
         )}
       </button>
+      )}
 
       <AnimatePresence>
         {isVisible && data && (
@@ -64,14 +73,14 @@ export default function SurpriseRewardToast() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="fixed bottom-32 sm:bottom-20 right-4 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-80 bg-md-highlight rounded-2xl shadow-2xl overflow-hidden border border-md-highlight"
+            className="fixed bottom-40 md:bottom-20 right-4 sm:right-6 z-50 w-[calc(100vw-2rem)] sm:w-80 bg-md-highlight rounded-2xl shadow-2xl overflow-hidden border border-md-highlight"
           >
             {/* Header / Brand Gradient Bar (acento primary #5c4152 → container) */}
             <div className="h-2 bg-gradient-to-r from-md-primary to-md-primary-container w-full"></div>
             
             <div className="p-5">
               <div className="flex justify-between items-start mb-3">
-                <h3 className="font-bold text-md-on-highlight text-lg">Oferta Relâmpago ⚡</h3>
+                <h3 className="font-bold text-md-on-highlight text-lg">Oferta relâmpago</h3>
                 <button
                   type="button"
                   onClick={() => setIsVisible(false)}
@@ -88,9 +97,9 @@ export default function SurpriseRewardToast() {
               <div className="bg-md-primary/10 border border-md-primary/20 rounded-xl p-3 mb-4 flex items-center justify-between">
                 <div>
                   <span className="text-xs text-md-on-highlight/70 block">Desconto IA:</span>
-                  <span className="font-black text-lg text-md-primary">{data.discountedPoints} pts</span>
+                  <span className="font-black text-lg text-md-primary-text">{data.discountedPoints} pts</span>
                 </div>
-                <div className="h-8 w-8 bg-md-primary rounded-full flex items-center justify-center text-white font-bold text-xs">
+                <div className="h-8 w-8 bg-md-primary rounded-full flex items-center justify-center text-md-on-primary font-bold text-xs">
                   -10%
                 </div>
               </div>
@@ -103,16 +112,17 @@ export default function SurpriseRewardToast() {
                     if (result.success && result.affiliateUrl) {
                       window.open(result.affiliateUrl, '_blank');
                     } else if (!result.success) {
-                      console.error('Autopilot redeem failed:', result.error);
+                      toast({ tone: 'error', title: 'Resgate não concluído', description: friendlyApiError(result, 'redeem') });
                     }
                   } catch (err) {
                     console.error('Autopilot redeem failed:', err);
+                    toast({ tone: 'error', title: 'Resgate não concluído', description: friendlyApiError({}, 'redeem') });
                   }
                   setIsVisible(false);
                 }}
-                className="w-full bg-md-primary text-md-on-primary py-2.5 rounded-lg font-medium hover:bg-md-primary-container transition-colors"
+                className="w-full h-11 bg-md-primary text-md-on-primary rounded-lg font-medium hover:bg-md-primary-container transition-colors"
               >
-                Resgatar Agora
+                Resgatar agora
               </button>
             </div>
           </motion.div>

@@ -25,7 +25,7 @@ export default function AdminDashboardClient() {
     Promise.all([
       fetch(`/api/admin/tenant/branding?t=${ts}`, { cache: 'no-store' }).then((r) => r.json()),
       fetch(`/api/admin/analytics?t=${ts}`, { cache: 'no-store' }).then((r) => r.json()),
-      fetch(`/api/courses?limit=50&t=${ts}`, { cache: 'no-store' }).then((r) => r.json()),
+      fetch(`/api/courses?limit=50&includeDrafts=1&t=${ts}`, { cache: 'no-store' }).then((r) => r.json()),
       fetch(`/api/rewards?limit=50&t=${ts}`, { cache: 'no-store' }).then((r) => r.json()),
     ])
       .then(([tenantData, analyticsData, coursesData, rewardsData]) => {
@@ -41,7 +41,8 @@ export default function AdminDashboardClient() {
           merged.map((c: any) => ({
             id: c.id,
             title: c.title,
-            status: c.status === 'published' ? 'Publicado' : 'Rascunho',
+            status:
+              c.status === 'published' ? 'Publicado' : c.status === 'draft' ? 'Rascunho' : 'Só neste navegador',
             enrolled: c.enrollmentCount ?? 0,
             date: new Date(c.createdAt).toLocaleDateString('pt-BR'),
           })),
@@ -64,21 +65,21 @@ export default function AdminDashboardClient() {
   const metrics = [
     {
       id: 'm1',
-      title: 'Colaboradores Ativos',
+      title: 'Colaboradores ativos',
       value: String(summary.totalUsers ?? 0),
       trend: `${summary.totalCompletions ?? 0} conclusões`,
       trendType: 'positive' as const,
     },
     {
       id: 'm2',
-      title: 'Pontos Distribuídos',
+      title: 'Pontos distribuídos',
       value: (summary.totalPointsAwarded ?? 0).toLocaleString('pt-BR'),
       trend: 'Total acumulado',
       trendType: 'neutral' as const,
     },
     {
       id: 'm3',
-      title: 'Pontos Resgatados',
+      title: 'Pontos resgatados',
       value: (summary.totalPointsRedeemed ?? 0).toLocaleString('pt-BR'),
       trend: `${rewards.filter((r) => r.active).length} recompensas ativas`,
       trendType: 'neutral' as const,
@@ -88,7 +89,7 @@ export default function AdminDashboardClient() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="animate-spin text-md-primary" size={48} />
+        <Loader2 className="animate-spin text-md-primary-text" size={48} />
       </div>
     );
   }
@@ -98,7 +99,7 @@ export default function AdminDashboardClient() {
       {/* Page Header */}
       <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <h1 className="text-headline-md font-extrabold text-md-on-surface">Painel do Gestor de RH</h1>
+          <h1 className="text-headline-md font-extrabold text-md-on-surface">Painel de RH</h1>
           <p className="text-body-md text-md-on-surface-variant mt-1">
             Bem-vindo ao centro de comando da {tenant?.name || 'empresa'}.
           </p>
@@ -132,8 +133,8 @@ export default function AdminDashboardClient() {
           <section className="md-card-outlined md-elevation-1 overflow-hidden">
             <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-md-outline flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-md-surface-container-high/50">
               <div className="flex items-center gap-2">
-                <span className="text-md-primary" style={{fontSize: '20px'}}>✨</span>
-                <h2 className="text-title-lg font-bold text-md-on-surface">Cursos Gerados pela IA</h2>
+                <span className="text-md-primary-text" style={{fontSize: '20px'}}>✨</span>
+                <h2 className="text-title-lg font-bold text-md-on-surface">Cursos</h2>
               </div>
               <a
                 href="/admin/wizard"
@@ -142,16 +143,10 @@ export default function AdminDashboardClient() {
                 + Gerar Novo Curso
               </a>
             </div>
-            <AISelectionTable courses={courses} />
+            <AISelectionTable courses={courses} onChanged={() => setReloadKey((k) => k + 1)} />
           </section>
 
-          <section className="md-card-outlined md-elevation-1 overflow-hidden">
-            <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-md-outline flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-md-surface-container-high/50">
-              <div className="flex items-center gap-2">
-                <span style={{fontSize: '20px'}}>🎁</span>
-                <h2 className="text-title-lg font-bold text-md-on-surface">Catálogo de Recompensas</h2>
-              </div>
-            </div>
+          <section id="recompensas" className="md-card-outlined md-elevation-1 overflow-hidden scroll-mt-20">
             <RewardToggleRow catalog={rewards} />
           </section>
         </div>

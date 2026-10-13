@@ -5,9 +5,9 @@ import type { TopCourse } from './types';
 const formatNumber = (value: number): string => new Intl.NumberFormat('pt-BR').format(value);
 
 const STATUS_STYLES: Record<string, string> = {
-  published: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  draft: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-  removed: 'bg-gray-500/10 text-gray-400 border-gray-500/20',
+  published: 'bg-md-tertiary/10 text-md-tertiary border-md-tertiary/20',
+  draft: 'bg-md-highlight/10 text-md-highlight border-md-highlight/20',
+  removed: 'bg-md-on-surface-variant/10 text-md-on-surface-variant border-md-on-surface-variant/20',
 };
 
 function statusStyle(status: string): string {
@@ -27,29 +27,29 @@ interface TopCoursesTableProps {
 export default function TopCoursesTable({ courses }: TopCoursesTableProps) {
   if (!courses.length) {
     return (
-      <p className="text-sm text-gray-500 py-6 text-center">
+      <p className="text-sm text-md-on-surface-muted py-6 text-center">
         Nenhum curso com conclusões registadas ainda.
       </p>
     );
   }
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Cursos mais concluídos">
       <table className="w-full text-sm">
         <thead>
-          <tr className="text-left text-xs text-gray-500 uppercase tracking-wide border-b border-[#2a2a2a]">
+          <tr className="text-left text-xs text-md-on-surface-muted uppercase tracking-wide border-b border-md-outline">
             <th className="pb-3 pr-4 font-semibold">Curso</th>
             <th className="pb-3 pr-4 font-semibold">Estado</th>
             <th className="pb-3 pr-4 font-semibold text-right">Conclusões</th>
             <th className="pb-3 pr-4 font-semibold text-right">Colaboradores</th>
-            <th className="pb-3 pr-4 font-semibold text-right">Pontos Gerados</th>
-            <th className="pb-3 font-semibold text-right">Taxa Média</th>
+            <th className="pb-3 pr-4 font-semibold text-right">Pontos gerados</th>
+            <th className="pb-3 font-semibold text-right">Taxa média</th>
           </tr>
         </thead>
         <tbody>
           {courses.map((course) => (
-            <tr key={course.id} className="border-b border-[#1f1f1f] last:border-0">
-              <td className="py-3 pr-4 text-white font-medium max-w-[280px] truncate" title={course.title}>
+            <tr key={course.id} className="border-b border-md-surface-container last:border-0">
+              <td className="py-3 pr-4 text-md-on-surface-strong font-medium max-w-[280px] truncate" title={course.title}>
                 {course.title}
               </td>
               <td className="py-3 pr-4">
@@ -59,10 +59,10 @@ export default function TopCoursesTable({ courses }: TopCoursesTableProps) {
                   {course.status}
                 </span>
               </td>
-              <td className="py-3 pr-4 text-gray-300 text-right">{formatNumber(course.completions)}</td>
-              <td className="py-3 pr-4 text-gray-300 text-right">{formatNumber(course.enrolledUsers)}</td>
-              <td className="py-3 pr-4 text-gray-300 text-right">{formatNumber(course.pointsGenerated)}</td>
-              <td className="py-3 text-gray-300 text-right">{completionRate(course)}</td>
+              <td className="py-3 pr-4 text-md-on-surface text-right">{formatNumber(course.completions)}</td>
+              <td className="py-3 pr-4 text-md-on-surface text-right">{formatNumber(course.enrolledUsers)}</td>
+              <td className="py-3 pr-4 text-md-on-surface text-right">{formatNumber(course.pointsGenerated)}</td>
+              <td className="py-3 text-md-on-surface text-right">{completionRate(course)}</td>
             </tr>
           ))}
         </tbody>

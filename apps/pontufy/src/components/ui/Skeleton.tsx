@@ -40,3 +40,77 @@ export function CatalogSkeleton({ count = 6 }: { count?: number }) {
     </div>
   );
 }
+// Contêiner de carregamento acessível: o Skeleton é aria-hidden, então quem
+// usa leitor de tela ouve "Carregando…" pela região de status.
+export function LoadingRegion({ label = 'Carregando…', className = '', children }: { label?: string; className?: string; children: React.ReactNode }) {
+  return (
+    <div role="status" aria-busy="true" className={className}>
+      <span className="sr-only">{label}</span>
+      {children}
+    </div>
+  );
+}
+
+// Lista de linhas (histórico, certificados, notificações).
+export function ListSkeleton({ rows = 5 }: { rows?: number }) {
+  return (
+    <div className="space-y-3">
+      {Array.from({ length: rows }).map((_, i) => (
+        <div key={i} className="flex items-center gap-4 bg-md-surface border border-md-outline rounded-2xl p-4">
+          <Skeleton className="size-10 rounded-full flex-shrink-0" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-4 w-2/3" />
+            <Skeleton className="h-3 w-1/3" />
+          </div>
+          <Skeleton className="h-6 w-16 rounded-full" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Início: destaque + trilhas.
+export function DashboardSkeleton() {
+  return (
+    <div className="pt-6 px-4 sm:px-8 md:px-16 space-y-8">
+      <Skeleton className="h-36 w-full rounded-2xl" />
+      <div className="space-y-4 max-w-2xl">
+        <Skeleton className="h-7 w-32 rounded-full" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-4 w-3/4" />
+        <div className="flex gap-3 pt-2">
+          <Skeleton className="h-11 w-40 rounded-xl" />
+          <Skeleton className="h-11 w-32 rounded-xl" />
+        </div>
+      </div>
+      <div className="flex gap-4 overflow-hidden">
+        {[1, 2, 3, 4].map((i) => (
+          <Skeleton key={i} className="h-40 w-64 flex-shrink-0" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Player: cabeçalho, texto da aula e barra de ações.
+export function PlayerSkeleton() {
+  return (
+    <div className="flex flex-col h-dvh bg-md-surface-dim">
+      <div className="h-14 border-b border-md-outline px-4 flex items-center gap-4">
+        <Skeleton className="h-6 w-6 rounded-full" />
+        <Skeleton className="h-4 w-1/2" />
+      </div>
+      <div className="flex-1 px-6 sm:px-10 py-8 max-w-4xl space-y-4">
+        <Skeleton className="h-3 w-24" />
+        <Skeleton className="h-8 w-2/3" />
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+          <Skeleton key={i} className={`h-4 ${i % 3 === 0 ? 'w-2/3' : 'w-full'}`} />
+        ))}
+      </div>
+      <div className="border-t border-md-outline px-4 sm:px-10 py-4 flex gap-3">
+        <Skeleton className="h-11 w-11" />
+        <Skeleton className="h-11 flex-1 max-w-md" />
+      </div>
+    </div>
+  );
+}

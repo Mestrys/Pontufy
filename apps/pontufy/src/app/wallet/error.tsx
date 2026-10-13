@@ -5,7 +5,7 @@ import { ErrorState } from '@/components/ui/ErrorState';
 export default function WalletError({ reset }: { error: Error; reset: () => void }) {
   return (
     <ErrorState
-      title="Erro ao carregar a Carteira"
+      title="Não foi possível carregar a carteira"
       description="Algo deu errado. Tente novamente."
       reset={reset}
     />

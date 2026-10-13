@@ -53,7 +53,7 @@ export default async function SuperAdminPage() {
     <main className="min-h-screen bg-md-surface-dim flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-5xl">
         <header className="text-center mb-12">
-          <ShieldCheck className="text-md-primary mx-auto mb-4" size={48} />
+          <ShieldCheck className="text-md-primary-text mx-auto mb-4" size={48} />
           <h1 className="text-headline-md font-extrabold text-md-on-surface mb-2">Pontufy Platform Console</h1>
           <p className="text-body-lg text-md-on-surface-variant">
             Bem-vindo, <strong className="text-md-on-surface">{session.user.email}</strong>
@@ -69,10 +69,10 @@ export default async function SuperAdminPage() {
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
-                  <div className="p-3 rounded-xl text-md-primary bg-md-primary-container/10 mb-4">
+                  <div className="p-3 rounded-xl text-md-on-primary-container bg-md-primary-container/10 mb-4">
                     {card.icon}
                   </div>
-                  <h2 className="text-title-lg font-bold text-md-on-surface mb-2 group-hover:text-md-primary transition-colors">
+                  <h2 className="text-title-lg font-bold text-md-on-surface mb-2 group-hover:text-md-primary-text transition-colors">
                     {card.title}
                   </h2>
                   <p className="text-body-md text-md-on-surface-variant mb-4">{card.description}</p>

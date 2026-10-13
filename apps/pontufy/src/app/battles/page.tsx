@@ -1,11 +1,13 @@
 'use client';
+import Link from 'next/link';
 
 import { useEffect, useState } from 'react';
 import { Swords, Users, Loader2, Hourglass, CheckCircle2, XCircle } from 'lucide-react';
 import BattleArena from '@/components/battles/BattleArena';
+import { Dialog } from '@/components/ui/Dialog';
 import LeaderboardCard from '@/components/battles/LeaderboardCard';
 
-// TAREFA 13 — Batalhas de Conhecimento: desafio 1x1 assíncrono (13.1),
+// TAREFA 13 — Batalhas de conhecimento: desafio 1x1 assíncrono (13.1),
 // ranking interdepartamental (13.2) e bônus coletivo (13.5).
 
 interface BattleView {
@@ -36,6 +38,7 @@ export default function BattlesPage() {
   const [selectedOpponent, setSelectedOpponent] = useState('');
   const [creating, setCreating] = useState(false);
   const [activeBattleId, setActiveBattleId] = useState<string | null>(null);
+  const [battleLocked, setBattleLocked] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
 
@@ -107,26 +110,27 @@ export default function BattlesPage() {
   };
 
   return (
-    <main className="min-h-screen pb-20 pt-24 bg-md-surface-dim">
+    <div className="min-h-screen pb-20 pt-8 bg-md-surface-dim">
       <div className="max-w-5xl mx-auto px-6 md:px-8">
         <header className="mb-8">
-          <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
-            <Swords className="text-md-primary" size={28} />
-            Batalhas de Conhecimento
+          <h1 className="text-3xl font-black text-md-on-surface-strong tracking-tight flex items-center gap-3">
+            <Swords className="text-md-primary-text" size={28} />
+            Batalhas de conhecimento
           </h1>
-          <p className="text-gray-500 mt-1.5 text-sm">
+          <p className="text-md-on-surface-muted mt-1.5 text-sm">
             Desafie um colega para um duelo de 5 questões com 15 segundos cada — seus acertos
-            alimentam o ranking do seu departamento.
+            alimentam o ranking do seu departamento. Precisa de mais tempo? Ative o{' '}
+            <Link href="/profile" className="text-md-primary-text underline underline-offset-2">tempo estendido no Perfil</Link>.
           </p>
         </header>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3 rounded-lg text-center font-medium mb-4">
+          <div className="bg-md-error/10 border border-md-error/20 text-md-error text-sm p-3 rounded-lg text-center font-medium mb-4">
             {error}
           </div>
         )}
         {notice && (
-          <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm p-3 rounded-lg text-center font-medium mb-4">
+          <div className="bg-md-tertiary/10 border border-md-tertiary/20 text-md-tertiary text-sm p-3 rounded-lg text-center font-medium mb-4">
             {notice}
           </div>
         )}
@@ -135,16 +139,17 @@ export default function BattlesPage() {
           {/* Coluna principal: criar desafio + lista */}
           <div className="lg:col-span-3 space-y-6">
             {/* Criação de desafio */}
-            <section className="bg-black/20 border border-white/10 rounded-2xl p-5">
-              <h2 className="text-lg font-black text-white tracking-tight flex items-center gap-2 mb-4">
-                <Users size={20} className="text-md-primary" />
+            <section className="bg-md-surface-dim border border-md-on-surface-strong/10 rounded-2xl p-5">
+              <h2 className="text-lg font-black text-md-on-surface-strong tracking-tight flex items-center gap-2 mb-4">
+                <Users size={20} className="text-md-primary-text" />
                 Novo duelo
               </h2>
               <div className="flex gap-3">
                 <select
+                  aria-label="Colega para desafiar"
                   value={selectedOpponent}
                   onChange={(e) => setSelectedOpponent(e.target.value)}
-                  className="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-md-primary"
+                  className="flex-1 bg-md-surface-container border rounded-xl px-4 py-3 text-sm text-md-on-surface-strong focus:outline-none focus:border-md-focus"
                 >
                   <option value="">Escolha um colega…</option>
                   {colleagues.map((c) => (
@@ -157,29 +162,29 @@ export default function BattlesPage() {
                 <button
                   onClick={handleCreate}
                   disabled={!selectedOpponent || creating}
-                  className="px-6 py-3 rounded-xl bg-md-primary text-black font-bold text-sm hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+                  className="px-6 py-3 rounded-xl bg-md-primary text-md-on-primary font-bold text-sm hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
                 >
                   {creating ? <Loader2 size={16} className="animate-spin mx-auto" /> : 'Desafiar'}
                 </button>
               </div>
-              <p className="text-[11px] text-gray-500 mt-3">
+              <p className="text-xs text-md-on-surface-muted mt-3">
                 O desafiante responde primeiro; o oponente recebe as mesmas 5 questões depois.
                 Cada acerto vale 5 pontos para o departamento. Desafio expira em 72h.
               </p>
             </section>
 
             {/* Lista de batalhas */}
-            <section className="bg-black/20 border border-white/10 rounded-2xl p-5">
-              <h2 className="text-lg font-black text-white tracking-tight flex items-center gap-2 mb-4">
-                <Hourglass size={20} className="text-md-primary" />
+            <section className="bg-md-surface-dim border border-md-on-surface-strong/10 rounded-2xl p-5">
+              <h2 className="text-lg font-black text-md-on-surface-strong tracking-tight flex items-center gap-2 mb-4">
+                <Hourglass size={20} className="text-md-primary-text" />
                 Meus duelos
               </h2>
               {!battles ? (
                 <div className="flex justify-center py-10">
-                  <Loader2 className="animate-spin text-md-primary" size={26} />
+                  <Loader2 className="animate-spin text-md-primary-text" size={26} />
                 </div>
               ) : battles.length === 0 ? (
-                <p className="text-gray-500 text-sm text-center py-8">
+                <p className="text-md-on-surface-muted text-sm text-center py-8">
                   Nenhuma batalha ainda. Lance o primeiro desafio!
                 </p>
               ) : (
@@ -190,29 +195,30 @@ export default function BattlesPage() {
                     return (
                       <div
                         key={b.id}
-                        className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3"
+                        className="flex items-center gap-3 rounded-xl border border-md-on-surface-strong/10 bg-md-on-surface-strong/5 px-4 py-3"
                       >
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm font-bold text-white truncate">
+                          <p className="text-sm font-bold text-md-on-surface-strong truncate">
                             {b.challengerName}
-                            <span className="text-gray-500 font-normal mx-2">vs</span>
+                            <span className="text-md-on-surface-muted font-normal mx-2">vs</span>
                             {b.opponentName}
                           </p>
-                          <p className="text-xs text-gray-500 mt-0.5">
+                          <p className="text-xs text-md-on-surface-muted mt-0.5">
                             {statusLabel(b)}
                             {expired && !b.status.includes('completed') ? ' · expirado' : ''}
                           </p>
                         </div>
                         {b.status === 'completed' ? (
                           b.winnerId ? (
-                            <CheckCircle2 size={20} className="text-md-primary shrink-0" />
+                            <CheckCircle2 size={20} className="text-md-primary-text shrink-0" />
                           ) : (
-                            <XCircle size={20} className="text-gray-500 shrink-0" />
+                            <XCircle size={20} className="text-md-on-surface-muted shrink-0" />
                           )
                         ) : playable ? (
                           <button
                             onClick={() => setActiveBattleId(b.id)}
-                            className="px-4 py-2 rounded-full bg-md-primary text-black text-xs font-bold hover:opacity-90 transition shrink-0"
+                            type="button"
+                            className="h-11 px-5 rounded-full bg-md-primary text-md-on-primary text-sm font-bold hover:bg-md-primary-container transition-colors shrink-0"
                           >
                             Jogar turno
                           </button>
@@ -233,17 +239,26 @@ export default function BattlesPage() {
       </div>
 
       {/* Arena de duelo (timer 15s + detecção de foco) */}
-      {activeBattleId && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-md-surface-dim border border-white/10 rounded-2xl p-6 relative">
-            <BattleArena
-              battleId={activeBattleId}
-              onClose={() => setActiveBattleId(null)}
-              onFinished={load}
-            />
-          </div>
-        </div>
-      )}
-    </main>
+      {/* Durante as perguntas o duelo não fecha (Escape e fundo ficam
+          inativos): sair no meio anularia o turno sem aviso. */}
+      <Dialog
+        open={!!activeBattleId}
+        onClose={() => setActiveBattleId(null)}
+        dismissible={!battleLocked}
+        ariaLabel="Duelo"
+        zIndexClassName="z-50"
+        backdropClassName="bg-black/80 backdrop-blur-sm"
+        className="w-full max-w-3xl max-h-[90dvh] overflow-y-auto bg-md-surface-dim border border-md-on-surface-strong/10 rounded-2xl p-6"
+      >
+        {activeBattleId && (
+          <BattleArena
+            battleId={activeBattleId}
+            onClose={() => setActiveBattleId(null)}
+            onFinished={load}
+            onLockChange={setBattleLocked}
+          />
+        )}
+      </Dialog>
+    </div>
   );
 }

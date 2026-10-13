@@ -141,7 +141,7 @@ export default function AdminSkillsClient() {
         <div className="flex items-center gap-3 sm:gap-4">
           <div>
             <h1 className="text-headline-md font-extrabold text-md-on-surface flex items-center gap-2">
-              <TreePine className="text-md-primary" size={28} /> Trilhas de Competência
+              <TreePine className="text-md-primary-text" size={28} /> Trilhas
             </h1>
             <p className="text-body-md text-md-on-surface-variant mt-1">
               Crie competências corporativas e vincule nós de PDI ao desenvolvimento individual dos colaboradores.
@@ -164,26 +164,28 @@ export default function AdminSkillsClient() {
 
       {loading ? (
         <div className="flex justify-center py-16">
-          <Loader2 className="animate-spin text-md-primary" size={26} />
+          <Loader2 className="animate-spin text-md-primary-text" size={26} />
         </div>
       ) : (
         <>
           {/* ── Nova competência ─────────────────────────────────────── */}
           <section className="md-card-outlined md-elevation-1 p-6">
             <h2 className="text-label-lg font-bold text-md-on-surface uppercase tracking-wider mb-5 flex items-center gap-2">
-              <Plus size={18} className="text-md-primary" /> Nova Competência
+              <Plus size={18} className="text-md-primary-text" /> Nova Competência
             </h2>
             <div className="grid sm:grid-cols-4 gap-3 mb-4">
               <input
+                aria-label="Nome da competência"
                 value={skillName}
                 onChange={(e) => setSkillName(e.target.value)}
                 placeholder="Ex.: Liderança"
-                className="sm:col-span-2 px-4 py-3 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-variant/50 focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
+                className="sm:col-span-2 px-4 py-3 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-muted focus:outline-none focus:border-md-focus focus:ring-2 focus:ring-md-focus/40 text-body-md transition-colors"
               />
               <select
+                aria-label="Categoria"
                 value={skillCategory}
                 onChange={(e) => setSkillCategory(e.target.value)}
-                className="px-4 py-3 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
+                className="px-4 py-3 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface focus:outline-none focus:border-md-focus focus:ring-2 focus:ring-md-focus/40 text-body-md transition-colors"
               >
                 <option value="leadership">Liderança</option>
                 <option value="compliance">Compliance</option>
@@ -194,16 +196,17 @@ export default function AdminSkillsClient() {
                 <option value="general">Geral</option>
               </select>
               <select
+                aria-label="Nível-alvo"
                 value={targetLevel}
                 onChange={(e) => setTargetLevel(Number(e.target.value))}
-                className="px-4 py-3 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
+                className="px-4 py-3 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface focus:outline-none focus:border-md-focus focus:ring-2 focus:ring-md-focus/40 text-body-md transition-colors"
               >
                 {[3, 4, 5].map((l) => (
                   <option key={l} value={l}>Nível-alvo {l}</option>
                 ))}
               </select>
             </div>
-            <p className="text-body-sm text-md-on-surface-variant/60 mb-4">
+            <p className="text-body-sm text-md-on-surface-muted mb-4">
               Os nós da árvore são criados ao vincular cursos existentes — os primeiros nós ficam
               disponíveis automaticamente; os seguintes exigem ≥ 80% no pré-requisito.
             </p>
@@ -221,11 +224,11 @@ export default function AdminSkillsClient() {
           {/* ── Trilhas existentes ───────────────────────────────────── */}
           <section className="md-card-outlined md-elevation-1 p-6">
             <h2 className="text-label-lg font-bold text-md-on-surface uppercase tracking-wider mb-5 flex items-center gap-2">
-              <BookOpen size={18} className="text-md-primary" /> Trilhas Publicadas
+              <BookOpen size={18} className="text-md-primary-text" /> Trilhas Publicadas
             </h2>
             {skills.length === 0 ? (
               <div className="text-center py-12">
-                <TreePine size={48} className="mx-auto text-md-on-surface-variant/30 mb-4" />
+                <TreePine size={48} className="mx-auto text-md-on-surface-muted mb-4" aria-hidden="true" />
                 <p className="text-body-md text-md-on-surface-variant">Nenhuma competência criada ainda.</p>
               </div>
             ) : (
@@ -238,13 +241,13 @@ export default function AdminSkillsClient() {
                         {s.category}
                       </span>
                     </div>
-                    <p className="text-body-sm text-md-on-surface-variant/60 mb-3">{s.nodes.length} nós · nível-alvo {s.targetLevel}</p>
+                    <p className="text-body-sm text-md-on-surface-muted mb-3">{s.nodes.length} nós · nível-alvo {s.targetLevel}</p>
                     <div className="flex flex-wrap gap-1.5">
                       {s.nodes.map((n) => (
                         <span
                           key={n.id}
                           title={`${n.title}${n.prerequisiteId ? ' (requer pré-requisito)' : ' (raiz)'}`}
-                          className="text-label-sm font-mono text-md-on-surface-variant/60 bg-md-surface-container border border-md-outline rounded px-2 py-0.5 truncate max-w-[120px]"
+                          className="text-label-sm font-mono text-md-on-surface-muted bg-md-surface-container border border-md-outline rounded px-2 py-0.5 truncate max-w-[120px]"
                         >
                           {n.title.length > 14 ? `${n.title.slice(0, 13)}…` : n.title}
                         </span>
@@ -259,13 +262,14 @@ export default function AdminSkillsClient() {
           {/* ── PDI ──────────────────────────────────────────────────── */}
           <section className="md-card-outlined md-elevation-1 p-6">
             <h2 className="text-label-lg font-bold text-md-on-surface uppercase tracking-wider mb-5 flex items-center gap-2">
-              <Target size={18} className="text-md-primary" /> Plano de Desenvolvimento Individual
+              <Target size={18} className="text-md-primary-text" /> Plano de Desenvolvimento Individual
             </h2>
             <div className="grid sm:grid-cols-3 gap-3 mb-4">
               <select
+                aria-label="Colaborador"
                 value={pdiUserId}
                 onChange={(e) => setPdiUserId(e.target.value)}
-                className="px-4 py-3 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
+                className="px-4 py-3 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface focus:outline-none focus:border-md-focus focus:ring-2 focus:ring-md-focus/40 text-body-md transition-colors"
               >
                 <option value="">Colaborador…</option>
                 {users.map((u) => (
@@ -275,9 +279,10 @@ export default function AdminSkillsClient() {
                 ))}
               </select>
               <select
+                aria-label="Nó da árvore de habilidades"
                 value={pdiNodeId}
                 onChange={(e) => setPdiNodeId(e.target.value)}
-                className="px-4 py-3 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
+                className="px-4 py-3 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface focus:outline-none focus:border-md-focus focus:ring-2 focus:ring-md-focus/40 text-body-md transition-colors"
               >
                 <option value="">Nó da árvore…</option>
                 {skills.flatMap((s) =>
@@ -301,15 +306,15 @@ export default function AdminSkillsClient() {
 
             {pdis.length > 0 && (
               <div className="mt-5">
-                <p className="text-label-sm text-md-on-surface-variant/60 uppercase tracking-wider font-semibold mb-3">PDIs ativos</p>
+                <p className="text-label-sm text-md-on-surface-muted uppercase tracking-wider font-semibold mb-3">PDIs ativos</p>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {pdis.map((p, i) => (
                     <div key={`${p.userId}-${p.nodeId}-${i}`} className="flex items-center justify-between bg-md-surface-container border border-md-outline rounded-xl px-4 py-3 text-body-sm">
                       <div>
                         <span className="font-semibold text-md-on-surface">{p.userName}</span>
-                        <span className="text-md-on-surface-variant/60 ml-2">→ {p.skillName}: {p.nodeTitle}</span>
+                        <span className="text-md-on-surface-muted ml-2">→ {p.skillName}: {p.nodeTitle}</span>
                       </div>
-                        <span className="text-label-sm text-md-on-surface-variant/50">{new Date(p.createdAt).toLocaleDateString('pt-BR')}</span>
+                        <span className="text-label-sm text-md-on-surface-muted">{new Date(p.createdAt).toLocaleDateString('pt-BR')}</span>
                     </div>
                   ))}
                 </div>

@@ -8,16 +8,16 @@
  *   quando "Google Sans Flex"/"Google Sans" estiverem disponíveis.
  * - Shape scale M3: xs 4dp · sm 8dp · md/lg 12dp · xl 16dp · 2xl/3xl 28dp · full (pill)
  * - Elevação M3: níveis 0–5 (0dp = shadow-none) mapeados nos tokens shadow-* do Tailwind
- * - Cores: paleta MD3 (tokens md-*) + dark surfaces; white-label via --brand-*
+ * - Cores: paleta MD3 (tokens md-*) (tema escuro e claro); white-label sobrescreve md-primary*, md-primary-text e md-secondary
  */
 
 @theme {
   --font-sans: "Google Sans Flex", "Google Sans", var(--font-roboto), "Roboto", sans-serif;
 
-  /* White-Label dinâmico: valores padrão injetados em runtime pelo
-     DynamicThemeProvider (nunca aceitar input do tenant sem sanitização). */
-  --brand-primary: #10b981;
-  --brand-accent: #8b5cf6;
+  /* White-label: o DynamicThemeProvider sobrescreve no <html> os tokens
+     md-primary, md-primary-container, on-primary(-container), md-primary-text
+     e md-secondary com valores derivados da cor do cliente e já ajustados
+     para contraste (lib/branding.ts → deriveBrandTheme). */
 
   /* ── MD3 palette Pontufy (tokens semânticos) ────────────────────────────────
      Primary #5c4152 · Primary Container/Hover #b4585d · Secondary #d97f76
@@ -40,10 +40,28 @@
   --color-md-surface-variant: #2a2a2a;
   --color-md-on-surface: #e5e5e5;
   --color-md-on-surface-variant: #a3a3a3;
+  /* Texto de maior ênfase (títulos, valores); branco no escuro, quase preto no claro. */
+  --color-md-on-surface-strong: #ffffff;
+  /* Texto sobre foto, vídeo ou véu escuro: branco nos dois temas. */
+  --color-on-media: #ffffff;
   --color-md-outline: #2a2a2a;
   --color-md-outline-variant: #3a3a3a;
   --color-md-error: #f87171;
   --color-md-on-error: #1c0a0a;
+
+  /* Papéis de texto e estado com contraste medido (WCAG AA ≥ 4,5:1 em
+     #141414 e #1f1f1f). md-primary (#5c4152) é só preenchimento: como texto
+     fica em ~2:1. Para texto/ícone na cor da marca use md-primary-text. */
+  --color-md-on-surface-muted: #949494;   /* metadados: 6,07:1 em #141414 */
+  --color-md-primary-text: #d99bb8;       /* links e destaques: 8,19:1 */
+  --color-md-focus: #f7d0a9;              /* anel de foco: 12,76:1 */
+  --color-md-field-border: #636363;       /* borda de campo: 3,07:1 */
+
+  /* Containers tonais (sólidos; aceitam /NN para tingir a superfície) */
+  --color-md-tertiary-container: #2f4a3b;
+  --color-md-on-tertiary-container: #cfe3d6;
+  --color-md-secondary-container: #5a2e2a;
+  --color-md-on-secondary-container: #f6d5d1;
 
   /* M3 elevation levels 1–5 (tokens canônicos solicitados; mapeiam as
      sombras shadow-xs..2xl acima — 0dp = shadow-none/--shadow-2xs). */
@@ -53,17 +71,6 @@
   --md-elevation-4: 0 2px 3px 0 rgb(0 0 0 / 0.30), 0 6px 10px 4px rgb(0 0 0 / 0.15);
   --md-elevation-5: 0 4px 4px 0 rgb(0 0 0 / 0.30), 0 8px 12px 6px rgb(0 0 0 / 0.15);
 
-  --color-brand-bg: #0a0a0a;
-  --color-brand-surface: #141414;
-  --color-brand-raised: #1f1f1f;
-  --color-brand-border: #2a2a2a;
-  --color-brand-gray: #0a0a0a;
-  --color-brand-slate: #f1f5f9;
-  --color-brand-text: #737373;
-  --color-brand-muted: #525252;
-  --color-brand-accent: #10b981;
-  --color-brand-lavender: #10b981;
-  --color-brand-mint: #34d399;
 
   /* M3 shape scale (corner radius) */
   --radius: 0.5rem;
@@ -91,23 +98,138 @@
   --ease-emphasized: cubic-bezier(0.05, 0.7, 0.1, 1);
 }
 
-@layer base {
-  *, *::before, *::after {
-    border-color: #2a2a2a;
-  }
-  body {
-    background-color: #0a0a0a;
-    color: #e5e5e5;
-    @apply font-sans antialiased;
-  }
-  ::selection {
-    background: #10b981;
-    color: #fff;
+/* ── Tema claro (M1) ───────────────────────────────────────────────────────
+   Mesmos papéis do escuro, valores medidos com contrastRatio (lib/branding):
+   texto ≥ 4,5:1 sobre a superfície mais escura do claro (#e7e4e9), foco e
+   borda de campo ≥ 3:1. Os preenchimentos de estado (tertiary, highlight,
+   error) escurecem e o texto sobre eles fica branco.
+   Vale com data-theme="light" (escolha no Perfil) ou, no modo automático,
+   quando o sistema está claro. A marca do cliente é aplicada por
+   DynamicThemeProvider depois destes valores. */
+:root {
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --color-md-surface-dim: #f5f4f6;
+  --color-md-surface: #ffffff;
+  --color-md-surface-container: #f0eef1;
+  --color-md-surface-container-high: #e7e4e9;
+  --color-md-surface-variant: #e7e4e9;
+  --color-md-outline: #e1dde3;
+  --color-md-outline-variant: #cbc6ce;
+  --color-md-on-surface: #1d1b1e;
+  --color-md-on-surface-strong: #121113;
+  --color-md-on-surface-variant: #4a454e;
+  --color-md-on-surface-muted: #5e5963;
+  --color-md-primary: #5c4152;
+  --color-md-on-primary: #ffffff;
+  --color-md-primary-container: #4a3342;
+  --color-md-on-primary-container: #ffffff;
+  --color-md-primary-text: #7a3d60;
+  --color-md-secondary: #9a4038;
+  --color-md-on-secondary: #ffffff;
+  --color-md-tertiary: #2b6648;
+  --color-md-on-tertiary: #ffffff;
+  --color-md-highlight: #855000;
+  --color-md-on-highlight: #ffffff;
+  --color-md-error: #b3261e;
+  --color-md-on-error: #ffffff;
+  --color-md-focus: #8a3d68;
+  --color-md-field-border: #8c8691;
+  --color-md-tertiary-container: #cfe6d8;
+  --color-md-on-tertiary-container: #0f3a25;
+  --color-md-secondary-container: #f6d9d5;
+  --color-md-on-secondary-container: #5a1e18;
+  --color-blue-300: #1d4ed8;
+  --color-blue-400: #1d4ed8;
+  --color-purple-300: #7e22ce;
+  --color-purple-400: #7e22ce;
+  --color-violet-300: #6d28d9;
+  --color-violet-400: #6d28d9;
+  --color-orange-400: #c2410c;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --color-md-surface-dim: #f5f4f6;
+    --color-md-surface: #ffffff;
+    --color-md-surface-container: #f0eef1;
+    --color-md-surface-container-high: #e7e4e9;
+    --color-md-surface-variant: #e7e4e9;
+    --color-md-outline: #e1dde3;
+    --color-md-outline-variant: #cbc6ce;
+    --color-md-on-surface: #1d1b1e;
+    --color-md-on-surface-strong: #121113;
+    --color-md-on-surface-variant: #4a454e;
+    --color-md-on-surface-muted: #5e5963;
+    --color-md-primary: #5c4152;
+    --color-md-on-primary: #ffffff;
+    --color-md-primary-container: #4a3342;
+    --color-md-on-primary-container: #ffffff;
+    --color-md-primary-text: #7a3d60;
+    --color-md-secondary: #9a4038;
+    --color-md-on-secondary: #ffffff;
+    --color-md-tertiary: #2b6648;
+    --color-md-on-tertiary: #ffffff;
+    --color-md-highlight: #855000;
+    --color-md-on-highlight: #ffffff;
+    --color-md-error: #b3261e;
+    --color-md-on-error: #ffffff;
+    --color-md-focus: #8a3d68;
+    --color-md-field-border: #8c8691;
+    --color-md-tertiary-container: #cfe6d8;
+    --color-md-on-tertiary-container: #0f3a25;
+    --color-md-secondary-container: #f6d9d5;
+    --color-md-on-secondary-container: #5a1e18;
+    --color-blue-300: #1d4ed8;
+    --color-blue-400: #1d4ed8;
+    --color-purple-300: #7e22ce;
+    --color-purple-400: #7e22ce;
+    --color-violet-300: #6d28d9;
+    --color-violet-400: #6d28d9;
+    --color-orange-400: #c2410c;
   }
 }
 
+@layer base {
+  *, *::before, *::after {
+    border-color: var(--color-md-outline);
+  }
+  body {
+    background-color: var(--color-md-surface-dim);
+    color: var(--color-md-on-surface);
+    @apply font-sans antialiased;
+  }
+  ::selection {
+    background: var(--color-md-primary-container);
+    color: var(--color-md-on-primary-container);
+  }
+  /* Foco de teclado único e visível em toda a aplicação. Não remova com
+     focus:outline-none; campos podem trocar por focus:border-md-focus. */
+  :focus-visible {
+    outline: 2px solid var(--color-md-focus);
+    outline-offset: 2px;
+  }
+}
+
+/* Borda de campo de formulário (3:1 contra a superfície). Fora de @layer de
+   propósito: precisa vencer o border-md-outline (#2a2a2a, 1,28:1) dos
+   utilitários; o estado de foco continua com o utilitário do componente. */
+:where(input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="hidden"]), select, textarea):not(:focus) {
+  border-color: var(--color-md-field-border);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [class*="animate-[fadeIn"] { animation: none; }
+}
+
 @layer components {
-  /* Botões M3: base comum (pill, 40dp, label-large) + state layer via ::after */
+  /* Botões M3: base comum (pill, 44px de alvo, label-large) + state layer via ::after */
   .md-btn {
     position: relative;
     isolation: isolate;
@@ -116,7 +238,7 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    height: 2.5rem;
+    height: 2.75rem;
     padding-inline: 1.5rem;
     border-radius: 9999px;
     font-size: 0.875rem;
@@ -138,25 +260,26 @@
   .md-btn:active::after { opacity: 0.12; }
   .md-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-  .md-btn-filled { background-color: #5c4152; color: #fff; }
-  .md-btn-filled:hover { background-color: #b4585d; box-shadow: var(--shadow-sm); }
-  .md-btn-tonal { background-color: rgb(217 127 118 / 0.15); color: #d97f76; }
-  .md-btn-outlined { border: 1px solid #2a2a2a; color: #b4585d; background: transparent; }
-  .md-btn-text { color: #b4585d; background: transparent; padding-inline: 0.75rem; }
+  /* Leem os tokens para acompanhar a marca do cliente (white-label). */
+  .md-btn-filled { background-color: var(--color-md-primary); color: var(--color-md-on-primary); }
+  .md-btn-filled:hover { background-color: var(--color-md-primary-container); color: var(--color-md-on-primary-container); box-shadow: var(--shadow-sm); }
+  .md-btn-tonal { background-color: color-mix(in srgb, var(--color-md-secondary) 15%, transparent); color: var(--color-md-secondary); }
+  .md-btn-outlined { border: 1px solid var(--color-md-field-border); color: var(--color-md-primary-text); background: transparent; }
+  .md-btn-text { color: var(--color-md-primary-text); background: transparent; padding-inline: 0.75rem; }
 
   /* Cards M3 sobre a paleta atual */
   .md-card-elevated {
-    background-color: #141414;
+    background-color: var(--color-md-surface);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
   }
   .md-card-outlined {
-    background-color: #141414;
-    border: 1px solid #2a2a2a;
+    background-color: var(--color-md-surface);
+    border: 1px solid var(--color-md-outline);
     border-radius: var(--radius-md);
   }
   .md-card-filled {
-    background-color: #1f1f1f;
+    background-color: var(--color-md-surface-container);
     border-radius: var(--radius-md);
   }
 }
@@ -194,40 +317,8 @@
   .text-body-sm { font-size: 0.75rem; line-height: 1rem; letter-spacing: 0.033333em; }
   .text-label-lg { font-size: 0.875rem; line-height: 1.25rem; letter-spacing: 0.00714em; font-weight: 600; }
   .text-label-md { font-size: 0.75rem; line-height: 1rem; letter-spacing: 0.041666em; font-weight: 600; }
-  .text-label-sm { font-size: 0.6875rem; line-height: 1rem; letter-spacing: 0.045454em; font-weight: 600; }
+  .text-label-sm { font-size: 0.75rem; line-height: 1rem; letter-spacing: 0.041666em; font-weight: 600; }
 
-  .bg-gradient-pontufy {
-    background: linear-gradient(135deg, var(--brand-primary, #10b981) 0%, #059669 100%);
-  }
-  /* Gradiente de marca (white-label). Antes referenciado por
-     SurpriseRewardToast e marketplace/CheckoutDrawer sem definição — agora
-     resolvido; falha silenciosa eliminada. */
-  .bg-gradient-brand {
-    background: linear-gradient(
-      135deg,
-      var(--brand-primary, #10b981) 0%,
-      var(--brand-accent, #8b5cf6) 100%
-    );
-  }
-  .text-gradient-pontufy {
-    background-image: linear-gradient(135deg, var(--brand-primary, #10b981) 0%, var(--brand-accent, #8b5cf6) 100%);
-    @apply bg-clip-text text-transparent;
-  }
-  .bg-brand-primary {
-    background-color: var(--brand-primary, #10b981);
-  }
-  .bg-brand-accent {
-    background-color: var(--brand-accent, #8b5cf6);
-  }
-  .text-brand-primary {
-    color: var(--brand-primary, #10b981);
-  }
-  .text-brand-accent {
-    color: var(--brand-accent, #8b5cf6);
-  }
-  .border-brand-primary {
-    border-color: var(--brand-primary, #10b981);
-  }
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
   }
@@ -254,7 +345,7 @@
     -webkit-backdrop-filter: blur(12px);
   }
   .card-dark {
-    background: #141414;
-    border: 1px solid #2a2a2a;
+    background: var(--color-md-surface);
+    border: 1px solid var(--color-md-outline);
   }
 }

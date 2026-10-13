@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { LESSON_ORDER } from '@/lib/lesson-order';
 import { getSessionContext } from '@/backend/session';
 import { getTenantDb } from '@/backend/db';
 
@@ -12,7 +13,7 @@ export async function GET() {
 
     const courses = await db.course.findMany({
       where: { status: 'published' },
-      include: { lessons: { select: { id: true } } },
+      include: { lessons: { select: { id: true, title: true }, orderBy: LESSON_ORDER } },
       orderBy: { createdAt: 'desc' },
     });
 
@@ -20,10 +21,12 @@ export async function GET() {
 
     const completions = await db.lessonCompletion.findMany({
       where: { userId, lessonId: { in: lessonIds } },
-      select: { lessonId: true },
+      select: { lessonId: true, createdAt: true },
     });
 
     const completedIds = new Set(completions.map((c) => c.lessonId));
+    // Última atividade por aula: ordena "Continuar" pelo curso mexido mais recentemente.
+    const completedAt = new Map(completions.map((c) => [c.lessonId, c.createdAt.getTime()]));
 
     const enriched = courses.map((course: any) => {
       const totalLessons = course.lessons.length;
@@ -34,6 +37,9 @@ export async function GET() {
       if (completedLessons > 0 && completedLessons < totalLessons) status = 'in_progress';
       else if (completedLessons === totalLessons && totalLessons > 0) status = 'completed';
 
+      const nextLesson = course.lessons.find((l: { id: string; title: string }) => !completedIds.has(l.id));
+      const lastActivity = Math.max(0, ...course.lessons.map((l: { id: string }) => completedAt.get(l.id) ?? 0));
+
       return {
         id: course.id,
         title: course.title,
@@ -42,6 +48,8 @@ export async function GET() {
         completedLessons,
         progress,
         status,
+        nextLessonTitle: nextLesson?.title ?? null,
+        lastActivityAt: lastActivity ? new Date(lastActivity).toISOString() : null,
       };
     });
 

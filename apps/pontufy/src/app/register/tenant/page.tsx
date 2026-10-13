@@ -81,8 +81,8 @@ export default function TenantRegisterPage() {
         />
 
         <div className="md-card-outlined md-elevation-3 p-8 w-full max-w-md mx-auto text-center">
-          <Link href="/" className="inline-flex items-center gap-2 text-3xl font-black tracking-tight text-white mb-8">
-            <span className="text-md-primary">Pontu</span>fy
+          <Link href="/" className="inline-flex items-center min-h-11 text-3xl font-black tracking-tight text-md-on-surface-strong mb-8">
+            <span className="text-md-primary-text">Pontu</span>fy
           </Link>
 
           <CheckCircle2 size={48} className="text-md-tertiary mx-auto mb-4" />
@@ -117,8 +117,8 @@ export default function TenantRegisterPage() {
       />
 
       <div className="w-full max-w-md">
-        <Link href="/" className="inline-flex items-center gap-2 text-3xl font-black tracking-tight text-white mb-8">
-          <span className="text-md-primary">Pontu</span>fy
+        <Link href="/" className="inline-flex items-center min-h-11 text-3xl font-black tracking-tight text-md-on-surface-strong mb-8">
+          <span className="text-md-primary-text">Pontu</span>fy
         </Link>
 
         <div className="md-card-outlined md-elevation-3 p-8">
@@ -142,7 +142,7 @@ export default function TenantRegisterPage() {
                 Nome da empresa
               </label>
               <div className="relative">
-                <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-variant/60 size-5 pointer-events-none" aria-hidden="true" />
+                <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-muted size-5 pointer-events-none" aria-hidden="true" />
                 <input
                   id="companyName"
                   type="text"
@@ -150,7 +150,7 @@ export default function TenantRegisterPage() {
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
                   placeholder="Ex: TechCorp LTDA"
-                  className="w-full pl-12 pr-4 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-variant/50 focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
+                  className="w-full pl-12 pr-4 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-muted focus:outline-none focus:border-md-focus focus:ring-2 focus:ring-md-focus/40 text-body-md transition-colors"
                 />
               </div>
             </div>
@@ -160,12 +160,12 @@ export default function TenantRegisterPage() {
                 Setor
               </label>
               <div className="relative">
-                <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-variant/60 size-5 pointer-events-none" aria-hidden="true" />
+                <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-muted size-5 pointer-events-none" aria-hidden="true" />
                 <select
                   id="sector"
                   value={sector}
                   onChange={(e) => setSector(e.target.value)}
-                  className="w-full pl-12 pr-10 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors appearance-none cursor-pointer"
+                  className="w-full pl-12 pr-10 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface focus:outline-none focus:border-md-focus focus:ring-2 focus:ring-md-focus/40 text-body-md transition-colors appearance-none cursor-pointer"
                 >
                   {SECTORS.map((s) => (
                     <option key={s.value} value={s.value}>
@@ -181,7 +181,7 @@ export default function TenantRegisterPage() {
                 Seu nome
               </label>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-variant/60 size-5 pointer-events-none" aria-hidden="true" />
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-muted size-5 pointer-events-none" aria-hidden="true" />
                 <input
                   id="adminName"
                   type="text"
@@ -189,7 +189,7 @@ export default function TenantRegisterPage() {
                   value={adminName}
                   onChange={(e) => setAdminName(e.target.value)}
                   placeholder="Ex: Maria Silva"
-                  className="w-full pl-12 pr-4 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-variant/50 focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
+                  className="w-full pl-12 pr-4 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-muted focus:outline-none focus:border-md-focus focus:ring-2 focus:ring-md-focus/40 text-body-md transition-colors"
                 />
               </div>
             </div>
@@ -199,7 +199,7 @@ export default function TenantRegisterPage() {
                 Email corporativo
               </label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-variant/60 size-5 pointer-events-none" aria-hidden="true" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-muted size-5 pointer-events-none" aria-hidden="true" />
                 <input
                   id="adminEmail"
                   type="email"
@@ -207,7 +207,7 @@ export default function TenantRegisterPage() {
                   value={adminEmail}
                   onChange={(e) => setAdminEmail(e.target.value)}
                   placeholder="voce@empresa.com"
-                  className="w-full pl-12 pr-4 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-variant/50 focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
+                  className="w-full pl-12 pr-4 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-muted focus:outline-none focus:border-md-focus focus:ring-2 focus:ring-md-focus/40 text-body-md transition-colors"
                 />
               </div>
             </div>
@@ -217,7 +217,7 @@ export default function TenantRegisterPage() {
                 Criar senha
               </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-variant/60 size-5 pointer-events-none" aria-hidden="true" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-muted size-5 pointer-events-none" aria-hidden="true" />
                 <input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
@@ -225,12 +225,13 @@ export default function TenantRegisterPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Mínimo 8 caracteres"
-                  className="w-full pl-12 pr-14 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-variant/50 focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
+                  className="w-full pl-12 pr-14 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-muted focus:outline-none focus:border-md-focus focus:ring-2 focus:ring-md-focus/40 text-body-md transition-colors"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-md-on-surface-variant/60 hover:text-md-on-surface transition-colors"
+                  aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                  className="absolute inset-y-0 right-0 w-12 flex items-center justify-center text-md-on-surface-muted hover:text-md-on-surface transition-colors"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -242,14 +243,14 @@ export default function TenantRegisterPage() {
                 Confirmar senha
               </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-variant/60 size-5 pointer-events-none" aria-hidden="true" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-muted size-5 pointer-events-none" aria-hidden="true" />
                 <input
                   id="confirmPassword"
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-variant/50 focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors"
+                  className="w-full pl-12 pr-4 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-muted focus:outline-none focus:border-md-focus focus:ring-2 focus:ring-md-focus/40 text-body-md transition-colors"
                   placeholder="Confirme a senha"
                 />
               </div>
@@ -272,13 +273,13 @@ export default function TenantRegisterPage() {
 
           <div className="mt-6 space-y-3 text-center">
             <p className="text-body-sm text-md-on-surface-variant">
-              <Link href="/login" className="font-semibold text-md-primary hover:text-md-primary-container transition-colors flex items-center justify-center gap-1">
+              <Link href="/login" className="font-semibold text-md-primary-text hover:text-md-on-surface transition-colors min-h-11 flex items-center justify-center gap-1">
                 <ArrowLeft size={16} />
                 Já tem conta? Fazer login
               </Link>
             </p>
             <p className="text-body-sm text-md-on-surface-variant">
-              <Link href="/register" className="font-semibold text-md-primary hover:text-md-primary-container transition-colors flex items-center justify-center gap-1">
+              <Link href="/register" className="font-semibold text-md-primary-text hover:text-md-on-surface transition-colors min-h-11 flex items-center justify-center gap-1">
                 <Mail size={16} />
                 Recebeu um convite? Criar conta
               </Link>

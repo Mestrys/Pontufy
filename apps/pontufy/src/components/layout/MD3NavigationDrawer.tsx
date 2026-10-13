@@ -1,11 +1,13 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { LayoutDashboard, LogOut, ShieldCheck, User, X } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
 import { MD3SearchBar } from '@/components/ui/MD3SearchBar';
+import { Dialog } from '@/components/ui/Dialog';
+import { isRouteActive } from './shell-routes';
+import BrandMark from '@/components/theme/BrandMark';
 
 export interface MD3DrawerLink {
   href: string;
@@ -25,28 +27,10 @@ interface MD3NavigationDrawerProps {
 export function MD3NavigationDrawer({ open, onClose, links, activeHref }: MD3NavigationDrawerProps) {
   const { data: session, status } = useSession();
   const pathname = usePathname();
-  const panelRef = useRef<HTMLDivElement>(null);
   const [isOnline, setIsOnline] = useState<boolean>(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
   const role = (session?.user as { role?: string } | undefined)?.role;
-  const isActive = (href: string) => pathname === href || activeHref === href;
-
-  useEffect(() => {
-    if (!open) return;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  const isActive = (href: string) => isRouteActive(pathname ?? activeHref, href);
 
   useEffect(() => {
     const goOnline = () => setIsOnline(true);
@@ -60,41 +44,27 @@ export function MD3NavigationDrawer({ open, onClose, links, activeHref }: MD3Nav
   }, []);
 
   return (
-    <AnimatePresence>
-      {open && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <motion.button
-            type="button"
-            aria-label="Fechar menu"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="absolute inset-0 w-full h-full bg-black/60"
-          />
-          <motion.aside
-            ref={panelRef}
-            role="dialog"
-            aria-modal="true"
-            aria-label="Menu de navegação"
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', stiffness: 340, damping: 34 }}
-            className="absolute top-0 right-0 bottom-0 w-[320px] max-w-[85vw] bg-md-surface border-l border-md-outline shadow-2xl flex flex-col"
-          >
+    <Dialog
+      open={open}
+      onClose={onClose}
+      variant="right"
+      ariaLabel="Menu de navegação"
+      zIndexClassName="z-50"
+      backdropClassName="bg-black/60"
+      className="h-full w-[320px] max-w-[85vw] bg-md-surface border-l border-md-outline shadow-2xl flex flex-col"
+    >
             {/* Header do drawer */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-md-outline flex-shrink-0">
-              <Link href="/dashboard" onClick={onClose} className="text-lg font-black tracking-tight text-white">
-                <span className="text-md-primary-container">Pontu</span>fy
+              <Link href="/dashboard" onClick={onClose} aria-label="Início" className="min-h-11 inline-flex items-center">
+                <BrandMark />
               </Link>
               <button
                 type="button"
                 onClick={onClose}
                 aria-label="Fechar menu"
-                className="p-2 text-gray-400 hover:text-white transition-colors rounded-full"
+                className="-mr-2 size-11 flex items-center justify-center text-md-on-surface-variant hover:text-md-on-surface-strong transition-colors rounded-full"
               >
-                <X size={20} />
+                <X size={20} aria-hidden="true" />
               </button>
             </div>
 
@@ -109,11 +79,12 @@ export function MD3NavigationDrawer({ open, onClose, links, activeHref }: MD3Nav
                 <Link
                   key={link.href}
                   href={link.href}
+                  aria-current={pathname === link.href ? 'page' : undefined}
                   onClick={onClose}
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                     isActive(link.href)
-                      ? 'bg-md-primary/20 text-white font-bold'
-                      : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                      ? 'bg-md-primary/20 text-md-on-surface-strong font-bold'
+                      : 'text-md-on-surface-variant hover:bg-md-on-surface-strong/5 hover:text-md-on-surface-strong'
                   }`}
                 >
                   {link.label}
@@ -127,7 +98,7 @@ export function MD3NavigationDrawer({ open, onClose, links, activeHref }: MD3Nav
                   className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold text-md-secondary mt-1 transition-colors"
                 >
                   <LayoutDashboard size={16} />
-                  Painel RH
+                  Painel de RH
                 </Link>
               )}
               {role === 'super_admin' && (
@@ -147,42 +118,39 @@ export function MD3NavigationDrawer({ open, onClose, links, activeHref }: MD3Nav
               <div className="border-t border-md-outline px-4 py-4 flex-shrink-0">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="relative">
-                    <div className="w-10 h-10 rounded-full bg-md-primary flex items-center justify-center text-white font-black">
+                    <div className="w-10 h-10 rounded-full bg-md-primary flex items-center justify-center text-md-on-primary font-black">
                       {session?.user?.name?.[0]?.toUpperCase() ?? <User size={18} />}
                     </div>
                     <span
                       className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-md-surface ${
-                        isOnline ? 'bg-emerald-500' : 'bg-red-500'
+                        isOnline ? 'bg-md-tertiary' : 'bg-md-error'
                       }`}
                       title={isOnline ? 'Conectado' : 'Offline'}
                     />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-white truncate">{session?.user?.name}</p>
-                    <p className="text-xs text-gray-500 truncate">{session?.user?.email}</p>
+                    <p className="text-sm font-semibold text-md-on-surface-strong truncate">{session?.user?.name}</p>
+                    <p className="text-xs text-md-on-surface-muted truncate">{session?.user?.email}</p>
                   </div>
                 </div>
                 <Link
                   href="/profile"
                   onClick={onClose}
-                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
+                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-md-on-surface hover:bg-md-on-surface-strong/5 hover:text-md-on-surface-strong transition-colors"
                 >
                   <User size={15} />
-                  Meu Perfil
+                  Meu perfil
                 </Link>
                 <button
                   type="button"
                   onClick={() => signOut({ callbackUrl: '/login' })}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-red-400 bg-red-500/10 hover:bg-red-500/20 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-md-error bg-md-error/10 hover:bg-md-error/20 transition-colors"
                 >
                   <LogOut size={15} />
                   Sair da conta
                 </button>
               </div>
             )}
-          </motion.aside>
-        </div>
-      )}
-    </AnimatePresence>
+    </Dialog>
   );
 }

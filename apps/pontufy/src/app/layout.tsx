@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Roboto, Geist_Mono } from "next/font/google";
 import AuthProvider from "@/components/providers/AuthProvider";
 import AppShell from "@/components/layout/AppShell";
@@ -43,7 +43,6 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://pontufy.com"),
   other: {
     lomadee: "2324685",
-    "theme-color": "#0a0a0a",
   },
   // Explicit meta tags for lomadee verification
   verification: {
@@ -52,6 +51,25 @@ export const metadata: Metadata = {
     },
   },
 };
+
+// viewport-fit=cover: com a barra de status translúcida (appleWebApp) o app
+// desenha até as bordas do iPhone, e os elementos fixos usam
+// env(safe-area-inset-*) para não ficar sob o entalhe ou a barra de início.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f5f4f6" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
+};
+
+// Antes da primeira pintura: aplica a aparência escolhida no Perfil
+// (data-theme) e a marca do tenant guardada na última visita, sem esperar o
+// fetch do DynamicThemeProvider. Só aceita nomes de token e #RRGGBB.
+const THEME_BOOTSTRAP = `try{var t=localStorage.getItem('pontufy-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}
+try{var v=JSON.parse(localStorage.getItem('pontufy-brand-v2')||'null');if(v&&v.dark&&v.light){var b=function(o){var r='';for(var k in o){if(/^--color-md-[a-z-]+$/.test(k)&&/^#[0-9A-F]{6}$/i.test(o[k]))r+=k+':'+o[k]+';';}return r;};var s=document.createElement('style');s.id='pontufy-brand';s.textContent=':root:root{'+b(v.dark)+'}:root:root[data-theme="light"]{'+b(v.light)+'}@media (prefers-color-scheme: light){:root:root:not([data-theme="dark"]){'+b(v.light)+'}}';document.head.appendChild(s);}}catch(e){}`;
 
 export default function RootLayout({
   children,
@@ -62,8 +80,13 @@ export default function RootLayout({
     <html
       lang="pt-BR"
       className={`${roboto.variable} ${geistMono.variable} font-sans h-full antialiased`}
+      // O script do <head> põe data-theme no <html> antes da hidratação.
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col bg-brand-gray">
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
+      </head>
+      <body className="min-h-full flex flex-col bg-md-surface-dim text-md-on-surface">
         <AuthProvider>
           <DynamicThemeProvider>
             <ToastProvider>

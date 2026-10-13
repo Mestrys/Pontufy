@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server';
+import { LESSON_ORDER } from '@/lib/lesson-order';
+import { isAiWritten } from '@/lib/ai-course';
 import { getSessionContext } from '@/backend/session';
 import { getTenantDb } from '@/backend/db';
 
@@ -7,14 +9,15 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-    const { tenantId, userId } = await getSessionContext();
+    const { tenantId, userId, role } = await getSessionContext();
     const { id } = await params;
     const db = getTenantDb(tenantId);
 
+    // O RH pode abrir rascunhos (pré-visualização antes de publicar).
     const course = await db.course.findFirst({
-      where: { id, status: 'published' },
+      where: role === 'admin_rh' ? { id } : { id, status: 'published' },
       include: {
-        lessons: { orderBy: { createdAt: 'asc' } },
+        lessons: { orderBy: LESSON_ORDER },
       },
     });
 
@@ -56,10 +59,26 @@ export async function GET(
       quizPassed = !!passedAttempt;
     }
 
+    // Transparência de IA: o colaborador vê que o curso foi gerado por IA e
+    // quem do RH revisou e publicou (última publicação registrada na auditoria).
+    const aiGenerated = await isAiWritten(db, course);
+    let reviewedBy: string | null = null;
+    if (aiGenerated && course.status === 'published') {
+      const published = await db.auditLog.findFirst({
+        where: { entity: 'Course', entityId: course.id, action: 'COURSE_PUBLISHED' },
+        orderBy: { createdAt: 'desc' },
+        select: { user: { select: { name: true } } },
+      });
+      reviewedBy = published?.user?.name ?? null;
+    }
+
     return NextResponse.json({
       id: course.id,
       title: course.title,
       description: course.description,
+      status: course.status,
+      aiGenerated,
+      reviewedBy,
       lessons,
       quiz,
       quizPassed,

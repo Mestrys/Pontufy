@@ -79,8 +79,8 @@ export function ResetPasswordForm() {
         />
 
         <div className="md-card-outlined md-elevation-3 p-8 w-full max-w-md mx-auto text-center">
-          <Link href="/" className="inline-flex items-center gap-2 text-3xl font-black tracking-tight text-white mb-8">
-            <span className="text-md-primary">Pontu</span>fy
+          <Link href="/" className="inline-flex items-center min-h-11 text-3xl font-black tracking-tight text-md-on-surface-strong mb-8">
+            <span className="text-md-primary-text">Pontu</span>fy
           </Link>
 
           <div className="text-md-error mb-4" style={{fontSize: '48px'}}>⚠️</div>
@@ -113,8 +113,8 @@ export function ResetPasswordForm() {
         />
 
         <div className="md-card-outlined md-elevation-3 p-8 w-full max-w-md mx-auto text-center">
-          <Link href="/" className="inline-flex items-center gap-2 text-3xl font-black tracking-tight text-white mb-8">
-            <span className="text-md-primary">Pontu</span>fy
+          <Link href="/" className="inline-flex items-center min-h-11 text-3xl font-black tracking-tight text-md-on-surface-strong mb-8">
+            <span className="text-md-primary-text">Pontu</span>fy
           </Link>
 
           <CheckCircle2 size={48} className="text-md-tertiary mx-auto mb-4" />
@@ -147,8 +147,8 @@ export function ResetPasswordForm() {
       />
 
       <div className="w-full max-w-md">
-        <Link href="/" className="inline-flex items-center gap-2 text-3xl font-black tracking-tight text-white mb-8">
-          <span className="text-md-primary">Pontu</span>fy
+        <Link href="/" className="inline-flex items-center min-h-11 text-3xl font-black tracking-tight text-md-on-surface-strong mb-8">
+          <span className="text-md-primary-text">Pontu</span>fy
         </Link>
 
         <div className="md-card-outlined md-elevation-3 p-8">
@@ -172,7 +172,7 @@ export function ResetPasswordForm() {
                 Nova senha
               </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-variant/60 size-5 pointer-events-none" aria-hidden="true" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-muted size-5 pointer-events-none" aria-hidden="true" />
                 <input
                   id="password"
                   name="password"
@@ -182,14 +182,14 @@ export function ResetPasswordForm() {
                   disabled={isLoading}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-12 pr-14 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-variant/50 focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full pl-12 pr-14 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-muted focus:outline-none focus:border-md-focus focus:ring-2 focus:ring-md-focus/40 text-body-md transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                   placeholder="Mínimo 8 caracteres"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-md-on-surface-variant/60 hover:text-md-on-surface transition-colors"
+                  className="absolute inset-y-0 right-0 w-12 flex items-center justify-center text-md-on-surface-muted hover:text-md-on-surface transition-colors"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -201,7 +201,7 @@ export function ResetPasswordForm() {
                 Confirmar nova senha
               </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-variant/60 size-5 pointer-events-none" aria-hidden="true" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-muted size-5 pointer-events-none" aria-hidden="true" />
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
@@ -211,7 +211,7 @@ export function ResetPasswordForm() {
                   disabled={isLoading}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-variant/50 focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full pl-12 pr-4 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-muted focus:outline-none focus:border-md-focus focus:ring-2 focus:ring-md-focus/40 text-body-md transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                   placeholder="Confirme a nova senha"
                 />
               </div>
@@ -234,7 +234,7 @@ export function ResetPasswordForm() {
           </form>
 
           <p className="mt-6 text-center text-body-sm text-md-on-surface-variant">
-            <Link href="/login" className="font-semibold text-md-primary hover:text-md-primary-container transition-colors flex items-center justify-center gap-1">
+            <Link href="/login" className="font-semibold text-md-primary-text hover:text-md-on-surface transition-colors min-h-11 flex items-center justify-center gap-1">
               <ArrowLeft size={16} />
               Voltar ao login
             </Link>

@@ -11,10 +11,15 @@ import { rateLimitCheck } from '@/lib/redis';
 import { buildProviderChain } from '@/lib/ai-providers';
 import { sanitizeAiHtml, sanitizeAiText } from '@/lib/validations/security';
 import { logAudit } from '@/lib/audit';
-import { generatedCourseSchema } from '@/schemas/course-schema';
+import { generatedCourseSchema, lessonSchema } from '@/schemas/course-schema';
 import type { GeneratedCourse } from '@/schemas/course-schema';
+import { CONTENT_TYPES, CONTENT_TYPE_LABELS } from '@/lib/course-types';
+import type { ContentType } from '@/lib/course-types';
+import { SYSTEM_PROMPT, FORMAT_PROMPTS, LESSON_CONTENT_DESCRIPTIONS } from '@/lib/course-prompts';
 
-export type { GeneratedCourse };
+// Não re-exportar tipos daqui: em módulos 'use server' o loader de server
+// actions do Next 16 avalia `export type { X }` como valor e quebra o módulo
+// inteiro ("GeneratedCourse is not defined"). Importe de '@/schemas/course-schema'.
 
 // Wrapper de server action — arquivos "use server" só podem exportar
 // funções async definidas no próprio módulo (re-export direto é rejeitado).
@@ -36,27 +41,26 @@ export async function checkAIProviders(): Promise<{
  */
 const MAX_OUTPUT_TOKENS = Number(process.env.COURSE_MAX_OUTPUT_TOKENS || 8192);
 
-const SYSTEM_PROMPT = `Você é o motor de IA da Pontufy, uma plataforma B2B de educação corporativa gamificada.
-Gere um curso de treinamento COMPLETO, prático e adaptado ao setor/vertical informado.
-
-Regras OBRIGATÓRIAS:
-1. FOCO SETORIAL — Adapte títulos, exemplos e vocabulário ao setor. Nada genérico.
-2. ESTRUTURA — Entregue de 3 a 8 aulas, em ordem didática (do fundamental ao avançado). Use o campo "order" para numerar (1, 2, 3...).
-3. CONTEÚDO COMPLETO — Cada aula DEVE ter conteúdo educacional rico e completo:
-   - Mínimo de 3 parágrafos substanciais (150+ palavras cada) — o "content" DEVE ter pelo menos 200 caracteres úteis.
-   - Explique conceitos-chave de forma clara e detalhada.
-   - Inclua exemplos práticos e reais do setor informado.
-   - Adicione boas práticas, dicas e alertas importantes.
-   - Use formatação Markdown: ## para subtítulos, **negrito** para termos-chave, - para listas.
-   - NUNCA use resumos curtos: o conteúdo deve ser completo e autossuficiente.
-4. PONTUAÇÃO — "pointsAwarded" é um inteiro entre 10 e 100: aulas introdutórias valem menos, avançadas valem mais.
-5. QUIZ — Gere de 2 a 8 perguntas de múltipla escolha cobrindo TODO o conteúdo do curso:
-   - Cada pergunta deve ter de 3 a 5 opções ("options") e o índice da correta em "correctIndex" (base 0).
-   - Perguntas devem testar compreensão real, não memorização superficial.
-   - Varie a dificuldade: fáceis, médias e difíceis.
-6. META — Informe "category" (categoria do curso) e "estimatedDurationMinutes" (tempo estimado em minutos).
-7. Se material de referência for fornecido, BASEIE o conteúdo nele.
-8. Responda exclusivamente no schema estruturado solicitado.`;
+/**
+ * Schema central com a orientação de "content" específica do formato e
+ * correctIndex validado contra o número real de opções de cada pergunta.
+ */
+function buildCourseSchema(contentType: ContentType) {
+  return generatedCourseSchema
+    .extend({
+      lessons: z
+        .array(
+          lessonSchema.extend({
+            content: lessonSchema.shape.content.describe(LESSON_CONTENT_DESCRIPTIONS[contentType]),
+          }),
+        )
+        .min(3, 'O curso deve conter pelo menos 3 aulas'),
+    })
+    .refine((course) => course.quiz.every((q) => q.correctIndex < q.options.length), {
+      message: 'correctIndex deve ser menor que o número de opções.',
+      path: ['quiz'],
+    });
+}
 
 // ═══════════════════════ Fallback local determinístico ═══════════════
 
@@ -115,7 +119,7 @@ function generateLocalFallback(prompt: string, sector: string, referenceContent?
 
   return {
     title: `Treinamento: ${prompt.slice(0, 60)}`,
-    description: `Curso sobre "${prompt.slice(0, 100)}" para o setor de ${sectorName}. Configure uma chave de IA (GEMINI_API_KEY) no Vercel para gerar conteúdo personalizado e inteligente.`,
+    description: `Curso sobre "${prompt.slice(0, 100)}" para o setor de ${sectorName}.`,
     category: sectorName,
     estimatedDurationMinutes: 60,
     lessons: [
@@ -194,6 +198,7 @@ function generateLocalFallback(prompt: string, sector: string, referenceContent?
 async function generateCourseWithFallback(
   prompt: string,
   sector: string,
+  contentType: ContentType,
   referenceContent?: string,
 ): Promise<{ data: GeneratedCourse; provider: string; errors?: string[] }> {
   const chain = buildProviderChain();
@@ -204,20 +209,24 @@ async function generateCourseWithFallback(
   }
 
   let userPrompt = `Setor/Vertical: ${sector || 'geral'}.
+Tipo de conteúdo: ${CONTENT_TYPE_LABELS[contentType]}.
 Objetivo do treinamento solicitado pelo RH: ${prompt}`;
 
   if (referenceContent) {
     userPrompt += `\n\n--- MATERIAL DE REFERÊNCIA FORNECIDO ---\n${referenceContent.slice(0, 30000)}\n--- FIM DO MATERIAL ---\n\nIMPORTANTE: Baseie o conteúdo do curso no material acima. Extraia os tópicos principais, organize-os didaticamente e gere as aulas com base real no conteúdo fornecido.`;
   }
 
+  const courseSchema = buildCourseSchema(contentType);
+  const systemPrompt = `${SYSTEM_PROMPT}\n\n${FORMAT_PROMPTS[contentType]}`;
+
   const errors: string[] = [];
   for (const attempt of chain) {
     try {
-      console.log(`[course-generator] Tentando provedor: ${attempt.name}`);
+      console.log(`[course-generator] Tentando provedor: ${attempt.name} (tipo: ${contentType})`);
       const { object } = await generateObject({
         model: attempt.build(),
-        schema: generatedCourseSchema,
-        system: SYSTEM_PROMPT,
+        schema: courseSchema,
+        system: systemPrompt,
         prompt: userPrompt,
         temperature: 0.6,
         maxRetries: 1,
@@ -244,6 +253,7 @@ const inputSchema = z.object({
     .min(10, 'Descreva o objetivo do treinamento (mínimo de 10 caracteres).')
     .max(2000),
   sector: z.string().max(60).optional(),
+  contentType: z.enum(CONTENT_TYPES).optional(),
   referenceContent: z.string().max(60000).optional(),
 });
 
@@ -256,6 +266,7 @@ export interface CoursePayload {
   status: string;
   createdAt: string;
   quizJson: string | null;
+  contentType: ContentType;
   category?: string;
   estimatedDurationMinutes?: number;
   lessons: Array<{
@@ -314,6 +325,7 @@ export async function generateTrainingCourse(
     return { success: false, error: parsed.error.issues[0]?.message ?? 'Entrada inválida.' };
   }
 
+  const contentType = parsed.data.contentType ?? 'text';
   const db = getTenantDb(tenantId);
 
   const tenant = await db.tenant.findUnique({ where: { id: tenantId } });
@@ -331,7 +343,12 @@ export async function generateTrainingCourse(
 
   let generated: { data: GeneratedCourse; provider: string; errors?: string[] };
   try {
-    generated = await generateCourseWithFallback(parsed.data.prompt, parsed.data.sector ?? '', parsed.data.referenceContent);
+    generated = await generateCourseWithFallback(
+      parsed.data.prompt,
+      parsed.data.sector ?? '',
+      contentType,
+      parsed.data.referenceContent,
+    );
   } catch (err) {
     console.error('[course-generator] geração falhou:', err);
     return {
@@ -340,13 +357,23 @@ export async function generateTrainingCourse(
     };
   }
 
+  // Sem coluna própria para o formato: registra-o na descrição (omitido no fallback local, que gera texto genérico).
+  const isLocal = generated.provider.startsWith('local:');
+  const courseDescription =
+    contentType !== 'text' && !isLocal
+      ? `${generated.data.description} (Formato: ${CONTENT_TYPE_LABELS[contentType]})`
+      : generated.data.description;
   const now = new Date();
   // Ordena pelas aulas pela ordem didática definida pelo gerador.
   const orderedLessons = [...generated.data.lessons].sort((a, b) => a.order - b.order);
   // 8.2 — Sanitização de conteúdo gerado por IA antes da persistência:
   // títulos/aulas/quiz não podem carregar HTML perigoso para os colaboradores.
-  const lessonsToCreate = orderedLessons.map((lesson) => ({
+  const lessonsToCreate = orderedLessons.map((lesson, i) => ({
+    // createdAt define a ordem no player: 1 ms por aula, senão todas empatam
+    // no mesmo instante da transação e a ordem fica indefinida.
+    createdAt: new Date(now.getTime() + i),
     title: sanitizeAiText(lesson.title).slice(0, 160),
+    // Todos os formatos são roteiros/estruturas em Markdown; o player trata 'video' como URL de mídia.
     type: 'text' as const,
     pointsAssigned: Math.max(10, Math.min(100, Math.round(lesson.pointsAwarded))),
     contentUrl: sanitizeAiHtml(lesson.content),
@@ -385,8 +412,10 @@ export async function generateTrainingCourse(
         data: {
           tenantId,
           title: generated.data.title,
-          description: generated.data.description,
-          status: 'published',
+          description: courseDescription,
+          // Curso gerado por IA nasce como rascunho: o RH revisa e publica
+          // (setCourseStatus) antes de chegar aos colaboradores.
+          status: 'draft',
           aiCreditsSpent: 1,
           quizJson,
           lessons: { create: lessonsToCreate },
@@ -422,6 +451,7 @@ export async function generateTrainingCourse(
       entityId: courseId,
       newValue: {
         provider: generated.provider,
+        contentType,
         lessonsCount: lessonRecords.length,
         creditsSpent: 1,
       },
@@ -454,13 +484,79 @@ export async function generateTrainingCourse(
     course: {
       id: courseId,
       title: generated.data.title,
-      description: generated.data.description,
-      status: 'published',
+      description: courseDescription,
+      status: persisted ? 'draft' : 'local',
       createdAt: now.toISOString(),
       quizJson,
+      contentType,
       category: generated.data.category,
       estimatedDurationMinutes: generated.data.estimatedDurationMinutes,
       lessons: lessonRecords,
     },
   };
+}
+
+// ═══════════════════════ Publicação (revisão humana) ═════════════════
+
+const courseStatusSchema = z.object({
+  courseId: z.string().min(1).max(100),
+  status: z.enum(['published', 'draft']),
+});
+
+export type SetCourseStatusResult =
+  | { success: true; status: 'published' | 'draft' }
+  | { success: false; error: string };
+
+/**
+ * Publica ou volta para rascunho um curso do próprio tenant. Só o RH pode;
+ * a mudança fica na auditoria.
+ */
+export async function setCourseStatus(input: {
+  courseId: string;
+  status: 'published' | 'draft';
+}): Promise<SetCourseStatusResult> {
+  const session = await auth();
+  if (!session?.user) {
+    return { success: false, error: 'Sessão expirada. Entre novamente.' };
+  }
+  if (session.user.role !== 'admin_rh') {
+    return { success: false, error: 'Apenas a gestão de RH pode publicar cursos.' };
+  }
+
+  const parsed = courseStatusSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, error: 'Curso inválido.' };
+  }
+  const { courseId, status } = parsed.data;
+  const tenantId = session.user.tenantId;
+  const db = getTenantDb(tenantId);
+
+  const course = await db.course.findFirst({
+    where: { id: courseId },
+    select: { id: true, status: true },
+  });
+  if (!course) {
+    return { success: false, error: 'Curso não encontrado.' };
+  }
+
+  if (course.status !== status) {
+    await db.course.updateMany({ where: { id: courseId }, data: { status } });
+    await logAudit({
+      tenantId,
+      userId: session.user.id,
+      action: status === 'published' ? 'COURSE_PUBLISHED' : 'COURSE_UNPUBLISHED',
+      entity: 'Course',
+      entityId: courseId,
+      oldValue: { status: course.status },
+      newValue: { status },
+    });
+  }
+
+  try {
+    revalidatePath('/admin', 'page');
+    revalidatePath('/dashboard', 'page');
+    revalidatePath('/cursos', 'page');
+  } catch {}
+
+  return { success: true, status };
 }

@@ -51,8 +51,8 @@ export default function ForgotPasswordPage() {
         />
 
         <div className="md-card-outlined md-elevation-3 p-8 w-full max-w-md mx-auto text-center">
-          <Link href="/" className="inline-flex items-center gap-2 text-3xl font-black tracking-tight text-white mb-8">
-            <span className="text-md-primary">Pontu</span>fy
+          <Link href="/" className="inline-flex items-center min-h-11 text-3xl font-black tracking-tight text-md-on-surface-strong mb-8">
+            <span className="text-md-primary-text">Pontu</span>fy
           </Link>
 
           <CheckCircle2 size={48} className="text-md-tertiary mx-auto mb-4" />
@@ -60,7 +60,7 @@ export default function ForgotPasswordPage() {
           <p className="text-body-md text-md-on-surface-variant mb-6">
             Enviamos um link de recuperação para <strong className="text-md-on-surface">{email}</strong>.
           </p>
-          <p className="text-body-sm text-md-on-surface-variant/70 mb-8">
+          <p className="text-body-sm text-md-on-surface-muted mb-8">
             Verifique sua caixa de entrada (e spam). O link expira em 1 hora.
           </p>
 
@@ -88,8 +88,8 @@ export default function ForgotPasswordPage() {
       />
 
       <div className="w-full max-w-md">
-        <Link href="/" className="inline-flex items-center gap-2 text-3xl font-black tracking-tight text-white mb-8">
-          <span className="text-md-primary">Pontu</span>fy
+        <Link href="/" className="inline-flex items-center min-h-11 text-3xl font-black tracking-tight text-md-on-surface-strong mb-8">
+          <span className="text-md-primary-text">Pontu</span>fy
         </Link>
 
         <div className="md-card-outlined md-elevation-3 p-8">
@@ -113,7 +113,7 @@ export default function ForgotPasswordPage() {
                 E-mail corporativo
               </label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-variant/60 size-5 pointer-events-none" aria-hidden="true" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-md-on-surface-muted size-5 pointer-events-none" aria-hidden="true" />
                 <input
                   id="email"
                   name="email"
@@ -123,7 +123,7 @@ export default function ForgotPasswordPage() {
                   disabled={isLoading}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-variant/50 focus:outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 text-body-md transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full pl-12 pr-4 py-3.5 bg-md-surface-container border border-md-outline rounded-xl text-md-on-surface placeholder:text-md-on-surface-muted focus:outline-none focus:border-md-focus focus:ring-2 focus:ring-md-focus/40 text-body-md transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                   placeholder="voce@empresa.com"
                 />
               </div>
@@ -146,7 +146,7 @@ export default function ForgotPasswordPage() {
           </form>
 
           <p className="mt-6 text-center text-body-sm text-md-on-surface-variant">
-            <Link href="/login" className="font-semibold text-md-primary hover:text-md-primary-container transition-colors flex items-center justify-center gap-1">
+            <Link href="/login" className="font-semibold text-md-primary-text hover:text-md-on-surface transition-colors min-h-11 flex items-center justify-center gap-1">
               <ArrowLeft size={16} />
               Voltar ao login
             </Link>

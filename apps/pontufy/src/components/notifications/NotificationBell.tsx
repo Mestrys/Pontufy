@@ -47,12 +47,12 @@ export function NotificationBell() {
       <button
         type="button"
         onClick={() => setIsDrawerOpen(true)}
-        className="relative p-2 text-gray-400 hover:text-white transition-colors"
+        className="relative size-11 flex items-center justify-center text-md-on-surface-variant hover:text-md-on-surface-strong transition-colors"
         aria-label="Notificações"
       >
         <Bell size={20} />
         {unreadNotifications > 0 && (
-          <span className="absolute top-0.5 right-0.5 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-emerald-500 text-black text-[10px] font-black border-2 border-[#0a0a0a]">
+          <span className="absolute top-0.5 right-0.5 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-md-tertiary text-md-on-tertiary text-xs font-black border-2 border-md-surface-dim">
             {unreadNotifications > 99 ? '99+' : unreadNotifications}
           </span>
         )}

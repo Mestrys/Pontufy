@@ -7,6 +7,7 @@ import {
   scoreBattleTurn,
   TURN_TIME_LIMIT_SECONDS,
   QUESTION_TIME_LIMIT_SECONDS,
+  EXTENDED_TIME_FACTOR,
   type BattleQuestion,
 } from '@/lib/battles';
 import { creditDepartmentPoints } from '@/lib/dept-ranking';
@@ -19,6 +20,7 @@ import { notifyBattleResult } from '@/lib/notifications';
 const answerSchema = z.object({
   answers: z.array(z.number().int().min(-1).max(5)).max(10),
   elapsedSeconds: z.number().int().min(0).max(600),
+  extendedTime: z.boolean().optional(),
   focusLost: z.boolean().optional(),
 });
 
@@ -127,7 +129,7 @@ export async function POST(
     if (data.focusLost) {
       // Perda de foco na janela: turno anulado (anti-copy-paste/outra aba).
       forfeited = true;
-    } else if (data.elapsedSeconds > TURN_TIME_LIMIT_SECONDS) {
+    } else if (data.elapsedSeconds > TURN_TIME_LIMIT_SECONDS * (data.extendedTime ? EXTENDED_TIME_FACTOR : 1)) {
       forfeited = true;
     }
 

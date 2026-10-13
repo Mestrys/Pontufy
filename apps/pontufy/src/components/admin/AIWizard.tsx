@@ -2,9 +2,18 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Sparkles, CheckCircle, ChevronRight, ArrowLeft, AlertCircle, Upload, X, FileText, AlertTriangle, Zap, Loader2 } from 'lucide-react';
+import {
+  Sparkles, CheckCircle, ChevronRight, ArrowLeft, AlertCircle, Upload, X, FileText, AlertTriangle, Zap,
+  Video, Mic, LayoutTemplate, HelpCircle, PenLine, BookOpen,
+} from 'lucide-react';
 import { generateTrainingCourse, checkAIProviders } from '@/actions/course-generator';
+import { getCourseForReview } from '@/actions/course-review';
+import type { ReviewCourse } from '@/actions/course-review';
+import CourseReview from '@/components/admin/CourseReview';
+import { Skeleton, LoadingRegion } from '@/components/ui/Skeleton';
 import type { GenerateTrainingResult } from '@/actions/course-generator';
+import { CONTENT_TYPE_LABELS } from '@/lib/course-types';
+import type { ContentType } from '@/lib/course-types';
 import { saveCourse } from '@/lib/local-courses';
 import { mutate } from 'swr';
 
@@ -24,12 +33,31 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
 }
 
+const CONTENT_TYPE_CONFIG: Record<ContentType, { icon: React.ReactNode; description: string }> = {
+  text: { icon: <BookOpen size={20} />, description: 'Artigos educacionais ricos em Markdown' },
+  video: { icon: <Video size={20} />, description: 'Roteiros completos prontos para gravação' },
+  podcast: { icon: <Mic size={20} />, description: 'Episódios com diálogos e dicas de produção' },
+  slides: { icon: <LayoutTemplate size={20} />, description: 'Estrutura de slides com notas do apresentador' },
+  quiz_interativo: { icon: <HelpCircle size={20} />, description: 'Questões situacionais com explicações detalhadas' },
+  escrita_expressa: { icon: <PenLine size={20} />, description: 'Desafios de escrita com rubrica de avaliação' },
+};
+
+const PROMPT_PLACEHOLDERS: Record<ContentType, string> = {
+  text: 'Ex: Crie um treinamento de LGPD focado na equipe de atendimento ao cliente, com foco prático em proteção de dados e cenários de call center...',
+  video: 'Ex: Roteiro de vídeo sobre boas práticas de atendimento ao cliente para equipes de varejo...',
+  podcast: 'Ex: Episódio de podcast sobre liderança situacional para gestores de equipes remotas...',
+  slides: 'Ex: Apresentação sobre gestão de conflitos para coordenadores de RH...',
+  quiz_interativo: 'Ex: Quiz sobre segurança da informação e LGPD para equipe de TI...',
+  escrita_expressa: 'Ex: Exercícios de escrita para relatórios gerenciais destinados a analistas sênior...',
+};
+
 export default function AIWizard() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState(1);
   const [prompt, setPrompt] = useState('');
   const [sector, setSector] = useState('tech');
+  const [contentType, setContentType] = useState<ContentType>('text');
   const [error, setError] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [dragOver, setDragOver] = useState(false);
@@ -37,6 +65,8 @@ export default function AIWizard() {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [activeChecklist, setActiveChecklist] = useState(0);
   const [result, setResult] = useState<SuccessResult | null>(null);
+  const [review, setReview] = useState<ReviewCourse | null>(null);
+  const [reviewError, setReviewError] = useState('');
 
   const [providerStatus, setProviderStatus] = useState<{
     available: string[];
@@ -54,19 +84,26 @@ export default function AIWizard() {
     health: 'Saúde e Bem-Estar',
     retail: 'Varejo e Vendas',
     industry: 'Indústria e Manufatura',
+    finance: 'Financeiro e Contabilidade',
+    education: 'Educação e Treinamento',
+    logistics: 'Logística e Supply Chain',
+    hr: 'Recursos Humanos',
+    legal: 'Jurídico e Compliance',
+    other: 'Outro',
   };
 
+  const structuringLabel = `Estruturando ${CONTENT_TYPE_LABELS[contentType].toLowerCase()}...`;
   const checklistItems = files.length > 0
     ? [
         'Processando materiais de referência...',
         'Enviando prompt para a IA...',
-        'Estruturando módulos de ensino...',
+        structuringLabel,
         'Calibrando distribuição de recompensas (pts)...',
         'Finalizando formatação...',
       ]
     : [
         'Enviando prompt para a IA...',
-        'Estruturando módulos de ensino...',
+        structuringLabel,
         'Calibrando distribuição de recompensas (pts)...',
         'Finalizando formatação...',
       ];
@@ -135,6 +172,7 @@ export default function AIWizard() {
       const res = await generateTrainingCourse({
         prompt,
         sector: sectorLabels[sector] ?? sector,
+        contentType,
         referenceContent: referenceContent || undefined,
       });
 
@@ -144,7 +182,9 @@ export default function AIWizard() {
         return;
       }
 
-      saveCourse({
+      // Cache local só quando o banco falhou: um rascunho persistido não deve
+      // aparecer como curso disponível no navegador do RH.
+      if (!res.persisted) saveCourse({
         id: res.course.id,
         title: res.course.title,
         description: res.course.description,
@@ -156,7 +196,15 @@ export default function AIWizard() {
       });
 
       setResult(res);
+      window.dispatchEvent(new CustomEvent('pontufy:ai-credits', { detail: res.creditsRemaining }));
+      setReview(null);
+      setReviewError('');
       setStep(3);
+      if (res.persisted) {
+        getCourseForReview(res.course.id)
+          .then((r) => (r.success ? setReview(r.course) : setReviewError(r.error)))
+          .catch(() => setReviewError('Não foi possível abrir a revisão agora. Abra o curso pelo painel.'));
+      }
 
       mutate('/api/courses?limit=50');
       mutate('/api/courses?page=1&limit=12');
@@ -227,35 +275,25 @@ export default function AIWizard() {
 
         <div className="mb-8">
           <h2 className="text-headline-sm font-bold text-md-on-surface flex items-center gap-2 mb-2">
-            <Sparkles className="text-md-primary" size={24} /> Assistente de IA
+            <Sparkles className="text-md-primary-text" size={24} /> Assistente de IA
           </h2>
           <p className="text-body-md text-md-on-surface-variant">Crie treinamentos corporativos engajadores em segundos.</p>
         </div>
 
         {providerStatus && !providerStatus.configured && (
           <div className="mb-6 p-4 bg-md-highlight/10 border border-md-highlight/30 rounded-xl">
-            <div className="flex items-start gap-3 text-md-on-highlight">
-              <AlertTriangle size={20} className="flex-shrink-0 mt-0.5" />
+            <div className="flex items-start gap-3 text-md-highlight">
+              <AlertTriangle size={20} className="flex-shrink-0 mt-0.5" aria-hidden="true" />
               <div>
-                <p className="text-body-md font-bold">Motor de IA não configurado</p>
+                <p className="text-body-md font-bold">Geração por IA indisponível no momento</p>
                 <p className="text-body-sm mt-1">
-                  Nenhuma chave de API de IA está configurada. Os cursos serão gerados com um <strong>template básico</strong>.
-                </p>
-                <p className="text-body-sm mt-2 font-medium">
-                  Para geração inteligente, configure no Vercel (Settings → Environment Variables):
-                </p>
-                <ul className="text-body-sm mt-1 space-y-1 ml-4 list-disc">
-                  <li><code className="bg-md-highlight/20 px-1 rounded text-xs">GEMINI_API_KEY</code> — Gratuito em aistudio.google.com</li>
-                  <li><code className="bg-md-highlight/20 px-1 rounded text-xs">OPENAI_API_KEY</code> — platform.openai.com</li>
-                  <li><code className="bg-md-highlight/20 px-1 rounded text-xs">ANTHROPIC_API_KEY</code> — console.anthropic.com</li>
-                </ul>
-                <p className="text-xs mt-3 text-md-on-highlight/70 font-medium">
-                  Importante: Configure a variável para TODOS os ambientes (Production, Preview e Development) no Vercel.
+                  Você ainda pode gerar um <strong>rascunho básico</strong> a partir de um modelo padrão e completá-lo antes de publicar.
+                  Se o aviso continuar, fale com o suporte da Pontufy.
                 </p>
                 {providerStatus.diagnostics && (
                   <details className="mt-2">
-                    <summary className="cursor-pointer text-xs font-medium text-md-on-highlight/70">Diagnóstico do servidor</summary>
-                    <ul className="mt-1 space-y-0.5 text-xs text-md-on-highlight/60">
+                    <summary className="cursor-pointer text-xs font-medium">Detalhes técnicos (para o suporte)</summary>
+                    <ul className="mt-1 space-y-0.5 text-xs">
                       {Object.entries(providerStatus.diagnostics).map(([k, v]) => (
                         <li key={k}><strong>{k}:</strong> {v}</li>
                       ))}
@@ -290,38 +328,94 @@ export default function AIWizard() {
 
         <div className="space-y-6">
           <div>
-            <label className="text-label-lg text-md-on-surface-variant mb-2 block">
+            <p id="wizard-format-label" className="text-label-lg text-md-on-surface-variant mb-3 block">
+              Formato do conteúdo
+            </p>
+            <div role="group" aria-labelledby="wizard-format-label" className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {(Object.keys(CONTENT_TYPE_CONFIG) as ContentType[]).map((type) => {
+                const selected = contentType === type;
+                return (
+                  <button
+                    key={type}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => setContentType(type)}
+                    className={`relative flex flex-col items-start gap-1.5 p-3 rounded-xl border-2 text-left transition-all ${
+                      selected
+                        ? 'border-md-primary-container bg-md-primary/20'
+                        : 'border-md-outline hover:border-md-primary-container/60 hover:bg-md-surface-container-high/50'
+                    }`}
+                  >
+                    {selected && (
+                      <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-md-primary-container" />
+                    )}
+                    <span className={selected ? 'text-md-secondary' : 'text-md-on-surface-variant'}>
+                      {CONTENT_TYPE_CONFIG[type].icon}
+                    </span>
+                    <span className="text-label-lg font-bold leading-tight text-md-on-surface">
+                      {CONTENT_TYPE_LABELS[type]}
+                    </span>
+                    {/* Selecionado: texto claro, porque o tinte da marca do cliente pode ser claro. */}
+                    <span className={`text-xs leading-tight ${selected ? 'text-md-on-surface' : 'text-md-on-surface-variant'}`}>
+                      {CONTENT_TYPE_CONFIG[type].description}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="wizard-sector" className="text-label-lg text-md-on-surface-variant mb-2 block">
               Setor/Vertical de Atuação
             </label>
             <select
+              id="wizard-sector"
               value={sector}
               onChange={(e) => setSector(e.target.value)}
-              className="w-full bg-md-surface-container border border-md-outline text-md-on-surface rounded-xl p-3 outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 transition-all text-body-md"
+              className="w-full bg-md-surface-container border border-md-outline text-md-on-surface rounded-xl p-3 outline-none focus:border-md-focus focus:ring-2 focus:ring-md-focus/40 transition-all text-body-md"
             >
               <option value="tech">Tecnologia e Inovação</option>
               <option value="health">Saúde e Bem-Estar</option>
               <option value="retail">Varejo e Vendas</option>
               <option value="industry">Indústria e Manufatura</option>
+              <option value="finance">Financeiro e Contabilidade</option>
+              <option value="education">Educação e Treinamento</option>
+              <option value="logistics">Logística e Supply Chain</option>
+              <option value="hr">Recursos Humanos</option>
+              <option value="legal">Jurídico e Compliance</option>
+              <option value="other">Outro</option>
             </select>
           </div>
 
           <div>
-            <label className="text-label-lg text-md-on-surface-variant mb-2 block">
+            <label htmlFor="wizard-prompt" className="text-label-lg text-md-on-surface-variant mb-2 block">
               O que você deseja ensinar?
             </label>
             <textarea
+              id="wizard-prompt"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              className="w-full h-32 bg-md-surface-container border border-md-outline text-md-on-surface rounded-xl p-3 outline-none focus:border-md-primary focus:ring-2 focus:ring-md-primary/20 transition-all resize-none text-body-md placeholder:text-md-on-surface-variant/50"
-              placeholder="Ex: Crie um treinamento de LGPD focado na equipe de atendimento ao cliente, com foco prático em proteção de dados e cenários de call center..."
+              className="w-full h-32 bg-md-surface-container border border-md-outline text-md-on-surface rounded-xl p-3 outline-none focus:border-md-focus focus:ring-2 focus:ring-md-focus/40 transition-all resize-none text-body-md placeholder:text-md-on-surface-muted"
+              placeholder={PROMPT_PLACEHOLDERS[contentType]}
             />
           </div>
 
           <div>
-            <label className="text-label-lg text-md-on-surface-variant mb-2 block">
-              Material de Referência <span className="text-md-on-surface-variant/60 font-normal">(opcional)</span>
-            </label>
+            <p id="wizard-files-label" className="text-label-lg text-md-on-surface-variant mb-2 block">
+              Material de Referência <span className="text-md-on-surface-muted font-normal">(opcional)</span>
+            </p>
+            {/* Zona de upload operável por teclado (Enter/Espaço abrem o seletor). */}
             <div
+              role="button"
+              tabIndex={0}
+              aria-labelledby="wizard-files-label"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  fileInputRef.current?.click();
+                }
+              }}
               onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
               onDragLeave={() => setDragOver(false)}
               onDrop={(e) => {
@@ -344,11 +438,11 @@ export default function AIWizard() {
                 onChange={(e) => { if (e.target.files) addFiles(e.target.files); e.target.value = ''; }}
                 className="hidden"
               />
-              <Upload size={24} className="mx-auto mb-2 text-md-on-surface-variant/50" />
+              <Upload size={24} className="mx-auto mb-2 text-md-on-surface-muted" />
               <p className="text-body-sm text-md-on-surface-variant">
-                Arraste arquivos aqui ou <span className="text-md-primary font-semibold">clique para selecionar</span>
+                Arraste arquivos aqui ou <span className="text-md-primary-text font-semibold">clique para selecionar</span>
               </p>
-              <p className="text-xs text-md-on-surface-variant/50 mt-1">
+              <p className="text-xs text-md-on-surface-muted mt-1">
                 PDF, Word, TXT, PowerPoint, Excel, MD, MP4, MP3 — até {MAX_FILES} arquivos, 10MB cada
               </p>
             </div>
@@ -357,15 +451,15 @@ export default function AIWizard() {
               <div className="mt-3 space-y-2">
                 {files.map((f, i) => (
                   <div key={i} className="flex items-center gap-3 bg-md-surface-container-high rounded-lg px-3 py-2 group">
-                    <FileText size={16} className="text-md-primary flex-shrink-0" />
+                    <FileText size={16} className="text-md-primary-text flex-shrink-0" />
                     <span className="text-body-sm text-md-on-surface truncate flex-1">{f.name}</span>
-                    <span className="text-xs text-md-on-surface-variant/60">{formatFileSize(f.size)}</span>
+                    <span className="text-xs text-md-on-surface-muted">{formatFileSize(f.size)}</span>
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); removeFile(i); }}
                       className="p-1 rounded hover:bg-md-outline transition-colors opacity-0 group-hover:opacity-100"
                     >
-                      <X size={14} className="text-md-on-surface-variant/50" />
+                      <X size={14} className="text-md-on-surface-muted" />
                     </button>
                   </div>
                 ))}
@@ -374,11 +468,14 @@ export default function AIWizard() {
           </div>
 
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-4 border-t border-md-outline">
-            <div className="flex items-center gap-2 text-body-sm">
+            <div className="flex items-center gap-2 text-body-sm flex-wrap">
               <span className="text-md-on-surface-variant">Custo da operação:</span>
-              <span className="font-bold text-md-primary bg-md-primary-container px-2 py-0.5 rounded-full">
+              <span className="font-bold text-md-on-primary-container bg-md-primary-container px-2 py-0.5 rounded-full">
                 1 Crédito de IA
               </span>
+              <span className="text-md-on-surface-muted">·</span>
+              <span className="text-md-on-surface-variant">Formato:</span>
+              <span className="font-bold text-md-on-surface">{CONTENT_TYPE_LABELS[contentType]}</span>
             </div>
 
             <button
@@ -407,6 +504,9 @@ export default function AIWizard() {
           <Sparkles className="text-md-on-primary" size={32} />
         </div>
         <h2 className="text-headline-sm font-bold text-md-on-surface mb-2">A IA está trabalhando...</h2>
+        <p className="text-body-md text-md-on-surface-variant mb-2">
+          Gerando: <strong>{CONTENT_TYPE_LABELS[contentType]}</strong>
+        </p>
         <p className="text-body-md text-md-on-surface-variant mb-10">Isso pode levar até 30 segundos.</p>
 
         <div className="w-full max-w-xl mx-auto h-2 bg-md-outline rounded-full overflow-hidden mb-8">
@@ -424,7 +524,7 @@ export default function AIWizard() {
               <div
                 key={index}
                 className={`flex items-center gap-3 transition-all duration-500 ${
-                  isCompleted ? 'text-md-tertiary' : isActive ? 'text-md-on-surface font-semibold' : 'text-md-on-surface-variant/60'
+                  isCompleted ? 'text-md-tertiary' : isActive ? 'text-md-on-surface font-semibold' : 'text-md-on-surface-muted'
                 }`}
               >
                 {isCompleted ? (
@@ -453,41 +553,48 @@ export default function AIWizard() {
       <div className="md-card-outlined md-elevation-1 p-6 sm:p-8 animate-[fadeIn_0.3s_ease-out]">
         {renderStepIndicator()}
 
-        <div className="mb-8 flex items-center justify-between">
-          <div>
+        <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
             <h2 className="text-headline-sm font-bold text-md-on-surface flex items-center gap-2">
-              <CheckCircle className="text-md-tertiary" /> Curso Criado!
+              <CheckCircle className="text-md-tertiary" aria-hidden="true" />
+              {result.persisted ? 'Revise o curso antes de publicar' : 'Curso salvo só neste navegador'}
             </h2>
-            <p className="text-body-md text-md-on-surface-variant mt-1">
-              <strong>{result.course.title}</strong> foi publicado com sucesso.
+            <p className="text-body-md text-md-on-surface-variant mt-1" role="status">
+              {result.persisted ? (
+                <><strong>{result.course.title}</strong> está salvo como rascunho e ainda não aparece para os colaboradores.</>
+              ) : (
+                <>Não foi possível salvar <strong>{result.course.title}</strong> no servidor. Ele fica disponível só neste navegador e não chega aos colaboradores.</>
+              )}
             </p>
+            <p className="text-body-sm text-md-on-surface-muted mt-1">Créditos de IA restantes: {result.creditsRemaining}</p>
           </div>
           <button
+            type="button"
             onClick={() => {
               setStep(1);
               setPrompt('');
               setFiles([]);
               setResult(null);
+              setReview(null);
             }}
-            className="text-body-sm font-semibold text-md-on-surface-variant hover:text-md-primary flex items-center gap-1 transition-colors"
+            className="h-11 text-body-sm font-semibold text-md-on-surface-variant hover:text-md-primary-text flex items-center gap-1 transition-colors"
           >
-            <ArrowLeft size={16} /> Criar outro
+            <ArrowLeft size={16} aria-hidden="true" /> Criar outro
           </button>
         </div>
 
         {isTemplate && (
-          <div className="mb-6 p-4 bg-md-highlight/10 border border-md-highlight/30 rounded-xl flex items-start gap-3 text-md-on-highlight">
-            <AlertTriangle size={18} className="flex-shrink-0 mt-0.5" />
+          <div className="mb-6 p-4 bg-md-highlight/10 border border-md-highlight/30 rounded-xl flex items-start gap-3 text-md-highlight">
+            <AlertTriangle size={18} className="flex-shrink-0 mt-0.5" aria-hidden="true" />
             <div className="text-body-sm">
-              <p className="font-bold">Conteúdo gerado por template</p>
+              <p className="font-bold">Rascunho básico, sem IA</p>
               <p className="mt-1">
-                Este curso foi criado com um modelo básico porque nenhuma IA está configurada ou todos os provedores falharam.
-                Para cursos personalizados e inteligentes, configure uma <code className="bg-md-highlight/20 px-1 rounded text-xs">GEMINI_API_KEY</code> no Vercel.
+                A IA não respondeu agora, então criamos um rascunho a partir de um modelo padrão. Edite as aulas antes de publicar, ou gere o curso de novo mais tarde.
               </p>
               {result.aiErrors && result.aiErrors.length > 0 && (
                 <details className="mt-2">
-                  <summary className="cursor-pointer font-medium text-md-on-highlight/70">Ver erros dos provedores</summary>
-                  <ul className="mt-1 space-y-1 ml-4 list-disc text-xs text-md-on-highlight/60">
+                  <summary className="cursor-pointer font-medium">Detalhes técnicos</summary>
+                  <ul className="mt-1 space-y-1 ml-4 list-disc text-xs">
                     {result.aiErrors.map((e, i) => <li key={i}>{e}</li>)}
                   </ul>
                 </details>
@@ -496,51 +603,33 @@ export default function AIWizard() {
           </div>
         )}
 
-        <div className="flex flex-wrap items-center gap-3 mb-6 text-body-sm">
-          <span className="bg-md-tertiary-container text-md-on-tertiary-container font-bold px-3 py-1 rounded-full">
-            {result.lessonsCount} aulas
-          </span>
-          <span className={`font-medium px-3 py-1 rounded-full ${
-            isTemplate ? 'bg-md-highlight/10 text-md-on-highlight' : 'bg-md-tertiary-container text-md-on-tertiary-container'
-          }`}>
-            {isTemplate ? 'Template local' : `IA: ${result.provider}`}
-          </span>
-          <span className="bg-md-surface-container-high text-md-on-surface-variant font-medium px-3 py-1 rounded-full">
-            Créditos restantes: {result.creditsRemaining}
-          </span>
-          {!result.persisted && (
-            <span className="bg-md-highlight/10 text-md-on-highlight font-medium px-3 py-1 rounded-full">
-              Salvo localmente
-            </span>
-          )}
-        </div>
-
-        {lessons.length > 0 && (
-          <div className="bg-md-surface-container border border-md-outline rounded-xl p-6 mb-8">
-            <h3 className="text-title-lg font-bold text-md-on-surface mb-4">Estrutura do Curso</h3>
-            <div className="divide-y divide-md-outline bg-md-surface-container-high border border-md-outline rounded-lg overflow-hidden shadow-sm">
+        {result.persisted ? (
+          review ? (
+            <CourseReview initial={review} />
+          ) : reviewError ? (
+            <p role="alert" className="text-body-sm text-md-error">
+              {reviewError} <a href={`/admin/courses/${result.course.id}`} className="underline">Abrir a revisão</a>
+            </p>
+          ) : (
+            <LoadingRegion label="Abrindo a revisão…" className="space-y-3">
+              {lessons.map((l) => <Skeleton key={l.id} className="h-16 w-full rounded-xl" />)}
+            </LoadingRegion>
+          )
+        ) : (
+          <>
+            <ol className="divide-y divide-md-outline bg-md-surface-container border border-md-outline rounded-xl overflow-hidden mb-6">
               {lessons.map((lesson, i) => (
-                <div key={i} className="px-4 py-3 flex justify-between items-center">
+                <li key={i} className="px-4 py-3 flex justify-between items-center gap-3">
                   <span className="text-body-md font-medium text-md-on-surface">{lesson.title}</span>
-                  <span className="text-label-sm font-bold text-md-primary bg-md-primary-container px-2 py-1 rounded-full">
-                    +{lesson.pointsAssigned} pts
-                  </span>
-                </div>
+                  <span className="text-label-sm text-md-on-surface-muted">+{lesson.pointsAssigned} pts</span>
+                </li>
               ))}
+            </ol>
+            <div className="flex justify-end">
+              <a href="/admin" className="md-btn md-btn-filled">Voltar ao painel</a>
             </div>
-          </div>
+          </>
         )}
-
-        <div className="flex justify-end">
-          <button
-            onClick={() => {
-              window.location.href = '/admin';
-            }}
-            className="md-btn md-btn-filled"
-          >
-            Voltar ao Painel
-          </button>
-        </div>
       </div>
     );
   }

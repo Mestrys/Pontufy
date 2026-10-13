@@ -27,12 +27,6 @@ interface SummaryData {
   totalPointsRedeemed: number;
 }
 
-const CHART_COLORS = {
-  primary: '#5c4152',
-  secondary: '#d97f76',
-  tertiary: '#a1c0ae',
-  highlight: '#f7d0a9',
-};
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
@@ -85,7 +79,7 @@ export default function AnalyticsDashboard() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Loader2 className="animate-spin text-md-primary" size={32} />
+        <Loader2 className="animate-spin text-md-primary-text" size={32} />
       </div>
     );
   }
@@ -95,13 +89,13 @@ export default function AnalyticsDashboard() {
       {summary && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard label="Colaboradores" value={summary.totalUsers} />
-          <StatCard label="Aulas Concluídas" value={summary.totalCompletions} />
-          <StatCard label="Pontos Distribuídos" value={summary.totalPointsAwarded} />
-          <StatCard label="Pontos Resgatados" value={summary.totalPointsRedeemed} />
+          <StatCard label="Aulas concluídas" value={summary.totalCompletions} />
+          <StatCard label="Pontos distribuídos" value={summary.totalPointsAwarded} />
+          <StatCard label="Pontos resgatados" value={summary.totalPointsRedeemed} />
         </div>
       )}
 
-      <ChartCard title="Aulas Concluídas por Dia">
+      <ChartCard title="Aulas concluídas por dia">
         {engagement.length === 0 ? (
           <div className="h-full flex items-center justify-center text-md-on-surface-variant">
             Sem dados de engajamento ainda.
@@ -119,7 +113,7 @@ export default function AnalyticsDashboard() {
         )}
       </ChartCard>
 
-      <ChartCard title="Pontos Distribuídos por Dia">
+      <ChartCard title="Pontos distribuídos por dia">
         {engagement.length === 0 ? (
           <div className="h-full flex items-center justify-center text-md-on-surface-variant">
             Sem dados de pontos ainda.

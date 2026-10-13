@@ -17,7 +17,7 @@ Pontufy é uma plataforma B2B SaaS de gamificação corporativa. Empresas (tenan
 | ORM | Prisma + PostgreSQL | Supabase em produção; SQLite **apenas** local |
 | AI | Vercel AI SDK | **v6** — `maxOutputTokens` (não `maxTokens`), `toTextStreamResponse` (não `toDataStreamResponse`) |
 | Estado | Zustand | `src/store/useStore.ts` para pontos/busca, `useUserStore.ts` para sessão |
-| Estilo | Tailwind CSS | Tema dark: `bg-[#0a0a0a]`, `bg-[#141414]`, `border-[#2a2a2a]`, `text-gray-400` |
+| Estilo | Tailwind CSS v4 | Tokens MD3 `md-*` em `src/app/globals.css` (`@theme`); ver "Tema Visual" |
 | Email | Resend | Via `src/lib/email.ts`; sem `RESEND_API_KEY` imprime no console (dev) |
 | Cache/Queue | Upstash Redis + QStash | Inicialização lazy obrigatória (Vercel Edge não suporta top-level await) |
 | Pagamentos | Stripe | `src/app/api/integrations/` |
@@ -209,22 +209,99 @@ export async function GET() {
 }
 ```
 
-### Tema Visual (Dark)
+### Tema visual (escuro e claro)
 
-Toda UI deve seguir o tema escuro estabelecido:
+Use sempre os tokens `md-*` de `src/app/globals.css`. O app tem **tema escuro e claro**: o padrão é automático (segue o sistema) e a pessoa pode fixar em Perfil → Preferências → Aparência (`lib/theme-pref.ts`, `data-theme` no `<html>`, aplicado antes da primeira pintura pelo script do `layout.tsx`). Os valores do claro ficam no bloco "Tema claro (M1)" do `globals.css` e foram medidos com `contrastRatio` (texto ≥ 4,5:1 sobre #e7e4e9; foco e borda de campo ≥ 3:1). Os contrastes abaixo são do escuro, sobre `md-surface` (#141414). `npm run check:theme` roda no build e reprova as classes proibidas.
+
+**Como testar**: rode os harness de contraste com `colorScheme: 'light'` e `'dark'` no Playwright; um tema verde não diz nada do outro.
+
+**Superfícies**
 
 ```
-Fundo principal:     bg-[#0a0a0a]
-Fundo de card:       bg-[#141414]
-Fundo de input:      bg-[#1f1f1f]
-Bordas:              border-[#2a2a2a]
-Texto primário:      text-white
-Texto secundário:    text-gray-400 / text-gray-500
-Accent (brand):      text-emerald-400 / bg-emerald-600 / hover:bg-emerald-500
-Accent admin:        text-emerald-400
-Accent superadmin:   text-violet-400
-Erro:                text-red-400 / bg-red-500/10 / border-red-500/20
+Fundo da página:     bg-md-surface-dim (#0a0a0a)
+Card / painel:       bg-md-surface (#141414)
+Campo / elevado:     bg-md-surface-container (#1f1f1f)
+Divisor de card:     border-md-outline (#2a2a2a)
+Borda de campo:      automática em input/select/textarea (#636363, 3,07:1)
 ```
+
+**Texto**
+
+```
+Principal:           text-md-on-surface
+Ênfase (título):     text-md-on-surface-strong (branco no escuro, quase preto no claro)
+Sobre foto/vídeo:    text-on-media (branco nos dois temas; só sobre imagem ou véu preto)
+Secundário:          text-md-on-surface-variant (#a3a3a3, 7,30:1)
+Metadados/legenda:   text-md-on-surface-muted (#949494, 6,07:1)
+Link / destaque:     text-md-primary-text (#d99bb8, 8,19:1)
+Sobre preenchimento: text-md-on-primary, text-md-on-tertiary, text-md-on-highlight...
+```
+
+**Mapa semântico de cor** (uma cor, um significado)
+
+```
+Ação primária:       bg-md-primary text-md-on-primary hover:bg-md-primary-container
+Pontos / sucesso:    text-md-tertiary · bg-md-tertiary/10 · border-md-tertiary/20
+Alerta / aviso:      text-md-highlight · bg-md-highlight/10
+Erro:                text-md-error · bg-md-error/10 · border-md-error/30
+Chip tonal:          bg-md-tertiary-container text-md-on-tertiary-container
+```
+
+**Regras**
+
+- `md-primary` (#5c4152) e `md-primary-container` (#b4585d) são **só preenchimento**: como texto ficam entre 2:1 e 3,9:1. Para texto e ícone na cor da marca, use `text-md-primary-text`.
+- Em fundo translúcido (`bg-md-X/10`), o texto é `text-md-X`, nunca `text-md-on-X`. `on-X` só funciona sobre o preenchimento sólido; sobre o tinte chega a 1,02:1.
+- Não use opacidade em texto (`text-.../60`, `opacity-50` em bloco de texto). Escolha o papel de texto mais fraco que ainda passa: `md-on-surface-muted`.
+- Piso tipográfico de **12px** (`text-xs`, `text-label-sm`). Nada de `text-[9px]`, `text-[10px]` ou `text-[11px]`.
+- Foco: o `:focus-visible` global desenha `outline` de 2px em `md-focus` (#f7d0a9). Não use `focus:outline-none`, exceto em campo com `focus:border-md-focus`.
+- **White-label**: a cor do cliente sobrescreve `md-primary`, `md-primary-container`, `md-on-primary(-container)`, `md-primary-text` e `md-secondary` numa `<style id="pontufy-brand">`, com um bloco por tema (`DynamicThemeProvider` → `deriveBrandTheme(cor, destaque, 'dark' | 'light')` e `brandStylesheet` em `lib/branding.ts`, que ajustam a cor até 4,5:1). Nunca no `style` do `<html>`: inline venceria o tema claro. Por isso, nada de hex fixo da paleta em componente: sobre `bg-md-primary` o texto é `text-md-on-primary` (pode ser escuro), nunca `text-white`. Em fundo tingido da marca (`bg-md-primary/15`), use `text-md-on-surface`, não `muted`. Logo e nome da empresa vêm de `useBrand()` / `<BrandMark />`.
+
+**Proibido** (reprovado pelo `check:theme`)
+
+```
+alert() / confirm() / prompt()               → inline, useToast ou AlertDialog
+text-gray-500/600/700, placeholder-gray-*   → text-md-on-surface-muted
+emerald-*                                    → mapa semântico acima
+text-md-primary, text-md-primary-container   → text-md-primary-text
+text-md-on-surface-variant/NN                → text-md-on-surface-muted
+text-[<12px]                                 → text-xs
+text-white, text-gray-*                      → text-md-on-surface-strong / -on-surface / -on-surface-variant, ou text-on-media
+bg-white/NN, border-white/NN                 → bg-md-on-surface-strong/NN (camada de estado), border-md-outline
+bg-gray-*, bg-[#hex], border-[#hex]          → md-surface-*, md-outline, md-outline-variant
+(exceção consciente: comentário "check-theme: ok" na mesma linha)
+```
+
+### Diálogos, avisos e carregamento
+
+- **Todo overlay modal usa `components/ui/Dialog`** (`variant` `center`, `right` ou `left`). Ele já entrega `role="dialog"`, `aria-modal`, foco inicial, foco preso, Escape, pilha de diálogos, trava de rolagem e foco devolvido a quem abriu. Não monte `fixed inset-0` próprio.
+- Para fechar com condição (envio em andamento, respostas não salvas), use `dismissible={false}` ou trate o pedido em `onClose` e abra um `AlertDialog` de confirmação.
+- Painel que só é modal em parte do tempo (gaveta do RH no celular) usa o hook `useModalBehavior`. Menu suspenso não é modal: use `useDismissableMenu`, que fecha com Escape, clique ou foco fora.
+- **Nada de `alert()`, `confirm()` ou `prompt()`** (o `check:theme` reprova). Use:
+  - erro de uma ação → texto inline perto do controle, com `role="alert"` (dentro de um diálogo, sempre inline: um toast fica fora do `aria-modal`);
+  - confirmação de algo que aconteceu ou erro sem lugar fixo → `useToast()` (`tone: 'error'` para erro);
+  - confirmação antes de uma ação destrutiva → `AlertDialog` com `destructive`.
+- Mensagem de erro de API passa por `friendlyApiError()` (`src/lib/api-errors.ts`): nunca mostre o texto cru da rota ("lessonId inválido.").
+- Carregamento de tela usa `Skeleton` dentro de `LoadingRegion` (anuncia "Carregando…"); spinner só dentro de botão. Tela vazia usa `EmptyState` com o próximo passo quando existir.
+- Alvo de toque mínimo de **44px** (`h-11`/`size-11`; `Button` e `.md-btn` já têm). Para ícones pequenos, mantenha o desenho e aumente só a área clicável.
+
+### Texto da interface
+
+- **Sentence case** em títulos, botões, abas e rótulos: “Concluir aula”, “Meus certificados”, “Fazer a avaliação final”. Maiúscula só na primeira palavra e em nomes próprios e siglas (Pontufy, LGPD, IA, RH).
+- **Um nome para cada coisa** (glossário). Use estes, não os sinônimos:
+
+| Use | Não use |
+|---|---|
+| Início | Dashboard, Home |
+| Cursos | Meus Cursos, Treinamentos (na navegação) |
+| Trilhas | Trilhas de Competência, Trilhas de Habilidade |
+| Benefícios | Clube de Benefícios, Recompensas, Loja |
+| Carteira | Central de Conquistas |
+| pontos / pts | XP, moedas |
+| Avaliação final | Quiz Final, Quiz de Avaliação |
+| Painel de RH | Painel do Gestor, Dashboard Admin |
+| Marca | Identidade Visual, Marca & Identidade |
+
+- Mensagem de erro diz o que aconteceu e o que fazer, sem termo técnico (ver `friendlyApiError`). Nada de nome de variável de ambiente, provedor de IA ou rota na tela.
 
 ### Senha e Segurança
 

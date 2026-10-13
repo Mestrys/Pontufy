@@ -38,9 +38,9 @@ export default function RewardToggleRow({ catalog }: { catalog: RewardItem[] }) 
   if (items.length === 0) {
     return (
       <div className="md-card-outlined md-elevation-1 p-8 text-center">
-        <Gift size={48} className="mx-auto text-md-on-surface-variant/30 mb-4" />
+        <Gift size={48} className="mx-auto text-md-on-surface-muted mb-4" aria-hidden="true" />
         <p className="text-body-md text-md-on-surface-variant">Nenhuma recompensa cadastrada</p>
-        <p className="text-body-sm text-md-on-surface-variant/60 mt-1">Adicione recompensas via API ou importe do catálogo</p>
+        <p className="text-body-sm text-md-on-surface-muted mt-1">Adicione recompensas via API ou importe do catálogo</p>
       </div>
     );
   }
@@ -49,15 +49,15 @@ export default function RewardToggleRow({ catalog }: { catalog: RewardItem[] }) 
     <div className="md-card-outlined md-elevation-1 overflow-hidden">
       <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-md-outline bg-md-surface-container-high/50">
         <div className="flex items-center gap-2 mb-1">
-          <Gift className="text-md-primary flex-shrink-0" size={20} />
-          <h2 className="text-title-lg font-bold text-md-on-surface">Controle do Catálogo de Recompensas</h2>
+          <Gift className="text-md-primary-text flex-shrink-0" size={20} />
+          <h2 className="text-title-lg font-bold text-md-on-surface">Catálogo de benefícios</h2>
         </div>
         <p className="text-body-sm text-md-on-surface-variant">
-          Gerencie quais prêmios estarão visíveis no Clube de Benefícios da sua empresa.
+          Escolha quais benefícios os colaboradores da sua empresa veem.
         </p>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Benefícios">
         <table className="w-full text-left border-collapse min-w-[500px]">
           <thead>
             <tr className="bg-md-surface-container-high/50 text-md-on-surface-variant text-label-sm uppercase tracking-wider border-b border-md-outline">
@@ -81,7 +81,7 @@ export default function RewardToggleRow({ catalog }: { catalog: RewardItem[] }) 
                     {item.partner}
                   </div>
                 </td>
-                <td className="px-3 sm:px-6 py-4 text-center font-bold text-md-primary whitespace-nowrap">{item.points} pts</td>
+                <td className="px-3 sm:px-6 py-4 text-center font-bold text-md-primary-text whitespace-nowrap">{item.points} pts</td>
                 <td className="px-3 sm:px-6 py-4 text-center">
                   <span className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-label-sm font-semibold ${
                     item.active
@@ -92,19 +92,27 @@ export default function RewardToggleRow({ catalog }: { catalog: RewardItem[] }) 
                   </span>
                 </td>
                 <td className="px-4 py-3 text-center">
+                  {/* Alvo de 44px; o trilho visível continua com 24px de altura. */}
                   <button
+                    type="button"
+                    role="switch"
+                    aria-checked={item.active}
                     onClick={() => handleToggle(item.id)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-md-primary focus:ring-offset-2 focus:ring-offset-md-surface ${
-                      item.active ? 'bg-md-tertiary' : 'bg-md-outline'
-                    }`}
-                    aria-label={item.active ? 'Desativar recompensa' : 'Ativar recompensa'}
-                    aria-pressed={item.active}
+                    className="h-11 w-14 inline-flex items-center justify-center rounded-full"
+                    aria-label={`Disponível no Benefícios: ${item.title}`}
                   >
                     <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm ${
-                        item.active ? 'translate-x-6' : 'translate-x-1'
+                      aria-hidden="true"
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        item.active ? 'bg-md-tertiary' : 'bg-md-outline-variant'
                       }`}
-                    />
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm ${
+                          item.active ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </span>
                   </button>
                 </td>
               </tr>

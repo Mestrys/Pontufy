@@ -2,9 +2,9 @@
 // Pontufy — Inicialização segura e resiliente dos provedores de IA
 // ═══════════════════════════════════════════════════════════════════════
 // Cadeia de fallback multi-provedor (custo-benefício):
-//   1. Google Gemini (gemini-2.0-flash / gemini-1.5-flash)
+//   1. Google Gemini (gemini-2.5-flash-lite)
 //   2. OpenAI (gpt-4o-mini)
-//   3. Anthropic (claude-3-5-haiku / claude-3-haiku)
+//   3. Anthropic (claude-haiku-4-5)
 //   4. Template local determinístico (último recurso, sem rede)
 //
 // Convenções Vercel AI SDK v6:
@@ -48,7 +48,7 @@ export function buildProviderChain(): ProviderAttempt[] {
   const googleKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
   if (googleKey && isValidGeminiKey(googleKey)) {
     const google = createGoogleGenerativeAI({ apiKey: googleKey });
-    const model = process.env.GOOGLE_COURSE_MODEL || 'gemini-2.0-flash';
+    const model = process.env.GOOGLE_COURSE_MODEL || 'gemini-2.5-flash-lite';
     chain.push({ name: `google:${model}`, label: `Google Gemini (${model})`, build: () => google(model) });
   } else if (googleKey) {
     console.warn(
@@ -64,7 +64,7 @@ export function buildProviderChain(): ProviderAttempt[] {
 
   if (process.env.ANTHROPIC_API_KEY) {
     const anthropic = createAnthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-    const model = process.env.ANTHROPIC_COURSE_MODEL || 'claude-3-5-haiku';
+    const model = process.env.ANTHROPIC_COURSE_MODEL || 'claude-haiku-4-5';
     chain.push({ name: `anthropic:${model}`, label: `Anthropic (${model})`, build: () => anthropic(model) });
   }
 

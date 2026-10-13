@@ -1,8 +1,12 @@
 'use client';
 
-import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
+import { useState, useEffect, useCallback, useRef, useSyncExternalStore, createContext, useContext, ReactNode } from 'react';
 import Link from 'next/link';
-import { signOut } from 'next-auth/react';
+import { usePathname } from 'next/navigation';
+import { signOut, useSession } from 'next-auth/react';
+import { useModalBehavior } from '@/components/ui/Dialog';
+import { useDismissableMenu } from '@/hooks/useDismissableMenu';
+import BrandMark from '@/components/theme/BrandMark';
 import {
   LayoutDashboard,
   BarChart3,
@@ -44,17 +48,17 @@ interface NavItem {
 
 const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
   {
-    label: 'Visão Geral',
+    label: 'Visão geral',
     items: [
-      { href: '/admin', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
-      { href: '/admin/analytics', icon: <BarChart3 size={20} />, label: 'Analytics' },
+      { href: '/admin', icon: <LayoutDashboard size={20} />, label: 'Painel' },
+      { href: '/admin/analytics', icon: <BarChart3 size={20} />, label: 'Indicadores' },
     ],
   },
   {
-    label: 'Cursos & Treinamentos',
+    label: 'Cursos',
     items: [
-      { href: '/admin/wizard', icon: <Sparkles size={20} />, label: 'IA Cursos' },
-      { href: '/admin/skills', icon: <FileText size={20} />, label: 'Trilhas de Habilidade' },
+      { href: '/admin/wizard', icon: <Sparkles size={20} />, label: 'Criar curso com IA' },
+      { href: '/admin/skills', icon: <FileText size={20} />, label: 'Trilhas' },
     ],
   },
   {
@@ -66,25 +70,73 @@ const NAV_SECTIONS: { label: string; items: NavItem[] }[] = [
   {
     label: 'Catálogo',
     items: [
-      { href: '/admin/rewards', icon: <Gift size={20} />, label: 'Recompensas' },
+      // O catálogo é gerido no painel (seção #recompensas); não há rota própria.
+      { href: '/admin#recompensas', icon: <Gift size={20} />, label: 'Benefícios' },
     ],
   },
   {
     label: 'Configurações',
     items: [
-      { href: '/admin/settings/branding', icon: <Settings size={20} />, label: 'Marca & Identidade' },
+      { href: '/admin/settings/branding', icon: <Settings size={20} />, label: 'Marca' },
       { href: '/admin/audit-logs', icon: <ShieldCheck size={20} />, label: 'Auditoria' },
     ],
   },
 ];
 
+// Item ativo pela rota atual. Links com âncora (#) apontam para uma seção de
+// outra página e nunca ficam ativos; subrotas ativam o item pai.
+function isNavItemActive(href: string, pathname: string): boolean {
+  if (href.includes('#')) return false;
+  if (href === '/admin') return pathname === '/admin';
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+function currentSectionLabel(pathname: string): string {
+  for (const section of NAV_SECTIONS) {
+    for (const item of section.items) {
+      if (isNavItemActive(item.href, pathname)) return item.label;
+    }
+  }
+  return 'Painel';
+}
+
+// No celular (< md) a gaveta lateral vira um modal; no desktop é navegação fixa.
+const MOBILE_QUERY = '(max-width: 767px)';
+function subscribeMobile(cb: () => void) {
+  const mq = window.matchMedia(MOBILE_QUERY);
+  mq.addEventListener('change', cb);
+  return () => mq.removeEventListener('change', cb);
+}
+
 export function AdminLayoutProvider({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const { data: session } = useSession();
   const [navOpen, setNavOpen] = useState(false);
   const [navCollapsed, setNavCollapsed] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [aiCredits, setAiCredits] = useState(0);
   const [tenant, setTenant] = useState<{ name: string; aiCredits: number } | null>(null);
+  const isMobile = useSyncExternalStore(subscribeMobile, () => window.matchMedia(MOBILE_QUERY).matches, () => false);
+  const asideRef = useRef<HTMLElement>(null);
+  const closeNav = useCallback(() => setNavOpen(false), []);
+  useModalBehavior({ open: navOpen && isMobile, panelRef: asideRef, onClose: closeNav });
+
+  // Fecha a gaveta ao trocar de página.
+  const [navPath, setNavPath] = useState(pathname);
+  if (navPath !== pathname) {
+    setNavPath(pathname);
+    setNavOpen(false);
+  }
+
+  const profileRef = useRef<HTMLDivElement>(null);
+  const profileButtonRef = useRef<HTMLButtonElement>(null);
+  const notificationsRef = useRef<HTMLDivElement>(null);
+  const notificationsButtonRef = useRef<HTMLButtonElement>(null);
+  const closeProfile = useCallback(() => setProfileOpen(false), []);
+  const closeNotifications = useCallback(() => setNotificationsOpen(false), []);
+  useDismissableMenu(profileOpen, closeProfile, profileRef, profileButtonRef);
+  useDismissableMenu(notificationsOpen, closeNotifications, notificationsRef, notificationsButtonRef);
 
   // Load tenant info and AI credits
   useEffect(() => {
@@ -99,19 +151,14 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
       .catch(() => {});
   }, []);
 
-  // Handle outside click for profile dropdown
+  // O wizard avisa o novo saldo após gerar um curso (o layout não remonta).
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (!target.closest('[data-profile-dropdown]')) {
-        setProfileOpen(false);
-      }
-      if (!target.closest('[data-notifications-dropdown]')) {
-        setNotificationsOpen(false);
-      }
+    const onCredits = (e: Event) => {
+      const value = (e as CustomEvent<number>).detail;
+      if (typeof value === 'number') setAiCredits(value);
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    window.addEventListener('pontufy:ai-credits', onCredits);
+    return () => window.removeEventListener('pontufy:ai-credits', onCredits);
   }, []);
 
   const handleSignOut = () => signOut({ callbackUrl: '/login' });
@@ -130,7 +177,12 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
 
         {/* Navigation Drawer */}
         <aside
-          className={`fixed h-full z-50 transition-all duration-300 ease-standard bg-md-surface-container border-r border-md-outline flex flex-col ${
+          ref={asideRef}
+          // Fechada no celular, sai da ordem de Tab; aberta, é um diálogo modal.
+          inert={isMobile && !navOpen}
+          role={isMobile && navOpen ? 'dialog' : undefined}
+          aria-modal={isMobile && navOpen ? true : undefined}
+          className={`fixed h-full z-50 transition-all duration-300 ease-standard bg-md-surface-container border-r border-md-outline flex flex-col pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] ${
             navCollapsed
               ? 'w-16 md:w-16'
               : 'w-64 md:w-64'
@@ -140,15 +192,15 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
           {/* Drawer Header */}
           <div className={`flex items-center justify-between p-4 border-b border-md-outline ${navCollapsed ? 'justify-center' : ''}`}>
             {!navCollapsed && (
-              <Link href="/admin" className="flex items-center gap-2 text-xl font-black tracking-tighter text-md-on-surface">
-                <span className="text-md-primary">Pontu</span>fy
-                <span className="text-md-primary">Admin</span>
+              <Link href="/admin" aria-label="Painel de RH" className="min-h-11 flex items-center gap-2 text-xl font-black tracking-tighter text-md-on-surface">
+                <BrandMark />
+                <span className="text-sm font-bold tracking-normal text-md-on-surface-muted">RH</span>
               </Link>
             )}
             <button
               type="button"
               onClick={() => setNavCollapsed(!navCollapsed)}
-              className={`p-2 rounded-xl hover:bg-md-surface-container-high transition-colors ${
+              className={`size-11 flex items-center justify-center rounded-xl hover:bg-md-surface-container-high transition-colors ${
                 navCollapsed ? 'mx-auto' : 'ml-auto'
               }`}
               aria-label={navCollapsed ? 'Expandir menu' : 'Colapsar menu'}
@@ -167,7 +219,7 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
           {!navCollapsed && tenant && (
             <div className="mx-3 mb-4 p-3 bg-md-primary-container/20 border border-md-primary-container/30 rounded-xl">
               <div className="flex items-center gap-2 text-body-sm">
-                <Building2 size={16} className="text-md-primary" />
+                <Building2 size={16} className="text-md-primary-text" />
                 <span className="font-semibold text-md-on-surface truncate">{tenant.name}</span>
               </div>
               <div className="mt-2 flex items-center gap-1.5">
@@ -183,16 +235,19 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
           <nav className="flex-1 overflow-y-auto p-2" aria-label="Menu principal">
             {NAV_SECTIONS.map((section) => (
               <div key={section.label} className={navCollapsed ? 'hidden' : 'block'}>
-                <h3 className="px-3 py-1 text-label-sm text-md-on-surface-variant/60 uppercase tracking-widest">
+                <h3 className="px-3 py-1 text-label-sm text-md-on-surface-muted uppercase tracking-widest">
                   {section.label}
                 </h3>
                 <div className="space-y-1">
-                  {section.items.map((item) => (
+                  {section.items.map((item) => {
+                    const active = isNavItemActive(item.href, pathname);
+                    return (
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-body-md font-medium transition-all duration-200 ${
-                        item.href === window.location.pathname
+                      aria-current={active ? 'page' : undefined}
+                      className={`flex items-center gap-3 px-3 py-3 rounded-xl text-body-md font-medium transition-all duration-200 ${
+                        active
                           ? 'bg-md-primary-container text-md-on-primary-container'
                           : 'text-md-on-surface-variant hover:bg-md-surface-container-high hover:text-md-on-surface'
                       }`}
@@ -206,7 +261,8 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
                         </span>
                       )}
                     </Link>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             ))}
@@ -220,16 +276,16 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
               <>
                 <Link
                   href="/dashboard"
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-body-md font-medium text-md-on-surface-variant hover:bg-md-surface-container-high hover:text-md-on-surface transition-colors mb-2"
+                  className="flex items-center gap-3 px-3 py-3 rounded-xl text-body-md font-medium text-md-on-surface-variant hover:bg-md-surface-container-high hover:text-md-on-surface transition-colors mb-2"
                   onClick={() => setNavOpen(false)}
                 >
                   <span className="flex-shrink-0"><LayoutDashboard size={20} /></span>
-                  <span>Visão do Colaborador</span>
+                  <span>Ver como colaborador</span>
                 </Link>
                 <button
                   type="button"
                   onClick={handleSignOut}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-body-md font-medium text-md-error hover:bg-md-error/10 transition-colors"
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-body-md font-medium text-md-error hover:bg-md-error/10 transition-colors"
                 >
                   <span className="flex-shrink-0"><LogOut size={20} /></span>
                   <span>Sair</span>
@@ -241,7 +297,8 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
                   type="button"
                   onClick={() => { window.location.href = '/dashboard'; }}
                   className="p-2.5 rounded-xl text-md-on-surface-variant hover:bg-md-surface-container-high hover:text-md-on-surface transition-colors"
-                  title="Visão do Colaborador"
+                  title="Ver como colaborador"
+                  aria-label="Ver como colaborador"
                 >
                   <LayoutDashboard size={22} />
                 </button>
@@ -250,6 +307,7 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
                   onClick={handleSignOut}
                   className="p-2.5 rounded-xl text-md-error hover:bg-md-error/10 transition-colors"
                   title="Sair"
+                  aria-label="Sair"
                 >
                   <LogOut size={22} />
                 </button>
@@ -258,38 +316,42 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
           </div>
         </aside>
 
-        {/* Mobile drawer toggle button (only visible on mobile when drawer closed) */}
-        <button
-          type="button"
-          onClick={() => setNavOpen(true)}
-          className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-xl bg-md-surface-container border border-md-outline shadow-md"
-          aria-label="Abrir menu"
-        >
-          <Menu size={24} className="text-md-on-surface" />
-        </button>
-
         {/* Main Content */}
         <main className={`flex-1 min-h-screen transition-all duration-300 ${navCollapsed ? 'md:ml-16' : 'md:ml-64'}`}>
           {/* Top App Bar */}
-          <header className="sticky top-0 z-30 bg-md-surface-container border-b border-md-outline backdrop-blur-sm bg-opacity-80">
+          <header className="sticky top-0 z-30 bg-md-surface-container border-b border-md-outline backdrop-blur-sm bg-opacity-80 pt-[env(safe-area-inset-top)]">
             <div className="flex items-center justify-between h-16 px-4 sm:px-6 md:px-8">
-              {/* Page Title */}
-              <div className="flex-1" data-page-title>
-                {children && false} // Placeholder - actual title comes from page
+              {/* Mobile: botão do menu dentro da barra (não sobrepõe o conteúdo)
+                  e o nome da seção atual, já que a gaveta fica oculta. No
+                  desktop a gaveta mostra o item ativo e cada página tem seu h1. */}
+              <div className="flex-1 min-w-0 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setNavOpen(true)}
+                  className="md:hidden -ml-2 size-11 flex items-center justify-center rounded-xl text-md-on-surface hover:bg-md-surface-container-high transition-colors"
+                  aria-label="Abrir menu"
+                  aria-expanded={navOpen}
+                >
+                  <Menu size={24} aria-hidden="true" />
+                </button>
+                <span className="md:hidden text-title-md text-md-on-surface truncate">
+                  {currentSectionLabel(pathname)}
+                </span>
               </div>
 
               {/* Actions */}
               <div className="flex items-center gap-2">
                 {/* Notifications */}
-                <div className="relative" data-notifications-dropdown>
+                <div className="relative" ref={notificationsRef}>
                   <button
+                    ref={notificationsButtonRef}
                     type="button"
                     onClick={() => setNotificationsOpen(!notificationsOpen)}
-                    className="p-2 rounded-xl text-md-on-surface-variant hover:bg-md-surface-container-high hover:text-md-on-surface transition-colors"
+                    className="size-11 flex items-center justify-center rounded-xl text-md-on-surface-variant hover:bg-md-surface-container-high hover:text-md-on-surface transition-colors"
                     aria-label="Notificações"
                     aria-expanded={notificationsOpen}
                   >
-                    <Bell size={22} />
+                    <Bell size={22} aria-hidden="true" />
                     {/* Badge would go here */}
                   </button>
                   {notificationsOpen && (
@@ -300,11 +362,12 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
                 </div>
 
                 {/* Profile Dropdown */}
-                <div className="relative" data-profile-dropdown>
+                <div className="relative" ref={profileRef}>
                   <button
+                    ref={profileButtonRef}
                     type="button"
                     onClick={() => setProfileOpen(!profileOpen)}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-md-surface-container-high transition-colors"
+                    className="flex items-center gap-2 px-3 min-h-11 rounded-xl hover:bg-md-surface-container-high transition-colors"
                     aria-label="Menu do perfil"
                     aria-expanded={profileOpen}
                   >
@@ -317,7 +380,7 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
                       {tenant?.name || 'Administrador'}
                     </span>
                     <span className="hidden sm:block text-label-sm text-md-tertiary bg-md-tertiary-container px-2 py-0.5 rounded-full">
-                      admin_rh
+                      Gestão de RH
                     </span>
                     <ChevronDown size={16} className={`text-md-on-surface-variant transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
                   </button>
@@ -326,8 +389,10 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
                     <div className="absolute right-0 top-full mt-2 w-56 bg-md-surface-container border border-md-outline rounded-2xl shadow-lg md-elevation-3 py-2">
                       <div className="px-4 py-3 border-b border-md-outline">
                         <p className="text-body-md font-semibold text-md-on-surface">{tenant?.name || 'Administrador'}</p>
-                        <p className="text-body-sm text-md-on-surface-variant">admin@empresa.com</p>
-                        <span className="inline-block mt-1 text-label-sm text-md-tertiary bg-md-tertiary-container px-2 py-0.5 rounded-full">admin_rh</span>
+                        {session?.user?.email && (
+                          <p className="text-body-sm text-md-on-surface-variant truncate">{session.user.email}</p>
+                        )}
+                        <span className="inline-block mt-1 text-label-sm text-md-tertiary bg-md-tertiary-container px-2 py-0.5 rounded-full">Gestão de RH</span>
                       </div>
                       <Link
                         href="/profile"

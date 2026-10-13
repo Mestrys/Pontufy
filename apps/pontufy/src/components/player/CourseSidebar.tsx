@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import {
   CheckCircle2,
   PlayCircle,
@@ -27,6 +27,10 @@ interface CourseSidebarProps {
   allCompleted: boolean;
   quizPassed: boolean;
   onOpenQuiz: () => void;
+  /** Começa recolhido (usado no celular para priorizar a aula). */
+  defaultCollapsed?: boolean;
+  /** Pré-visualização de rascunho: todas as aulas abertas, sem quiz. */
+  preview?: boolean;
 }
 
 export default function CourseSidebar({
@@ -37,8 +41,11 @@ export default function CourseSidebar({
   allCompleted,
   quizPassed,
   onOpenQuiz,
+  defaultCollapsed = false,
+  preview = false,
 }: CourseSidebarProps) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(defaultCollapsed);
+  const listId = useId();
   const progress = lessons.length > 0 ? Math.round((completedCount / lessons.length) * 100) : 0;
 
   // Acesso sequencial: a primeira aula incompleta é a "em andamento";
@@ -46,21 +53,23 @@ export default function CourseSidebar({
   const firstIncompleteIndex = lessons.findIndex((l) => !l.completed);
 
   return (
-    <div className="w-full h-full bg-md-surface flex flex-col overflow-hidden">
+    <div className="w-full h-full min-h-0 bg-md-surface flex flex-col overflow-hidden">
       {/* Header com colapso */}
       <div className="p-4 border-b border-md-outline flex-shrink-0">
         <button
+          type="button"
           onClick={() => setCollapsed((c) => !c)}
-          className="w-full flex items-center justify-between"
+          className="w-full min-h-11 -my-2 flex items-center justify-between"
           aria-expanded={!collapsed}
+          aria-controls={listId}
         >
-          <h2 className="font-bold text-white text-sm">Conteúdo do Curso</h2>
+          <h2 className="font-bold text-md-on-surface-strong text-sm">Conteúdo do curso</h2>
           <ChevronDown
             size={16}
-            className={`text-gray-500 transition-transform ${collapsed ? '-rotate-90' : ''}`}
+            className={`text-md-on-surface-muted transition-transform ${collapsed ? '-rotate-90' : ''}`}
           />
         </button>
-        <div className="flex items-center justify-between text-xs text-gray-500 mb-2 mt-3">
+        <div className="flex items-center justify-between text-xs text-md-on-surface-muted mb-2 mt-3">
           <span>{completedCount}/{lessons.length} aulas</span>
           <span className="text-md-tertiary font-bold">{progress}%</span>
         </div>
@@ -75,10 +84,10 @@ export default function CourseSidebar({
       {!collapsed && (
         <>
           {/* Lista de aulas */}
-          <div className="flex-1 overflow-y-auto">
+          <div id={listId} className="flex-1 min-h-0 overflow-y-auto">
             {lessons.map((lesson, index) => {
               const isActive = activeLesson?.id === lesson.id;
-              const locked = !lesson.completed && index > firstIncompleteIndex && !isActive;
+              const locked = !preview && !lesson.completed && index > firstIncompleteIndex && !isActive;
 
               return (
                 <button
@@ -95,24 +104,24 @@ export default function CourseSidebar({
                     {lesson.completed ? (
                       <CheckCircle2 size={17} className="text-md-tertiary" />
                     ) : locked ? (
-                      <Lock size={17} className="text-gray-600" />
+                      <Lock size={17} className="text-md-on-surface-muted" />
                     ) : isActive ? (
                       <PlayCircle size={17} className="text-md-secondary" />
                     ) : (
-                      <Circle size={17} className="text-gray-600" />
+                      <Circle size={17} className="text-md-on-surface-muted" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p
                       className={`text-xs leading-snug ${
-                        isActive ? 'text-white font-bold' : 'text-gray-400 font-medium'
-                      } ${lesson.completed ? 'line-through opacity-50' : ''}`}
+                        isActive ? 'text-md-on-surface-strong font-bold' : lesson.completed ? 'text-md-on-surface-muted font-medium' : 'text-md-on-surface-variant font-medium'
+                      }`}
                     >
-                      <span className="text-gray-600 mr-1">{index + 1}.</span>
+                      <span className={`mr-1 ${isActive ? 'text-md-on-surface' : 'text-md-on-surface-muted'}`}>{index + 1}.</span>
                       {lesson.title}
                     </p>
                     {!lesson.completed && !locked && (
-                      <div className="flex items-center gap-1 mt-1 text-[10px] text-md-tertiary font-bold">
+                      <div className="flex items-center gap-1 mt-1 text-xs text-md-tertiary font-bold">
                         <Coins size={10} /> +{lesson.points} pts
                       </div>
                     )}
@@ -132,7 +141,7 @@ export default function CourseSidebar({
                   ? 'bg-md-tertiary/10 text-md-tertiary border border-md-tertiary/40'
                   : allCompleted
                     ? 'bg-md-primary text-md-on-primary hover:bg-md-primary-container'
-                    : 'bg-md-surface-container text-gray-600 cursor-not-allowed border border-md-outline'
+                    : 'bg-md-surface-container text-md-on-surface-muted cursor-not-allowed border border-md-outline'
               }`}
             >
               {quizPassed ? (
@@ -142,7 +151,7 @@ export default function CourseSidebar({
               ) : (
                 <>
                   <Trophy size={16} />
-                  {allCompleted ? 'Fazer Quiz Final' : 'Quiz Final (+50 pts)'}
+                  {allCompleted ? 'Fazer a avaliação final' : 'Avaliação final (+50 pts)'}
                 </>
               )}
             </button>
