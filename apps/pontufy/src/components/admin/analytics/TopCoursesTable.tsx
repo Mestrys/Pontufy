@@ -34,7 +34,7 @@ export default function TopCoursesTable({ courses }: TopCoursesTableProps) {
   }
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Cursos mais concluídos">
       <table className="w-full text-sm">
         <thead>
           <tr className="text-left text-xs text-md-on-surface-muted uppercase tracking-wide border-b border-[#2a2a2a]">

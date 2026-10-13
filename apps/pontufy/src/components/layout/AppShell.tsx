@@ -2,7 +2,6 @@
 
 import { usePathname } from 'next/navigation';
 import Navbar from './Navbar';
-import Footer from './Footer';
 import MobileTabBar from './MobileTabBar';
 import { hasAppShell } from './shell-routes';
 
@@ -15,7 +14,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Navbar />
-      <div className="pt-[72px] flex-1">
+      <div className="pt-[calc(72px+env(safe-area-inset-top))] flex-1">
         {/* Transição de página M3 (fade + subida curta), chaveada por rota. CSS
             em vez de framer-motion: useReducedMotion dava um estado no servidor
             e outro no navegador (erro de hidratação com movimento reduzido); o
@@ -24,10 +23,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           {children}
         </main>
       </div>
-      {/* Espaço para a barra inferior no celular não cobrir o rodapé. */}
-      <div className="pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
-        <Footer />
-      </div>
+      {/* O rodapé jurídico saiu das telas do app (fica no Perfil e no login).
+          Espaço para a barra inferior no celular não cobrir o fim da página. */}
+      <div aria-hidden="true" className="h-[calc(4rem+env(safe-area-inset-bottom))] md:h-0" />
       <MobileTabBar />
     </>
   );

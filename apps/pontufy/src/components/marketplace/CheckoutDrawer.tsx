@@ -198,7 +198,7 @@ export default function CheckoutDrawer({
                   <button
                     type="button"
                     onClick={handleRedeem}
-                    className="w-full py-4 rounded-xl font-bold text-md-on-primary shadow-lg bg-md-primary hover:bg-md-primary-container hover:shadow-xl transition-all hover:scale-[1.02] flex items-center justify-center gap-2"
+                    className="w-full py-4 rounded-xl font-bold text-md-on-primary shadow-lg bg-md-primary hover:bg-md-primary-container hover:shadow-xl transition-colors flex items-center justify-center gap-2"
                   >
                     Confirmar resgate
                   </button>

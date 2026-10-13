@@ -57,7 +57,7 @@ export default function RewardToggleRow({ catalog }: { catalog: RewardItem[] }) 
         </p>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Benefícios">
         <table className="w-full text-left border-collapse min-w-[500px]">
           <thead>
             <tr className="bg-md-surface-container-high/50 text-md-on-surface-variant text-label-sm uppercase tracking-wider border-b border-md-outline">

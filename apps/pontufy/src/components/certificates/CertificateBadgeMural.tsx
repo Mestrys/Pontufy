@@ -98,7 +98,7 @@ export default function CertificateBadgeMural({ certificates }: { certificates: 
           return (
             <article
               key={cert.id}
-              className={`relative group overflow-hidden rounded-2xl p-5 border transition-all duration-300 ${cfg.bg} ${cfg.border} hover:border-opacity-70 hover:scale-[1.015]`}
+              className={`relative group overflow-hidden rounded-2xl p-5 border transition-all duration-300 ${cfg.bg} ${cfg.border} hover:border-opacity-70 motion-safe:hover:scale-[1.015]`}
             >
               {/* Rarity badge */}
               <div className="absolute top-3 right-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm border text-xs font-bold uppercase tracking-wider">

@@ -343,7 +343,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
       />
 
       {/* Top bar (Udemy-style) */}
-      <div className="h-14 flex-shrink-0 bg-md-surface border-b border-md-outline flex items-center px-4 gap-4 z-40">
+      <div className="h-[calc(3.5rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] flex-shrink-0 bg-md-surface border-b border-md-outline flex items-center px-4 gap-4 z-40">
         <Link
           href="/dashboard"
           className="-ml-2 h-11 min-w-11 px-2 flex items-center justify-center gap-2 rounded-lg text-gray-400 hover:text-white transition-colors text-sm font-medium"
@@ -466,7 +466,7 @@ export default function CoursePlayerPage({ params }: { params: Promise<{ id: str
       {/* Sidebar (mobile bottom sheet) */}
       {/* No celular o sumário começa recolhido: a aula fica com a maior parte
           da tela e a lista abre sob demanda. */}
-      <div className="lg:hidden border-t border-md-outline bg-md-surface max-h-[45dvh] flex flex-col min-h-0">
+      <div className="lg:hidden border-t border-md-outline bg-md-surface max-h-[45dvh] flex flex-col min-h-0 pb-[env(safe-area-inset-bottom)]">
         <CourseSidebar
           defaultCollapsed
           lessons={lessons.map((l) => ({

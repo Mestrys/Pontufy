@@ -54,7 +54,7 @@ export default function ProfilePage() {
   const { currentPoints } = useUserStore();
   const [name, setName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  const [soundEnabled, setSound] = useState(true);
+  const [soundEnabled, setSound] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
@@ -255,11 +255,18 @@ export default function ProfilePage() {
             destructive
           />
 
-          <div className="text-center">
-            <Link href="/wallet" className="inline-flex items-center min-h-11 text-sm text-gray-400 hover:text-white transition-colors font-medium">
-              ← Ver histórico de pontos na Carteira
-            </Link>
-          </div>
+          {/* Ajuda e informações legais: saíram do rodapé de todas as telas (M9). */}
+          <section className="bg-md-surface border border-md-outline rounded-xl p-6" aria-labelledby="about-heading">
+            <h2 id="about-heading" className="font-bold text-white mb-2">Ajuda e termos</h2>
+            <ul className="text-sm">
+              <li><a href="mailto:ajuda@pontufy.com" className="inline-flex min-h-11 items-center text-md-primary-text hover:underline">Falar com a ajuda: ajuda@pontufy.com</a></li>
+              <li><Link href="/termos" className="inline-flex min-h-11 items-center text-md-primary-text hover:underline">Termos de uso</Link></li>
+              <li><Link href="/privacidade" className="inline-flex min-h-11 items-center text-md-primary-text hover:underline">Política de privacidade</Link></li>
+            </ul>
+            <p className="mt-3 text-xs text-md-on-surface-muted">
+              Pontufy é operado pela Mestry&apos;s Tecnologia e Consultoria em TI LTDA · CNPJ 68.027.889/0001-34
+            </p>
+          </section>
         </div>
       </div>
     </div>

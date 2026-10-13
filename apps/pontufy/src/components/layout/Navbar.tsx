@@ -59,7 +59,7 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`fixed top-0 w-full z-50 px-4 sm:px-8 py-3 transition-all duration-500 ${
+        className={`fixed top-0 w-full z-50 px-4 sm:px-8 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:pl-8 sm:pr-8 transition-all duration-500 ${
           isScrolled || isMobileMenuOpen
             ? 'bg-md-surface/96 backdrop-blur-sm shadow-lg shadow-black/50'
             : 'bg-gradient-to-b from-black/80 via-black/40 to-transparent'

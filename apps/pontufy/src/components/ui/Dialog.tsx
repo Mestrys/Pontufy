@@ -223,6 +223,8 @@ export function Dialog({
             exit={reduceMotion ? { opacity: 0 } : offscreen}
             transition={reduceMotion ? { duration: 0.01 } : { type: 'spring', damping: 30, stiffness: 320 }}
             className={`relative outline-none ${className}`}
+            // Gavetas laterais vão até a borda: respeitam o entalhe e a barra do iPhone.
+            style={variant === 'center' ? undefined : { paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
           >
             {children}
           </motion.div>

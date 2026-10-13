@@ -8,11 +8,13 @@ export type FeedbackType = 'success' | 'points' | 'quiz-correct' | 'quiz-wrong';
 
 const SOUND_KEY = 'pontufy-sound-enabled';
 
+// Começa desligado (contexto corporativo, M11): só toca depois que a pessoa
+// liga em Perfil → Preferências.
 export function isSoundEnabled(): boolean {
   try {
-    return localStorage.getItem(SOUND_KEY) !== '0';
+    return localStorage.getItem(SOUND_KEY) === '1';
   } catch {
-    return true;
+    return false;
   }
 }
 

@@ -63,7 +63,7 @@ function RegisterForm() {
   if (!token) {
     return (
       <div className="md-card-outlined md-elevation-3 p-8 text-center">
-        <Link href="/" className="inline-flex items-center min-h-11 gap-2 text-3xl font-black tracking-tight text-white mb-6">
+        <Link href="/" className="inline-flex items-center min-h-11 text-3xl font-black tracking-tight text-white mb-6">
           <span className="text-md-primary-text">Pontu</span>fy
         </Link>
         <div className="text-md-error mb-4" style={{fontSize: '48px'}}>📨</div>
@@ -85,7 +85,7 @@ function RegisterForm() {
   if (inviteError) {
     return (
       <div className="md-card-outlined md-elevation-3 p-8 text-center">
-        <Link href="/" className="inline-flex items-center min-h-11 gap-2 text-3xl font-black tracking-tight text-white mb-6">
+        <Link href="/" className="inline-flex items-center min-h-11 text-3xl font-black tracking-tight text-white mb-6">
           <span className="text-md-primary-text">Pontu</span>fy
         </Link>
         <div className="text-md-error mb-4" style={{fontSize: '48px'}}>⚠️</div>
@@ -101,7 +101,7 @@ function RegisterForm() {
   if (success) {
     return (
       <div className="md-card-outlined md-elevation-3 p-8 text-center">
-        <Link href="/" className="inline-flex items-center min-h-11 gap-2 text-3xl font-black tracking-tight text-white mb-6">
+        <Link href="/" className="inline-flex items-center min-h-11 text-3xl font-black tracking-tight text-white mb-6">
           <span className="text-md-primary-text">Pontu</span>fy
         </Link>
         <CheckCircle2 size={48} className="text-md-tertiary mx-auto mb-4" />
@@ -157,7 +157,7 @@ function RegisterForm() {
   return (
     <div className="md-card-outlined md-elevation-3 p-8">
       <form className="space-y-5" onSubmit={handleSubmit}>
-        <Link href="/" className="inline-flex items-center gap-2 text-3xl font-black tracking-tight text-white mb-4 block text-center">
+        <Link href="/" className="inline-flex items-center text-3xl font-black tracking-tight text-white mb-4 block text-center">
           <span className="text-md-primary-text">Pontu</span>fy
         </Link>
 

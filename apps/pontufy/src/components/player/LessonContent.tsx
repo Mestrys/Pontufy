@@ -80,7 +80,7 @@ export default function LessonContent({
           - aula concluída → "Próxima aula" (ou status "Aula concluída" na última)
           O acesso é sequencial (o sumário bloqueia as aulas seguintes), então
           não há botão para pular a aula sem concluí-la. */}
-      <div className="flex-shrink-0 px-4 sm:px-10 py-3 sm:py-4 bg-md-surface border-t border-md-outline">
+      <div className="flex-shrink-0 px-4 sm:px-10 py-3 sm:py-4 lg:pb-[calc(1rem+env(safe-area-inset-bottom))] bg-md-surface border-t border-md-outline">
         {completionError && (
           <p role="alert" className="mb-3 max-w-4xl text-sm text-md-error">
             {completionError}

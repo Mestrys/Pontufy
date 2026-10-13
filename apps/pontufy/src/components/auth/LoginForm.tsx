@@ -69,7 +69,7 @@ export function LoginForm() {
   return (
     <div className="md-card-outlined md-elevation-3 p-8 w-full max-w-md mx-auto">
       <div className="text-center mb-8">
-        <Link href="/" className="inline-flex items-center min-h-11 gap-2 text-3xl font-black tracking-tight text-white mb-6">
+        <Link href="/" className="inline-flex items-center min-h-11 text-3xl font-black tracking-tight text-white mb-6">
           <span className="text-md-primary-text">Pontu</span>fy
         </Link>
         <h1 className="text-headline-sm font-bold text-md-on-surface mb-2">Entrar</h1>
@@ -166,6 +166,10 @@ export function LoginForm() {
         <Link href="/register" className="font-semibold text-md-primary-text hover:text-md-on-surface transition-colors">
           Criar minha conta
         </Link>
+      </p>
+      <p className="mt-4 flex justify-center gap-4 text-xs">
+        <Link href="/termos" className="inline-flex min-h-11 items-center text-md-on-surface-muted hover:text-md-on-surface">Termos de uso</Link>
+        <Link href="/privacidade" className="inline-flex min-h-11 items-center text-md-on-surface-muted hover:text-md-on-surface">Privacidade</Link>
       </p>
     </div>
   );

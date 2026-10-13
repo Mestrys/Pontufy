@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Roboto, Geist_Mono } from "next/font/google";
 import AuthProvider from "@/components/providers/AuthProvider";
 import AppShell from "@/components/layout/AppShell";
@@ -43,7 +43,6 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://pontufy.com"),
   other: {
     lomadee: "2324685",
-    "theme-color": "#0a0a0a",
   },
   // Explicit meta tags for lomadee verification
   verification: {
@@ -51,6 +50,16 @@ export const metadata: Metadata = {
       lomadee: "2324685",
     },
   },
+};
+
+// viewport-fit=cover: com a barra de status translúcida (appleWebApp) o app
+// desenha até as bordas do iPhone, e os elementos fixos usam
+// env(safe-area-inset-*) para não ficar sob o entalhe ou a barra de início.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#0a0a0a",
 };
 
 // Aplica a marca do tenant guardada na última visita antes da primeira pintura,

@@ -182,7 +182,7 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
           inert={isMobile && !navOpen}
           role={isMobile && navOpen ? 'dialog' : undefined}
           aria-modal={isMobile && navOpen ? true : undefined}
-          className={`fixed h-full z-50 transition-all duration-300 ease-standard bg-md-surface-container border-r border-md-outline flex flex-col ${
+          className={`fixed h-full z-50 transition-all duration-300 ease-standard bg-md-surface-container border-r border-md-outline flex flex-col pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] ${
             navCollapsed
               ? 'w-16 md:w-16'
               : 'w-64 md:w-64'
@@ -319,7 +319,7 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
         {/* Main Content */}
         <main className={`flex-1 min-h-screen transition-all duration-300 ${navCollapsed ? 'md:ml-16' : 'md:ml-64'}`}>
           {/* Top App Bar */}
-          <header className="sticky top-0 z-30 bg-md-surface-container border-b border-md-outline backdrop-blur-sm bg-opacity-80">
+          <header className="sticky top-0 z-30 bg-md-surface-container border-b border-md-outline backdrop-blur-sm bg-opacity-80 pt-[env(safe-area-inset-top)]">
             <div className="flex items-center justify-between h-16 px-4 sm:px-6 md:px-8">
               {/* Mobile: botão do menu dentro da barra (não sobrepõe o conteúdo)
                   e o nome da seção atual, já que a gaveta fica oculta. No
